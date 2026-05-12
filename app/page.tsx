@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Copy, Check, Loader2, Scissors, Zap, ShieldCheck, 
-  BarChart3, Star
+  Copy, Check, Loader2, Scissors, Zap, Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import axios from 'axios';
+import { AnalyticsSection } from "./components/analytics";
+import { PricingSection } from "./components/pricing";
+import { FeaturesSection } from "./components/features";
 
 export default function LandingPage() {
   const [url, setUrl] = useState("");
@@ -59,8 +61,8 @@ export default function LandingPage() {
       {/* --- HERO SECTION --- */}
       <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden">
         {/* Animated Background Gradients */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute top-90 left-1/2 -translate-x-1/2 w-full h-full -z-10">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/40 blur-[120px] rounded-full animate-pulse" />
           <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-violet-500/20 blur-[120px] rounded-full" />
         </div>
 
@@ -70,8 +72,8 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Badge variant="secondary" className="mb-4 px-4 py-4 border-primary/10 bg-primary/5 text-primary hover:bg-primary/20 transition-colors text-xs">
-              ✨ More than just a link shortener
+            <Badge variant="secondary" className="mb-4 px-4 py-4 border-primary/10 bg-gray-50 dark:bg-transparent text-primary hover:bg-primary/20 transition-colors text-xs">
+              <span className="text-md font-medium tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">More than just a link shortener</span>
             </Badge>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
               Shorten Links. <br />
@@ -154,34 +156,13 @@ export default function LandingPage() {
       </section>
 
       {/* --- FEATURES SECTION --- */}
-      <section className="py-24 bg-secondary/30 relative">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Why choose us?</h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              We provide the tools you need to grow your digital presence through smarter link management.
-            </p>
-          </div>
+      <FeaturesSection />
+      
+      {/* Analytics Section */}
+      <AnalyticsSection/>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={<Zap className="h-6 w-6" />}
-              title="Ultra Fast"
-              description="Links redirect in milliseconds. Global edge network ensures minimal latency for your users."
-            />
-            <FeatureCard 
-              icon={<ShieldCheck className="h-6 w-6" />}
-              title="Secure & Private"
-              description="We use enterprise-grade encryption and anti-phishing tech to keep your links safe."
-            />
-            <FeatureCard 
-              icon={<BarChart3 className="h-6 w-6" />}
-              title="Advanced Analytics"
-              description="Track clicks, geographic data, and device types to understand your audience better."
-            />
-          </div>
-        </div>
-      </section>
+      {/* Pricing Section */}
+      <PricingSection/>
 
       {/* --- STATS SECTION --- */}
       <section className="py-20">
@@ -215,7 +196,7 @@ export default function LandingPage() {
           <p className="text-primary-foreground/80 text-lg mb-10 max-w-xl mx-auto">
             Join thousands of creators and businesses who use our platform to manage their links effectively.
           </p>
-          <Button size="lg" variant="secondary" className="h-14 px-10 text-lg font-bold" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+          <Button size="lg" variant="secondary" className="h-14 px-10 text-lg font-bold " onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             Get Started for Free
           </Button>
         </div>
@@ -226,9 +207,9 @@ export default function LandingPage() {
         <div className="container px-4 mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-muted-foreground">
           <div className="flex items-center gap-2">
             <Scissors className="h-5 w-5 text-primary" />
-            <span className="font-bold text-foreground">Shorty.</span>
+            <span className="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">Shorty.</span>
           </div>
-          <p className="text-sm">© 2026 Shorty. Built with Next.js & Shadcn/UI.</p>
+          <p className="text-sm">© {new Date().getFullYear()} <span className="text-md font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">Shorty.</span> Built with Next.js & Shadcn/UI.</p>
           <div className="flex gap-6 text-sm">
             <a href="#" className="hover:text-primary transition-colors">Terms</a>
             <a href="#" className="hover:text-primary transition-colors">Privacy</a>
