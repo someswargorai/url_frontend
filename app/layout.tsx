@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "next-themes";
 import { Navbar } from "./common/Navbar";
 import Providers from "./providers/sessionProvider";
-
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -36,6 +36,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <Analytics/>
         <Providers>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Navbar />
