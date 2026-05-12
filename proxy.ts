@@ -1,31 +1,26 @@
-
+import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function proxy(request: NextRequest) {
+    const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET,
+    });
+ 
+    const isAuth = !!token;
+    const { pathname } = request.nextUrl;
 
-    const token = request.cookies.get("next-auth.session-token")?.value || request.cookies.get("__Secure-next-auth.session-token")?.value;
-
-    //if user is not logged in and tries to access dashboard
-    if (!token) {
-        if (request.nextUrl.pathname === "/login") {
-            return NextResponse.next();
-        }
+    if (!isAuth && pathname.startsWith("/shorten-url")) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    //if user is logged in and tries to access login or register
-    if (token) {
-        if (request.nextUrl.pathname === "/login") {
-            return NextResponse.redirect(new URL("/shorten-url", request.url));
-        }
+    if (isAuth && pathname.startsWith("/login")) {
+        return NextResponse.redirect(new URL("/shorten-url", request.url));
     }
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: [
-        "/shorten-url/:path*",
-        "/login/:path*",
-    ]
-}
+    matcher: ["/shorten-url/:path*", "/login/:path*"],
+};
