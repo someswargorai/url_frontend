@@ -30,7 +30,7 @@ export interface CustomSession extends DefaultSession {
 
 async function loginToBackend(payload_email: string, payload_name: string): Promise<UserType> {
     const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`,
         { email: payload_email, name: payload_name }
     );
 
