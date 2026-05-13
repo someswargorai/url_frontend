@@ -50,6 +50,8 @@ async function loginToBackend(payload_email: string, payload_name: string): Prom
 }
 
 export const authOptions: NextAuthOptions = {
+    trustHost: true,
+    secret: process.env.NEXTAUTH_SECRET,
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
