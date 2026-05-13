@@ -50,6 +50,18 @@ async function loginToBackend(payload_email: string, payload_name: string): Prom
 }
 
 export const authOptions: NextAuthOptions = {
+    cookies: {
+        sessionToken: {
+            name: `__Secure-next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: true,
+            },
+        },
+    },
+    secret: process.env.NEXTAUTH_SECRET,
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -132,7 +144,7 @@ export const authOptions: NextAuthOptions = {
 
     pages: {
         signIn: "/login",
-        error: "/login",
+        error: "/auth-error",
     },
 
     debug: process.env.NODE_ENV === "development",
