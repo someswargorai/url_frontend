@@ -102,7 +102,18 @@ export default function ShowStatsPage() {
     const deviceData = useMemo(() => processData(stats?.devices), [stats]);
     const browserData = useMemo(() => processData(stats?.browsers), [stats]);
     const osData = useMemo(() => processData(stats?.os), [stats]);
-    const referrerData = useMemo(() => processData(stats?.referrer), [stats]);
+    const referrerData = useMemo(() => {
+        const referrers = stats?.referrer?.map(ref => {
+            if (!ref || ref === "Direct") return "Direct Traffic";
+            try {
+                const url = new URL(ref);
+                return url.hostname;
+            } catch (e) {
+                return ref;
+            }
+        });
+        return processData(referrers);
+    }, [stats]);
 
     const countryData = useMemo(() => {
         const countries = stats?.location?.map(loc => {
@@ -244,6 +255,15 @@ export default function ShowStatsPage() {
                     data={cityData}
                     icon={<Globe className="h-5 w-5 text-blue-400" />}
                     delay={0.8}
+                />
+
+                {/* Referrers Chart */}
+                <ChartSection
+                    title="Referrers"
+                    description="Traffic sources for this link"
+                    data={referrerData}
+                    icon={<BarChart3 className="h-5 w-5 text-purple-400" />}
+                    delay={0.9}
                 />
             </div>
         </div>
