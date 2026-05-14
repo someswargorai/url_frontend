@@ -102,8 +102,24 @@ export default function ShowStatsPage() {
     const deviceData = useMemo(() => processData(stats?.devices), [stats]);
     const browserData = useMemo(() => processData(stats?.browsers), [stats]);
     const osData = useMemo(() => processData(stats?.os), [stats]);
-    const locationData = useMemo(() => processData(stats?.location), [stats]);
     const referrerData = useMemo(() => processData(stats?.referrer), [stats]);
+
+    const countryData = useMemo(() => {
+        const countries = stats?.location?.map(loc => {
+            if (loc === "Unknown Location") return "Unknown";
+            const parts = loc.split(', ');
+            return parts[parts.length - 1] || "Unknown";
+        });
+        return processData(countries);
+    }, [stats]);
+
+    const cityData = useMemo(() => {
+        const cities = stats?.location?.map(loc => {
+            if (loc === "Unknown Location") return "Unknown";
+            return loc.split(', ')[0] || "Unknown";
+        });
+        return processData(cities);
+    }, [stats]);
 
     if (loading) {
         return (
@@ -171,8 +187,8 @@ export default function ShowStatsPage() {
                     delay={0.1}
                 />
                 <StatsCard
-                    title="Top Location"
-                    value={locationData[0]?.name || "N/A"}
+                    title="Top Country"
+                    value={countryData[0]?.name || "N/A"}
                     icon={<Globe className="h-5 w-5 text-emerald-400" />}
                     delay={0.2}
                 />
@@ -212,50 +228,23 @@ export default function ShowStatsPage() {
                     delay={0.6}
                 />
 
-                {/* Locations Table */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
-                >
-                    <Card className="rounded-3xl border-white/10 overflow-hidden h-full">
-                        <CardHeader className="border-b border-white/5 pb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                                    <Globe className="h-5 w-5 text-emerald-400" />
-                                </div>
-                                <div>
-                                    <CardTitle>Top Locations</CardTitle>
-                                    <CardDescription>Where your clicks are coming from</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="space-y-4">
-                                {locationData.length > 0 ? (
-                                    locationData.slice(0, 6).map((item, i) => (
-                                        <div key={i} className="flex items-center justify-between">
-                                            <span className="text-zinc-300">{item.name}</span>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-32 bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                                                    <div 
-                                                        className="bg-emerald-500 h-full rounded-full" 
-                                                        style={{ width: `${(item.value / stats.count) * 100}%` }}
-                                                    />
-                                                </div>
-                                                <span className="text-xs font-mono font-bold text-zinc-500 w-8 text-right">
-                                                    {item.value}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-center text-zinc-500 py-10">No location data yet</p>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                {/* Countries Chart */}
+                <ChartSection
+                    title="Countries"
+                    description="Distribution by country"
+                    data={countryData}
+                    icon={<Globe className="h-5 w-5 text-emerald-400" />}
+                    delay={0.7}
+                />
+
+                {/* Cities Chart */}
+                <ChartSection
+                    title="Cities"
+                    description="Distribution by city"
+                    data={cityData}
+                    icon={<Globe className="h-5 w-5 text-blue-400" />}
+                    delay={0.8}
+                />
             </div>
         </div>
     );
