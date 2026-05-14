@@ -70,16 +70,17 @@ export function Navbar() {
 
             <ModeToggle />
 
-            <div className="h-6 w-[1px] bg-border/60 mx-1 hidden sm:block" />
+            <div className="h-6 w-[1px] bg-border/60 mx-1 block" />
 
             {session ? (
               <div className="flex items-center gap-3">
                 <Button
                   onClick={logout}
-                  className="SignButton hidden sm:flex rounded-full font-semibold py-4.5! px-6 shadow-md hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer"
+                  className="SignButton flex rounded-full font-semibold py-4.5! px-6 shadow-md hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer"
                 >
                   Sign Out
                 </Button>
+                
               </div>
             ) : (
               <Link href={"/login"}>

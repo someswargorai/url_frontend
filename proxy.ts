@@ -1,23 +1,18 @@
-import { getToken } from "next-auth/jwt";
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function proxy(request: NextRequest) {
-    const token = await getToken({
-        req: request,
-        secret: process.env.NEXTAUTH_SECRET,
-        cookieName: process.env.NODE_ENV === "production"
-            ? "__Secure-next-auth.session-token"
-            : "next-auth.session-token",
-    });
 
-    const isAuth = !!token;
+    const cookie = await cookies();
+    const token = cookie.get("next-auth.session-token")?.value || cookie.get("__Secure-next-auth.session-token")?.value;
+
     const { pathname } = request.nextUrl;
 
-    if (!isAuth && pathname.startsWith("/shorten-url")) {
+    if (!token && pathname.startsWith("/shorten-url")) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
-
-    if (isAuth && pathname.startsWith("/login")) {
+    console.log("isAuth", cookie, pathname);
+    if (token && pathname.startsWith("/login")) {
         return NextResponse.redirect(new URL("/shorten-url", request.url));
     }
 
@@ -25,5 +20,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/shorten-url/:path*", "/login/:path*"],
+    matcher: ["/shorten-url/:path*", "/login"],
 };

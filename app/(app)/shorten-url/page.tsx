@@ -67,13 +67,13 @@ export default function DashboardPage() {
         <Badge variant="secondary" className="mb-4 px-4 py-4 border-primary/10 bg-gray-50 dark:bg-transparent text-primary hover:bg-primary/20 transition-colors text-xs">
           <span className="text-md font-medium tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">More than just a link shortener</span>
         </Badge>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+        <h1 className="text-5xl font-extrabold tracking-tight mb-6">
           Shorten Links. <br />
           <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
             Expand Reach.
           </span>
         </h1>
-        <p className="text-md md:text-md text-muted-foreground max-w-2xl mx-auto mb-10">
+        <p className="text-sm text-muted-foreground max-w-2xl mx-auto mb-10">
           Create short, branded links in seconds. Track performance, optimize for conversion,
           and take control of your digital presence.
         </p>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
 
       {/* MAIN FORM CARD */}
       <div className="w-full max-w-2xl mx-auto space-y-6 relative">
-        <Card className="border-border/40 bg-card/40 backdrop-blur-xl shadow-2xl overflow-hidden ring-1 ring-white/10">
+        <Card className="border-border/40 bg-card/40 backdrop-blur-md shadow-md overflow-hidden ring-1 ring-white/10">
           <CardContent className="p-6">
             <form onSubmit={handleShorten} className="flex flex-col md:flex-row gap-3">
               <div className="relative flex-1">
@@ -96,7 +96,7 @@ export default function DashboardPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-14 px-8 font-bold text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25"
+                className="h-14 px-8 font-bold text-md transition-all hover:scale-[1.02] active:scale-95 shadow-sm shadow-primary/20"
               >
                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Scissors className="mr-2 h-5 w-5" />}
                 {loading ? "Creating..." : "Shorten Now"}
