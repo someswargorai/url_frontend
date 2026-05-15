@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "Shorty",
     images: [
       {
-        url: "https://res.cloudinary.com/dpacclyw4/image/upload/v1778871199/og_image_shorty_jdtpbn.png",
+        url: "https://res.cloudinary.com/dpacclyw4/image/upload/v1778873361/og_image_shorty_quiwqr.png",
         width: 1200,
         height: 630,
         alt: "Shorty - URL Shortener",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Shorty - URL Shortener",
     description: "Shorty is a URL shortening service that helps you shorten, track, and manage your links.",
-    images: ["https://res.cloudinary.com/dpacclyw4/image/upload/v1778871199/og_image_shorty_jdtpbn.png"],
+    images: ["https://res.cloudinary.com/dpacclyw4/image/upload/v1778873361/og_image_shorty_quiwqr.png"],
   },
 };
 
