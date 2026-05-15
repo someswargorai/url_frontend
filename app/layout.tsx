@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shorty - URL Shortener",
     description: "Shorty is a URL shortening service that helps you shorten, track, and manage your links.",
-    url: "https://shorty.vercel.app",
+    url: "https://www.myk8s.shop",
     siteName: "Shorty",
     images: [
       {
