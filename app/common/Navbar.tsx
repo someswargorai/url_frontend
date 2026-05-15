@@ -9,6 +9,7 @@ import { GithubIcon } from "../icons";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Navbar() {
 
@@ -56,7 +57,7 @@ export function Navbar() {
           </nav>
 
           {/* Actions Section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-0 md:gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -70,17 +71,30 @@ export function Navbar() {
 
             <ModeToggle />
 
-            <div className="h-6 w-[1px] bg-border/60 mx-1 block" />
+            <div className="h-6 w-[1px] ml-3 bg-border/60 mx-1 block" />
 
             {session ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full"
+                >
+                  <Link href={"/shorten-url"} className="flex items-center gap-2 font-semibold">
+                    <Avatar className="size-8">
+                      <AvatarImage src={session?.user?.image || ""} />
+                      <AvatarFallback className="text-xs">{session?.user?.name?.charAt(0).toUpperCase() || ""}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+                </Button>
                 <Button
                   onClick={logout}
                   className="SignButton flex rounded-full font-semibold py-4.5! px-6 shadow-md hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer"
                 >
                   Sign Out
                 </Button>
-                
+
               </div>
             ) : (
               <Link href={"/login"}>

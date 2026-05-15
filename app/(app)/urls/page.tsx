@@ -35,7 +35,10 @@ interface UrlAnalytics {
     _id: string;
     shortUrl: string;
     longUrl: string;
-    count: number;
+    countGraph: {
+        count: number;
+        timestamp: string;
+    }[];
     createdAt: string;
     location: string[];
     device: string[];
@@ -99,18 +102,21 @@ export default function AnalyticsPage() {
                         title="Total URLs"
                         value={urls.length}
                         icon={<Link2 className="h-5 w-5 text-blue-400" />}
+                        loading={loading}
                     />
 
                     <StatsCard
                         title="Total Clicks"
-                        value={urls.reduce((acc, curr) => acc + (curr.count || 0), 0)}
+                        value={urls.reduce((acc, curr) => acc + (curr.countGraph?.length || 0), 0)}
                         icon={<MousePointerClick className="h-5 w-5 text-purple-400" />}
+                        loading={loading} 
                     />
 
                     <StatsCard
                         title="Analytics Enabled"
                         value={urls.filter((url) => url.location?.length || url.device?.length).length}
                         icon={<Eye className="h-5 w-5 text-emerald-400" />}
+                        loading={loading}
                     />
                 </div>
 
@@ -145,7 +151,7 @@ export default function AnalyticsPage() {
                         ) : (
                             <div className="rounded-2xl overflow-hidden border border-white/10">
                                 <Table>
-                                    <TableHeader className="bg-white">
+                                    <TableHeader className="bg-white dark:bg-black">
                                         <TableRow className="border-white/10 hover:bg-transparent">
                                             <TableHead>Short URL</TableHead>
                                             <TableHead>Destination</TableHead>
@@ -166,7 +172,7 @@ export default function AnalyticsPage() {
                                                 transition={{ delay: index * 0.05 }}
                                                 className="border-b border-white/10  transition"
                                             >
-                                                <TableCell className="font-medium text-blue-400 max-w-[200px] truncate">
+                                                <TableCell className="font-medium text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 max-w-[200px] truncate">
                                                     {url.shortUrl}
                                                 </TableCell>
 
@@ -177,8 +183,8 @@ export default function AnalyticsPage() {
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <Badge className="">
-                                                        {url.count || 0} Clicks
+                                                    <Badge className="rounded-sm!">
+                                                        {url.countGraph?.length || 0} Clicks
                                                     </Badge>
                                                 </TableCell>
 
@@ -189,7 +195,7 @@ export default function AnalyticsPage() {
                                                 <TableCell className="text-center pl-4">
                                                     <Button
                                                         onClick={() => router.push(`/show-stats/${url?._id}`)}
-                                                        className="rounded-xl cursor-pointer"
+                                                        className="rounded-sm cursor-pointer"
                                                     >
                                                         View Analytics
                                                     </Button>
@@ -211,10 +217,12 @@ function StatsCard({
     title,
     value,
     icon,
+    loading,
 }: {
     title: string;
     value: number;
     icon: React.ReactNode;
+    loading?: boolean;
 }) {
     return (
         <motion.div
@@ -225,7 +233,11 @@ function StatsCard({
                 <CardContent className="p-6 flex items-center justify-between">
                     <div>
                         <p className="text-zinc-400 text-sm">{title}</p>
-                        <h2 className="text-4xl font-bold mt-2">{value}</h2>
+                        {loading ? (
+                            <Skeleton className="h-10 w-20 mt-2 bg-white/10" />
+                        ) : (
+                            <h2 className="text-4xl font-bold mt-2">{value}</h2>
+                        )}
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10">

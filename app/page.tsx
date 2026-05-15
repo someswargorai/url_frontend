@@ -169,19 +169,19 @@ export default function LandingPage() {
         <div className="container px-4 mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <p className="text-4xl font-bold text-primary mb-2">10M+</p>
+              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">10M+</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Links Created</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-primary mb-2">500M+</p>
+              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">500M+</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Clicks Tracked</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-primary mb-2">99.9%</p>
+              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">99.9%</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Uptime Rate</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-primary mb-2">24/7</p>
+              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">24/7</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Support</p>
             </div>
           </div>
@@ -218,21 +218,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  );
-}
-
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
-  return (
-    <Card className="border-border/50 bg-card/50 hover:border-primary/50 transition-all group">
-      <CardContent className="p-8">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-          {icon}
-        </div>
-        <h3 className="text-xl font-bold mb-3">{title}</h3>
-        <p className="text-muted-foreground leading-relaxed">
-          {description}
-        </p>
-      </CardContent>
-    </Card>
   );
 }

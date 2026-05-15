@@ -13,6 +13,8 @@ import {
     CartesianGrid,
     Tooltip,
     Cell,
+    AreaChart,
+    Area,
 } from "recharts";
 import {
     Card,
@@ -56,7 +58,14 @@ interface ChartData {
     value: number;
 }
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#ef4444"];
+const PALETTES = {
+    blue: ["#3b82f6", "#2563eb", "#1d4ed8", "#1e40af", "#1e3a8a"],
+    purple: ["#8b5cf6", "#7c3aed", "#6d28d9", "#5b21b6", "#4c1d95"],
+    pink: ["#ec4899", "#db2777", "#be185d", "#9d174d", "#831843"],
+    emerald: ["#10b981", "#059669", "#047857", "#065f46", "#064e3b"],
+    orange: ["#f59e0b", "#d97706", "#b45309", "#92400e", "#78350f"],
+    red: ["#ef4444", "#dc2626", "#b91c1c", "#991b1b", "#7f1d1d"],
+};
 
 export default function ShowStatsPage() {
     const params = useParams();
@@ -64,6 +73,7 @@ export default function ShowStatsPage() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [stats, setStats] = useState<UrlStats | null>(null);
+    const [clickHistory, setClickHistory] = useState<{count: number , _id: string}[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -77,6 +87,7 @@ export default function ShowStatsPage() {
                     },
                 });
                 setStats(response.data.urlStats);
+                setClickHistory(response.data.clickStateWithMinutes || []);
             } catch (error) {
                 console.error("Error fetching stats:", error);
             } finally {
@@ -114,6 +125,15 @@ export default function ShowStatsPage() {
         });
         return processData(referrers);
     }, [stats]);
+
+    const formattedClickHistory = useMemo(() => {
+        return [...clickHistory]
+            .sort((a, b) => new Date(a._id).getTime() - new Date(b._id).getTime())
+            .map(item => ({
+                time: new Date(item._id).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                clicks: item.count
+            }));
+    }, [clickHistory]);
 
     const countryData = useMemo(() => {
         const countries = stats?.location?.map(loc => {
@@ -190,10 +210,12 @@ export default function ShowStatsPage() {
                 </div>
             </motion.div>
 
+         
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <StatsCard
                     title="Total Clicks"
-                    value={stats.count}
+                    value={clickHistory.length}
                     icon={<MousePointerClick className="h-5 w-5 text-blue-400" />}
                     delay={0.1}
                 />
@@ -211,6 +233,70 @@ export default function ShowStatsPage() {
                 />
             </div>
 
+               <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="mb-8"
+            >
+                <Card className="rounded-3xl border-white/10 overflow-hidden bg-white/5 backdrop-blur-xl">
+                    <CardHeader className="border-b border-white/5 pb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                <BarChart3 className="h-5 w-5 text-blue-400" />
+                            </div>
+                            <div>
+                                <CardTitle>Click History</CardTitle>
+                                <CardDescription>Minute-wise activity for this URL</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="h-[300px] w-full">
+                            {formattedClickHistory.length > 0 ? (
+                                <ChartContainer config={{ clicks: { label: "Clicks", color: "#3b82f6" } }}>
+                                    <AreaChart data={formattedClickHistory} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                                        <XAxis
+                                            dataKey="time"
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#888', fontSize: 12 }}
+                                            dy={10}
+                                        />
+                                        <YAxis
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#888', fontSize: 12 }}
+                                            dx={-10}
+                                        />
+                                        <Tooltip content={<ChartTooltipContent />} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="clicks"
+                                            stroke="#3b82f6"
+                                            strokeWidth={2}
+                                            fillOpacity={1}
+                                            fill="url(#colorClicks)"
+                                        />
+                                    </AreaChart>
+                                </ChartContainer>
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-zinc-500">
+                                    No click history available
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Devices Chart */}
                 <ChartSection
@@ -219,6 +305,7 @@ export default function ShowStatsPage() {
                     data={deviceData}
                     icon={<Smartphone className="h-5 w-5 text-blue-400" />}
                     delay={0.4}
+                    colorScheme="blue"
                 />
 
                 {/* Browsers Chart */}
@@ -228,6 +315,7 @@ export default function ShowStatsPage() {
                     data={browserData}
                     icon={<Globe className="h-5 w-5 text-orange-400" />}
                     delay={0.5}
+                    colorScheme="orange"
                 />
 
                 {/* OS Chart */}
@@ -237,6 +325,7 @@ export default function ShowStatsPage() {
                     data={osData}
                     icon={<Monitor className="h-5 w-5 text-purple-400" />}
                     delay={0.6}
+                    colorScheme="purple"
                 />
 
                 {/* Countries Chart */}
@@ -246,6 +335,7 @@ export default function ShowStatsPage() {
                     data={countryData}
                     icon={<Globe className="h-5 w-5 text-emerald-400" />}
                     delay={0.7}
+                    colorScheme="emerald"
                 />
 
                 {/* Cities Chart */}
@@ -255,6 +345,7 @@ export default function ShowStatsPage() {
                     data={cityData}
                     icon={<Globe className="h-5 w-5 text-blue-400" />}
                     delay={0.8}
+                    colorScheme="blue"
                 />
 
                 {/* Referrers Chart */}
@@ -262,8 +353,9 @@ export default function ShowStatsPage() {
                     title="Referrers"
                     description="Traffic sources for this link"
                     data={referrerData}
-                    icon={<BarChart3 className="h-5 w-5 text-purple-400" />}
+                    icon={<BarChart3 className="h-5 w-5 text-pink-400" />}
                     delay={0.9}
+                    colorScheme="pink"
                 />
             </div>
         </div>
@@ -292,11 +384,26 @@ function StatsCard({ title, value, icon, delay }: { title: string; value: string
     );
 }
 
-function ChartSection({ title, description, data, icon, delay }: { title: string; description: string; data: ChartData[]; icon: React.ReactNode; delay: number }) {
+function ChartSection({ 
+    title, 
+    description, 
+    data, 
+    icon, 
+    delay, 
+    colorScheme = "blue" 
+}: { 
+    title: string; 
+    description: string; 
+    data: ChartData[]; 
+    icon: React.ReactNode; 
+    delay: number; 
+    colorScheme?: keyof typeof PALETTES;
+}) {
+    const palette = PALETTES[colorScheme];
     const config: ChartConfig = {
         value: {
             label: "Clicks",
-            color: "#3b82f6",
+            color: palette[0],
         },
     };
 
@@ -325,21 +432,21 @@ function ChartSection({ title, description, data, icon, delay }: { title: string
                                 <BarChart data={data} layout="vertical" margin={{ left: 40, right: 20 }}>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#333" />
                                     <XAxis type="number" hide />
-                                    <YAxis 
-                                        dataKey="name" 
-                                        type="category" 
-                                        axisLine={false} 
-                                        tickLine={false} 
+                                    <YAxis
+                                        dataKey="name"
+                                        type="category"
+                                        axisLine={false}
+                                        tickLine={false}
                                         tick={{ fill: '#888', fontSize: 12 }}
                                         width={80}
                                     />
-                                    <Tooltip 
+                                    <Tooltip
                                         cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                         content={<ChartTooltipContent />}
                                     />
                                     <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                                         {data.map((_, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            <Cell key={`cell-${index}`} fill={palette[index % palette.length]} />
                                         ))}
                                     </Bar>
                                 </BarChart>

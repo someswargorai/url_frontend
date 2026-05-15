@@ -90,7 +90,7 @@ export default function DashboardPage() {
                   placeholder="Paste your long link here..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4"
+                  className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4 placeholder:text-xs md:placeholder:text-sm"
                 />
               </div>
               <Button
