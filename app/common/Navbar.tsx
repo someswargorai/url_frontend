@@ -98,7 +98,7 @@ export function Navbar() {
               </div>
             ) : (
               <Link href={"/login"}>
-                <Button className="SignButton hidden sm:flex rounded-full font-semibold py-4.5! px-6 shadow-md hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer">
+                <Button className="SignButton flex rounded-full font-semibold py-4.5! px-6 shadow-md hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer">
                   Sign In
                 </Button>
               </Link>
