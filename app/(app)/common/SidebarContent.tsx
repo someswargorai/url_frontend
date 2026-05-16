@@ -8,13 +8,13 @@ import {
   BookOpen,
   Coffee,
   ChevronRight,
+  Globe,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
-import { ScissorsIcon } from "@/app/icons";
 
 const menuItems = [
   {
@@ -28,8 +28,13 @@ const menuItems = [
     icon: Link2,
   },
   {
+    title: "Api Key",
+    href: "/apikey",
+    icon: Globe
+  },
+  {
     title: "Documentation",
-    href: "/docs",
+    href: "/documentation",
     icon: BookOpen,
   },
 ];

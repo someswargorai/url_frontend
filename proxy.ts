@@ -8,11 +8,14 @@ export default async function proxy(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
 
-    if (!token && pathname.startsWith("/shorten-url")) {
+    if (!token) {
+        if (pathname.startsWith("/login")) {
+            return NextResponse.next();
+        }
         return NextResponse.redirect(new URL("/login", request.url));
     }
     console.log("isAuth", cookie, pathname);
-    if (token && pathname.startsWith("/login")) {
+    if (token && pathname.startsWith("/login")) { 
         return NextResponse.redirect(new URL("/shorten-url", request.url));
     }
 
@@ -20,5 +23,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/shorten-url/:path*", "/login"],
+    matcher: ["/shorten-url/:path*", "/login", "/show-stats/:path*", "/urls/:path*"],
 };

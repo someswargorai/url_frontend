@@ -42,9 +42,9 @@ export function Navbar() {
                         <div className="h-6 w-[1px] bg-border/60 mx-1 hidden sm:block" />
 
                         <Button className="SignButton hidden sm:flex rounded-full font-semibold py-4.5! px-6 shadow-md hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer">
-                            <Link href={"/login"} onClick={async () => {
+                            <div onClick={async () => {
                                 await signOut();
-                            }}>Logout</Link>
+                            }}>Logout</div>
                         </Button>
                     </div>
                 </div>

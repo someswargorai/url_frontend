@@ -73,7 +73,7 @@ export default function AnalyticsPage() {
         if (status === "authenticated") {
             fetchAnalytics();
         }
-    }, [session, status]);
+    }, [session?.access_token, status]);
 
     return (
         <div className="min-h-screen ">
@@ -140,8 +140,8 @@ export default function AnalyticsPage() {
                             </div>
                         ) : urls.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center">
-                                <Globe className="h-16 w-16 text-zinc-600 mb-4" />
-                                <h2 className="text-2xl font-semibold mb-2">
+                                <Globe className="h-10 w-10 text-zinc-600 mb-4" />
+                                <h2 className="text-xl font-semibold mb-2">
                                     No URLs Found
                                 </h2>
                                 <p className="text-zinc-400 max-w-md">
@@ -229,7 +229,7 @@ function StatsCard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
         >
-            <Card className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl overflow-hidden">
+            <Card className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-md overflow-hidden h-[140px]">
                 <CardContent className="p-6 flex items-center justify-between">
                     <div>
                         <p className="text-zinc-400 text-sm">{title}</p>

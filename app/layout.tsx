@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Someswar Gorai" }],
   creator: "Someswar Gorai",
   icons: {
-    icon: "/og_image_shorty.png",
+    icon: "/favicon.ico",
   },
   openGraph: {
     title: "Shorty - URL Shortener",

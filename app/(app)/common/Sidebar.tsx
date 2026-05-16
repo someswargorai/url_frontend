@@ -3,7 +3,6 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { SidebarContent } from "./SidebarContent";
 
 export function Sidebar() {
