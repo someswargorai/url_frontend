@@ -3,20 +3,56 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Loader2, Copy, Check, Zap, Scissors } from "lucide-react";
+import { Loader2, Copy, Check, Zap, Scissors, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Campaign {
+    _id: string;
+    name: string;
+    isDefault: boolean;
+}
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [url, setUrl] = useState("");
+  const [campaignId, setCampaignId] = useState<string>("default");
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+      const fetchCampaigns = async () => {
+          if (status !== "authenticated") return;
+          try {
+              const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/campaign`, {
+                  headers: { "Authorization": `Bearer ${session?.access_token}` }
+              });
+              setCampaigns(response.data?.campaigns || []);
+              
+              // Find the default campaign and select it initially
+              const defaultCamp = response.data?.campaigns?.find((c: Campaign) => c.isDefault);
+              if (defaultCamp) {
+                  setCampaignId(defaultCamp._id);
+              }
+          } catch (error) {
+              console.error(error);
+          }
+      };
+      fetchCampaigns();
+  }, [session?.access_token, status]);
 
   const handleShorten = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +63,13 @@ export default function DashboardPage() {
     setLoading(true);
     setShortUrl(null);
 
+    const requestBody: {url:string, campaignId?:string} = { url };
+    if (campaignId !== "default") {
+        requestBody.campaignId = campaignId;
+    }
+
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/url/shorten-url`, { url: url },{
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/url/shorten-url`, requestBody, {
         headers:{
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token}`,
@@ -46,8 +87,6 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
-
-
 
   const copyToClipboard = () => {
     if (!shortUrl) return;
@@ -83,20 +122,36 @@ export default function DashboardPage() {
       <div className="w-full max-w-2xl mx-auto space-y-6 relative">
         <Card className="border-border/40 bg-card/40 backdrop-blur-md shadow-md overflow-hidden ring-1 ring-white/10">
           <CardContent className="p-6">
-            <form onSubmit={handleShorten} className="flex flex-col md:flex-row gap-3">
-              <div className="relative flex-1">
-                <Input
-                  type="url"
-                  placeholder="Paste your long link here..."
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4 placeholder:text-xs md:placeholder:text-sm"
-                />
+            <form onSubmit={handleShorten} className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Input
+                    type="url"
+                    placeholder="Paste your long link here..."
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4 placeholder:text-xs md:placeholder:text-sm"
+                  />
+                </div>
+                {campaigns.length > 0 && (
+                  <Select value={campaignId} onValueChange={setCampaignId}>
+                    <SelectTrigger className="h-14! w-full md:w-[200px] bg-background/50 border-border/50 focus:ring-primary/50">
+                      <SelectValue placeholder="Select Campaign" />
+                    </SelectTrigger>
+                    <SelectContent className="h-36! overflow-y-scroll" align="start">
+                      {campaigns.map((camp) => (
+                        <SelectItem key={camp._id} value={camp._id} className="h-10!">
+                          {camp.name} {camp.isDefault && "(Default)"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-14 px-8 font-bold text-md transition-all hover:scale-[1.02] active:scale-95 shadow-sm shadow-primary/20"
+                className="h-14 w-full font-bold text-md transition-all hover:scale-[1.01] active:scale-[0.99] shadow-sm shadow-primary/20"
               >
                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Scissors className="mr-2 h-5 w-5" />}
                 {loading ? "Creating..." : "Shorten Now"}

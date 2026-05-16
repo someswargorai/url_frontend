@@ -23,6 +23,11 @@ const menuItems = [
     icon: Scissors,
   },
   {
+    title: "Campaigns",
+    href: "/campaigns",
+    icon: Globe,
+  },
+  {
     title: "My URLs",
     href: "/urls",
     icon: Link2,

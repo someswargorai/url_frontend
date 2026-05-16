@@ -2,6 +2,7 @@
 
 import { Navbar } from "./common/Navbar";
 import { Sidebar } from "./common/Sidebar";
+import { FloatingChatbot } from "@/components/FloatingChatbot";
 
 export default function AppLayout({
   children,
@@ -13,7 +14,7 @@ export default function AppLayout({
         
       <Sidebar />
 
-      <div className="w-full">
+      <div className="w-full relative">
         <Navbar />
 
         <main className="mt-20 h-screen md:pl-72">
@@ -21,6 +22,8 @@ export default function AppLayout({
           {children}
         </div>
       </main>
+      
+      <FloatingChatbot />
       </div>
     </div>
   );
