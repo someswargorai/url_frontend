@@ -86,7 +86,7 @@ const PALETTES = {
     red: ["#ef4444", "#dc2626", "#b91c1c", "#991b1b", "#7f1d1d"],
 };
 
-function renderMarkdown(text: string): string {
+export function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -505,7 +505,7 @@ export default function ShowStatsPage() {
                                     </TooltipContent>
                                 </UITooltip>
                             </TooltipProvider>
-                            <span className="text-xs text-zinc-500 uppercase tracking-wider">{stats?.private ? "Private" : "Public"}</span>
+                            <span className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">{stats?.private ? "Private" : "Public"}</span>
                         </div>
                         </div>
                         
@@ -735,7 +735,7 @@ function ChartSection({
                     </div>
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <div className="h-[250px] w-full">
+                    <div className="h-[250px] w-full overflow-y-auto">
                         {data.length > 0 ? (
                             <ChartContainer config={config}>
                                 <BarChart data={data} layout="vertical" margin={{ left: 40, right: 20 }}>

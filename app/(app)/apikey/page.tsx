@@ -88,7 +88,7 @@ export default function ApikeyPage() {
         if (status === "authenticated") {
             fetchApiKeys();
         }
-    }, [session, status]);
+    }, [session?.access_token, status]);
 
     const toggleVisibility = (keyString: string) => {
         setVisibleKeys((prev) => ({ ...prev, [keyString]: !prev[keyString] }));

@@ -45,19 +45,20 @@ export default function DocumentationPage() {
                 <Badge variant="outline" className="px-3 py-1 bg-background/50 backdrop-blur-sm border-primary/20 text-primary mb-4">
                     <Code2 className="w-4 h-4 mr-2 inline-block" /> v1.0.0
                 </Badge>
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/60">
-                    Developer Documentation
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                <p className="text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/60">
+                    Developer Documentation 
+                </p>
+                <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
                     Integrate our lightning-fast URL shortening service directly into your application using our NPM package or REST API.
                 </p>
             </div>
 
             <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-8 p-1 bg-transparent md:bg-muted/50 backdrop-blur-sm rounded-xl h-[48px]!">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-8 p-1 bg-transparent md:bg-muted/50 backdrop-blur-sm rounded-xl h-[48px]!">
                     <TabsTrigger value="overview" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Globe className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
                     <TabsTrigger value="installation" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Package className="w-4 h-4 mr-2" /> Installation</TabsTrigger>
                     <TabsTrigger value="usage" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Cpu className="w-4 h-4 mr-2" /> Quick Start</TabsTrigger>
+                    <TabsTrigger value="event-tracking" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Terminal className="w-4 h-4 mr-2" /> Event Tracking</TabsTrigger>
                     <TabsTrigger value="api" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Server className="w-4 h-4 mr-2" /> API Reference</TabsTrigger>
                 </TabsList>
 
@@ -148,26 +149,164 @@ export default function DocumentationPage() {
                                 language="javascript"
                                 code={`const { createShortUrl } = require("shorty_package");
 
-                                            async function generateShortLink() {
-                                            const apiKey = "YOUR_API_KEY"; // Retrieve this from your environment variables
-                                            const longUrl = "https://your-very-long-and-complex-url.com/path?query=123";
+async function generateShortLink() {
+const apiKey = "YOUR_API_KEY"; // Retrieve this from your environment variables
+const longUrl = "https://your-very-long-and-complex-url.com/path?query=123";
 
-                                            try {
-                                                const response = await createShortUrl(longUrl, apiKey);
+try {
+const response = await createShortUrl(longUrl, apiKey);
                                                 
-                                                // The response object contains the shortened URL identifier
-                                                console.log("Success! Short URL ID:", response.url);
-                                                console.log("Full Link: https://yourdomain.com/" + response.url);
+// The response object contains the shortened URL identifier
+console.log("Success! Short URL ID:", response.url);
+console.log("Full Link: https://yourdomain.com/" + response.url);
                                                 
-                                            } catch (error) {
-                                                console.error("Failed to shorten link:", error.message);
-                                            }
-                                            }
+} catch (error) {
+console.error("Failed to shorten link:", error.message);
+}
+}
 
-                                            generateShortLink();`}
-                                                                        />
+generateShortLink();`}
+    />
                         </CardContent>
                        
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="event-tracking" className="space-y-6 mt-4">
+                    <Card className="border-border/50 overflow-hidden shadow-sm">
+                        <CardHeader className="bg-muted/30 border-b border-border/50">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-xl">Event Tracking Integration</CardTitle>
+                                    <CardDescription className="mt-1">Track custom events with automatic metadata enrichment.</CardDescription>
+                                </div>
+                                <Badge className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20">Node.js / REST</Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                            <p className="text-muted-foreground leading-relaxed">
+                                Our platform supports seamless, real-time behavioral analytics tracking. When you register a <strong>Project</strong> in the dashboard, you receive a Project API Key. You can use this key with our SDK or call our public ingestion endpoint directly to track clicks, signups, transactions, and other actions.
+                            </p>
+                            
+                            <div>
+                                <h3 className="text-md font-semibold mb-2">1. Initialize the Event Ingestion</h3>
+                                <p className="text-muted-foreground mb-4">
+                                    Import the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">trackEvent</code> function from the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty_package</code>.
+                                </p>
+                                <CodeBlock
+                                    id="event-sdk-usage"
+                                    language="javascript"
+                                    code={`const { trackEvent } = require("shorty_package");
+
+async function captureUserBehavior() {
+  const projectKey = "pk_your_project_key_here";
+
+  try {
+    await trackEvent(projectKey, {
+      event: "product_purchased",
+      userId: "user_9942", // Optional: Link this to your internal user identifier
+      notification: true, // Optional: Send email notification to the project owner
+      metadata: { 
+        item: "Nike Pegasus 40",
+        price: 120.00,
+        currency: "USD"
+      }
+    });
+    console.log("Event captured successfully!");
+  } catch (error) {
+    console.error("Failed to capture event:", error.message);
+  }
+}
+
+captureUserBehavior();`}
+                                />
+                            </div>
+
+                            <div className="pt-4">
+                                <h3 className="text-md font-semibold mb-2">2. REST Ingestion API</h3>
+                                <p className="text-muted-foreground mb-4">
+                                    If you are not using our Node.js SDK, you can send HTTP POST requests directly to our ingestion endpoint:
+                                </p>
+                                <div className="p-3 bg-muted/30 border border-border/50 rounded-md flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-indigo-500 hover:bg-indigo-600">POST</Badge>
+                                        <code className="text-sm font-mono text-foreground">/event/track</code>
+                                    </div>
+                                    <Badge variant="outline" className="text-[10px]">Public</Badge>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="text-sm font-medium mb-2 text-foreground font-mono">Headers</h4>
+                                        <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
+                                            <table className="w-full text-sm text-left">
+                                                <thead className="bg-muted/50 text-muted-foreground">
+                                                    <tr>
+                                                        <th className="px-4 py-2 font-medium">Header</th>
+                                                        <th className="px-4 py-2 font-medium">Value</th>
+                                                        <th className="px-4 py-2 font-medium">Required</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-border/50">
+                                                    <tr>
+                                                        <td className="px-4 py-3 font-mono text-xs">x-project-key</td>
+                                                        <td className="px-4 py-3">Your project&apos;s API Key</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="px-4 py-3 font-mono text-xs">Content-Type</td>
+                                                        <td className="px-4 py-3">application/json</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-sm font-medium mb-2 text-foreground font-mono font-semibold">Body Parameters</h4>
+                                        <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
+                                            <table className="w-full text-sm text-left font-sans">
+                                                <thead className="bg-muted/50 text-muted-foreground">
+                                                    <tr>
+                                                        <th className="px-4 py-2 font-medium">Parameter</th>
+                                                        <th className="px-4 py-2 font-medium">Type</th>
+                                                        <th className="px-4 py-2 font-medium">Required</th>
+                                                        <th className="px-4 py-2 font-medium">Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-border/50">
+                                                    <tr>
+                                                        <td className="px-4 py-3 font-mono text-xs">event</td>
+                                                        <td className="px-4 py-3 font-mono text-xs">string</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
+                                                        <td className="px-4 py-3">The name of the tracking event (e.g., &quot;signup&quot;)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="px-4 py-3 font-mono text-xs">userId</td>
+                                                        <td className="px-4 py-3 font-mono text-xs">string</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">No</Badge></td>
+                                                        <td className="px-4 py-3">Your internal authenticated user ID</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="px-4 py-3 font-mono text-xs">anonymousId</td>
+                                                        <td className="px-4 py-3 font-mono text-xs">string</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">No</Badge></td>
+                                                        <td className="px-4 py-3">Unique tracking ID for anonymous guest visitors</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="px-4 py-3 font-mono text-xs">metadata</td>
+                                                        <td className="px-4 py-3 font-mono text-xs">object</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">No</Badge></td>
+                                                        <td className="px-4 py-3">Any arbitrary key-value pairs of business logic context</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
                     </Card>
                 </TabsContent>
 

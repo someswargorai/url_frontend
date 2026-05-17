@@ -28,6 +28,11 @@ const menuItems = [
     icon: Globe,
   },
   {
+    title: "Projects",
+    href: "/projects",
+    icon: Globe,
+  },
+  {
     title: "My URLs",
     href: "/urls",
     icon: Link2,
