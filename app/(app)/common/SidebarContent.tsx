@@ -43,6 +43,11 @@ const menuItems = [
     icon: Globe
   },
   {
+    title: "Custom Domain",
+    href: "/custom-domain",
+    icon: Globe,
+  },
+  {
     title: "Documentation",
     href: "/documentation",
     icon: BookOpen,
