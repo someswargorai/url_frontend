@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/select";
 
 interface Campaign {
-    _id: string;
-    name: string;
-    isDefault: boolean;
+  _id: string;
+  name: string;
+  isDefault: boolean;
 }
 
 export default function DashboardPage() {
@@ -34,24 +34,29 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-      const fetchCampaigns = async () => {
-          if (status !== "authenticated") return;
-          try {
-              const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/campaign`, {
-                  headers: { "Authorization": `Bearer ${session?.access_token}` }
-              });
-              setCampaigns(response.data?.campaigns || []);
-              
-              // Find the default campaign and select it initially
-              const defaultCamp = response.data?.campaigns?.find((c: Campaign) => c.isDefault);
-              if (defaultCamp) {
-                  setCampaignId(defaultCamp._id);
-              }
-          } catch (error) {
-              console.error(error);
-          }
-      };
-      fetchCampaigns();
+    const fetchCampaigns = async () => {
+      if (status !== "authenticated") return;
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/campaign`,
+          {
+            headers: { Authorization: `Bearer ${session?.access_token}` },
+          },
+        );
+        setCampaigns(response.data?.campaigns || []);
+
+        // Find the default campaign and select it initially
+        const defaultCamp = response.data?.campaigns?.find(
+          (c: Campaign) => c.isDefault,
+        );
+        if (defaultCamp) {
+          setCampaignId(defaultCamp._id);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchCampaigns();
   }, [session?.access_token, status]);
 
   const handleShorten = async (e: React.FormEvent) => {
@@ -63,20 +68,30 @@ export default function DashboardPage() {
     setLoading(true);
     setShortUrl(null);
 
-    const requestBody: {url:string, campaignId?:string} = { url };
+    const requestBody: { url: string; campaignId?: string } = { url };
     if (campaignId !== "default") {
-        requestBody.campaignId = campaignId;
+      requestBody.campaignId = campaignId;
     }
 
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/url/shorten-url`, requestBody, {
-        headers:{
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-        }
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/url/shorten-url`,
+        requestBody,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+        },
+      );
       if (response?.data) {
-        setShortUrl(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/${response?.data?.url}`);
+        if (response?.data?.domain) {
+          setShortUrl(`${response?.data?.domain}/${response?.data?.url}`);
+        } else { 
+          setShortUrl(
+            `${process.env.NEXT_PUBLIC_FRONTEND_URL}/${response?.data?.url}`,
+          );
+        }
         toast.success("URL shortened successfully!");
       }
     } catch (error) {
@@ -103,8 +118,13 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Badge variant="secondary" className="mb-4 px-4 py-4 border-primary/10 bg-gray-50 dark:bg-transparent text-primary hover:bg-primary/20 transition-colors text-xs">
-          <span className="text-md font-medium tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">More than just a link shortener</span>
+        <Badge
+          variant="secondary"
+          className="mb-4 px-4 py-4 border-primary/10 bg-gray-50 dark:bg-transparent text-primary hover:bg-primary/20 transition-colors text-xs"
+        >
+          <span className="text-md font-medium tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
+            More than just a link shortener
+          </span>
         </Badge>
         <h1 className="text-5xl font-extrabold tracking-tight mb-6">
           Shorten Links. <br />
@@ -113,8 +133,8 @@ export default function DashboardPage() {
           </span>
         </h1>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto mb-10">
-          Create short, branded links in seconds. Track performance, optimize for conversion,
-          and take control of your digital presence.
+          Create short, branded links in seconds. Track performance, optimize
+          for conversion, and take control of your digital presence.
         </p>
       </motion.div>
 
@@ -138,9 +158,16 @@ export default function DashboardPage() {
                     <SelectTrigger className="h-14! w-full md:w-[200px] bg-background/50 border-border/50 focus:ring-primary/50">
                       <SelectValue placeholder="Select Campaign" />
                     </SelectTrigger>
-                    <SelectContent className="h-36! overflow-y-scroll" align="start">
+                    <SelectContent
+                      className="h-36! overflow-y-scroll"
+                      align="start"
+                    >
                       {campaigns.map((camp) => (
-                        <SelectItem key={camp._id} value={camp._id} className="h-10!">
+                        <SelectItem
+                          key={camp._id}
+                          value={camp._id}
+                          className="h-10!"
+                        >
                           {camp.name} {camp.isDefault && "(Default)"}
                         </SelectItem>
                       ))}
@@ -153,7 +180,11 @@ export default function DashboardPage() {
                 disabled={loading}
                 className="h-14 w-full font-bold text-md transition-all hover:scale-[1.01] active:scale-[0.99] shadow-sm shadow-primary/20"
               >
-                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Scissors className="mr-2 h-5 w-5" />}
+                {loading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Scissors className="mr-2 h-5 w-5" />
+                )}
                 {loading ? "Creating..." : "Shorten Now"}
               </Button>
             </form>
@@ -174,8 +205,12 @@ export default function DashboardPage() {
                       <Zap className="h-5 w-5 text-primary" />
                     </div>
                     <div className="truncate">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Your Shortened Link</p>
-                      <p className="text-xl font-bold text-primary truncate tracking-tight">{shortUrl}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Your Shortened Link
+                      </p>
+                      <p className="text-xl font-bold text-primary truncate tracking-tight">
+                        {shortUrl}
+                      </p>
                     </div>
                   </div>
                   <Button
@@ -183,7 +218,11 @@ export default function DashboardPage() {
                     className="shrink-0 rounded-xl gap-2 h-14 px-6"
                     onClick={copyToClipboard}
                   >
-                    {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                    {copied ? (
+                      <Check className="h-5 w-5" />
+                    ) : (
+                      <Copy className="h-5 w-5" />
+                    )}
                     {copied ? "Copied" : "Copy Link"}
                   </Button>
                 </CardContent>
@@ -193,5 +232,5 @@ export default function DashboardPage() {
         </AnimatePresence>
       </div>
     </div>
-  )
+  );
 }

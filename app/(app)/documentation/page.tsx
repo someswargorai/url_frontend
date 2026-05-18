@@ -59,10 +59,10 @@ export default function DocumentationPage() {
                     <TabsTrigger value="installation" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Package className="w-4 h-4 mr-2" /> Installation</TabsTrigger>
                     <TabsTrigger value="usage" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Cpu className="w-4 h-4 mr-2" /> Quick Start</TabsTrigger>
                     <TabsTrigger value="event-tracking" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Terminal className="w-4 h-4 mr-2" /> Event Tracking</TabsTrigger>
-                    <TabsTrigger value="api" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Server className="w-4 h-4 mr-2" /> API Reference</TabsTrigger>
+                    <TabsTrigger value="api" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Server className="w-4 h-4 mr-1" /> API Reference</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="space-y-6 mt-4">
+                <TabsContent value="overview" className="space-y-6 mt-13 md:mt-4">
                     <Card className="border-primary/10 shadow-lg shadow-primary/5 bg-gradient-to-br from-card to-card/50">
                         <CardHeader>
                             <CardTitle className="text-2xl">Welcome to Shorty</CardTitle>
@@ -101,7 +101,7 @@ export default function DocumentationPage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="installation" className="space-y-6 mt-4">
+                <TabsContent value="installation" className="space-y-6 mt-13 md:mt-4">
                     <Card className="border-border/50 overflow-hidden">
                         <CardHeader className="bg-muted/30 border-b border-border/50">
                             <CardTitle className="flex items-center text-xl">
@@ -129,7 +129,7 @@ export default function DocumentationPage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="usage" className="space-y-6 mt-4">
+                <TabsContent value="usage" className="space-y-6 mt-13 md:mt-4">
                     <Card className="border-border/50 overflow-hidden">
                         <CardHeader className="bg-muted/30 border-b border-border/50">
                             <div className="flex items-center justify-between">
@@ -172,7 +172,7 @@ generateShortLink();`}
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="event-tracking" className="space-y-6 mt-4">
+                <TabsContent value="event-tracking" className="space-y-6 mt-13 md:mt-4">
                     <Card className="border-border/50 overflow-hidden shadow-sm">
                         <CardHeader className="bg-muted/30 border-b border-border/50">
                             <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ captureUserBehavior();`}
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="api" className="space-y-6 mt-4">
+                <TabsContent value="api" className="space-y-6 mt-13 md:mt-4">
                     <Card className="border-border/50 overflow-hidden shadow-sm">
                         <CardHeader className="bg-muted/30 border-b border-border/50">
                             <div className="flex items-center justify-between">

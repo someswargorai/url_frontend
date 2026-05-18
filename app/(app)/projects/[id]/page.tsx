@@ -38,7 +38,10 @@ import {
     Bot,
     User,
     Building,
+    Loader2,
 } from "lucide-react";
+
+import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
 import {
     ChartContainer,
     ChartTooltipContent,
@@ -58,6 +61,7 @@ import { toast } from "sonner";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { renderMarkdown } from "../../show-stats/[id]/page";
 import { Input } from "@/components/ui/input";
+import InsightsAnalytics from "@/components/InsightsAnalytics";
 
 
 interface ProjectAnalytics {
@@ -79,6 +83,18 @@ interface EventLog {
     location?: { country: string, city: string, region: string };
     ip?: string;
     timestamp?: string;
+}
+
+interface UserJourney {
+    userId: string;
+    deviceType: string;
+    os: string;
+    country: string;
+    city: string;
+    events: EventLog[];
+    rageClicks: number;
+    lastActive: string;
+    sessionDurationMs: number;
 }
 
 interface Project {
@@ -117,12 +133,54 @@ export default function ProjectDashboardPage() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [copied, setCopied] = useState(false);
 
+    // Grouped User Journeys from Backend
+    const [userJourneys, setUserJourneys] = useState<UserJourney[]>([]);
+    const [userJourneysLoading, setUserJourneysLoading] = useState<boolean>(false);
+    const [journeysPage, setJourneysPage] = useState<number>(1);
+    const [hasMoreJourneys, setHasMoreJourneys] = useState<boolean>(true);
+    const [loadingMoreJourneys, setLoadingMoreJourneys] = useState<boolean>(false);
+
     // AI Chat State
     const [chatInput, setChatInput] = useState("");
     const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai", text: string }[]>([
         { role: "ai", text: "Hello! I am your AI Analyst for this project. Ask me any question about your event logs, like 'Where is most of my traffic coming from?' or 'Which event is the most popular?'" }
     ]);
     const [chatLoading, setChatLoading] = useState(false);
+
+    const fetchUserJourneys = async (pageNum: number, isLoadMore: boolean = false) => {
+        try {
+            if (isLoadMore) {
+                setLoadingMoreJourneys(true);
+            } else {
+                setUserJourneysLoading(true);
+            }
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/event/${id}/user-journeys?page=${pageNum}&limit=5`, {
+                headers: { Authorization: `Bearer ${session?.access_token}` },
+            });
+            const fetchedJourneys = response.data.journeys || [];
+            
+            if (pageNum < response?.data?.totalPages) {
+                setHasMoreJourneys(true);
+            } else {
+                setHasMoreJourneys(false);
+            }
+
+            if (isLoadMore) {
+                setUserJourneys(prev => {
+                    const existingIds = new Set(prev.map(j => j.userId));
+                    const filteredNew = fetchedJourneys.filter((j: UserJourney) => !existingIds.has(j.userId));
+                    return [...prev, ...filteredNew];
+                });
+            } else {
+                setUserJourneys(fetchedJourneys);
+            }
+        } catch (error) {
+            console.error("Error fetching user journeys:", error);
+        } finally {
+            setUserJourneysLoading(false);
+            setLoadingMoreJourneys(false);
+        }
+    };
 
     const fetchLogs = async (pageNum: number, isLoadMore: boolean = false) => {
         try {
@@ -172,6 +230,10 @@ export default function ProjectDashboardPage() {
 
                 // Fetch Initial Logs
                 fetchLogs(1);
+
+                // Fetch Grouped User Journeys
+                setJourneysPage(1);
+                fetchUserJourneys(1);
             } catch (error) {
                 console.error("Error fetching project data:", error);
                 toast.error("Failed to load project dashboard.");
@@ -275,11 +337,12 @@ export default function ProjectDashboardPage() {
             </motion.div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="bg-muted/50 p-1 rounded-sm">
-                    <TabsTrigger value="overview" className="data-[state=active]:bg-card cursor-pointer rounded-sm">Overview</TabsTrigger>
-                    <TabsTrigger value="analytics" className="data-[state=active]:bg-card cursor-pointer rounded-sm">Analytics</TabsTrigger>
-                    <TabsTrigger value="logs" className="data-[state=active]:bg-card cursor-pointer rounded-sm">Live Logs</TabsTrigger>
-                    <TabsTrigger value="ai-analyst" className="data-[state=active]:bg-indigo-500/10 data-[state=active]:text-indigo-400 cursor-pointer rounded-sm">
+                <TabsList className="bg-muted/50 p-1 rounded-sm w-full overflow-x-auto scrollbar-none flex-nowrap justify-start">
+                    <TabsTrigger value="overview" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Overview</TabsTrigger>
+                    <TabsTrigger value="analytics" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Analytics</TabsTrigger>
+                    <TabsTrigger value="insights" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Insights</TabsTrigger>
+                    <TabsTrigger value="logs" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Live Logs</TabsTrigger>
+                    <TabsTrigger value="ai-analyst" className="data-[state=active]:bg-indigo-500/10 data-[state=active]:text-indigo-400 cursor-pointer rounded-sm flex-shrink-0">
                         <WandSparkles className="w-4 h-4 mr-2" />
                         AI Analyst
                     </TabsTrigger>
@@ -344,6 +407,24 @@ await trackEvent("${project.projectApiKey}", {
                             icon={<Globe className="h-5 w-5 text-emerald-400" />}
                         />
                     </div>
+ 
+                    {/* Global Traffic Map */}
+                    <Card className="rounded-md border-border/50 overflow-hidden bg-card/50 backdrop-blur-xl">
+                        <CardHeader className="border-b border-border/50 pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-md bg-muted border border-border/50">
+                                    <Globe className="h-5 w-5 text-emerald-400" />
+                                </div>
+                                <div>
+                                    <CardTitle>Global Traffic Map</CardTitle>
+                                    <CardDescription>Interactive heat map of project events globally</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            <GlobalMapSection countryData={countryData} />
+                        </CardContent>
+                    </Card>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Top Events Chart */}
@@ -393,14 +474,30 @@ await trackEvent("${project.projectApiKey}", {
                     </div>
                 </TabsContent>
 
+                <TabsContent value="insights" className="space-y-6">
+                    <InsightsAnalytics
+                        analytics={analytics}
+                        logs={logs}
+                        userJourneys={userJourneys}
+                        userJourneysLoading={userJourneysLoading}
+                        hasMoreJourneys={hasMoreJourneys}
+                        loadingMoreJourneys={loadingMoreJourneys}
+                        onLoadMoreJourneys={() => {
+                            const nextPage = journeysPage + 1;
+                            setJourneysPage(nextPage);
+                            fetchUserJourneys(nextPage, true);
+                        }}
+                    />
+                </TabsContent>
+
                 <TabsContent value="logs" className="space-y-6">
                     <Card className="rounded-md overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
-                        <CardHeader className="flex flex-row items-center justify-between">
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
                                 <CardTitle className="text-xl">Live Event Logs</CardTitle>
                                 <CardDescription>Real-time feed of events ingested by this project.</CardDescription>
                             </div>
-                            <Button onClick={() => { setPage(1); fetchLogs(1); }} variant="outline" size="sm" className="gap-2 cursor-pointer">
+                            <Button onClick={() => { setPage(1); fetchLogs(1); }} variant="outline" size="sm" className="gap-2 cursor-pointer rounded-sm w-full sm:w-auto justify-center">
                                 <List className="h-4 w-4" /> Refresh
                             </Button>
                         </CardHeader>
@@ -568,7 +665,7 @@ await trackEvent("${project.projectApiKey}", {
 }
 
 function StatsCard({ title, value, icon }: { title: string; value: string | number; icon: React.ReactNode }) {
-    return (
+    return (    
         <Card className="border-border/50 rounded-md bg-card/50 backdrop-blur-xl h-[120px]">
             <CardContent className="p-6 flex items-center justify-between">
                 <div>
@@ -652,5 +749,232 @@ function ChartSection({
                 </div>
             </CardContent>
         </Card>
+    );
+}
+
+// --- GLOBAL WORLD MAP COMPONENT ---
+
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
+const normalizeCountryName = (name: string): string => {
+    if (!name) return "";
+    const lower = name.toLowerCase().trim();
+    if (lower === "united states" || lower === "usa" || lower === "united states of america") {
+        return "united states";
+    }
+    if (lower === "united kingdom" || lower === "uk" || lower === "gb") {
+        return "united kingdom";
+    }
+    if (lower === "korea" || lower === "south korea" || lower === "korea, republic of") {
+        return "south korea";
+    }
+    return lower;
+};
+
+interface GeographyFeature {
+    rsmKey: string;
+    properties: {
+        name?: string;
+    };
+}
+
+function GlobalMapSection({ countryData }: { countryData: ChartData[] }) {
+    const [mounted, setMounted] = useState(true);
+    const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
+    const [tooltipContent, setTooltipContent] = useState<string | null>(null);
+    const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+
+    const maxCount = useMemo(() => {
+        if (countryData.length === 0) return 0;
+        return Math.max(...countryData.map(c => c.value));
+    }, [countryData]);
+
+    const handleZoomIn = () => {
+        if (position.zoom >= 8) return;
+        setPosition((pos) => ({ ...pos, zoom: pos.zoom * 1.5 }));
+    };
+
+    const handleZoomOut = () => {
+        if (position.zoom <= 1) return;
+        setPosition((pos) => ({ ...pos, zoom: pos.zoom / 1.5 }));
+    };
+
+    const handleReset = () => {
+        setPosition({ coordinates: [0, 20], zoom: 1 });
+    };
+
+    const handleMoveEnd = (newPosition: { coordinates: [number, number]; zoom: number }) => {
+        setPosition(newPosition);
+    };
+
+    if (!mounted) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[380px] bg-zinc-950/20 rounded-md border border-border/30 gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                <p className="text-xs text-muted-foreground animate-pulse">Loading global maps...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
+            {/* Map Column */}
+            <div className="lg:col-span-2 relative border border-border/30 rounded-md bg-zinc-950/20 p-2 h-[380px] overflow-hidden flex items-center justify-center group select-none">
+                <ComposableMap
+                    projection="geoEqualEarth"
+                    projectionConfig={{
+                        scale: 140
+                    }}
+                    width={800}
+                    height={400}
+                    style={{ width: "100%", height: "100%", maxHeight: "360px" }}
+                >
+                    <ZoomableGroup
+                        zoom={position.zoom}
+                        center={position.coordinates}
+                        onMoveEnd={handleMoveEnd}
+                    >
+                        <Geographies geography={geoUrl}>
+                            {({ geographies }: { geographies: GeographyFeature[] }) =>
+                                geographies.map((geo: GeographyFeature) => {
+                                    const countryName = geo.properties.name || "";
+                                    const dataItem = countryData.find(c => {
+                                        const topoNorm = normalizeCountryName(countryName);
+                                        const dataNorm = normalizeCountryName(c.name);
+                                        return topoNorm === dataNorm || topoNorm.includes(dataNorm) || dataNorm.includes(topoNorm);
+                                    });
+                                    const count = dataItem ? dataItem.value : 0;
+
+                                    let fillColor = "#18181b"; // Zinc-900 base
+                                    if (count > 0) {
+                                        const factor = maxCount > 0 ? count / maxCount : 0;
+                                        if (factor <= 0.2) fillColor = "#064e3b"; // Emerald-900
+                                        else if (factor <= 0.4) fillColor = "#065f46"; // Emerald-800
+                                        else if (factor <= 0.6) fillColor = "#047857"; // Emerald-700
+                                        else if (factor <= 0.8) fillColor = "#059669"; // Emerald-600
+                                        else fillColor = "#10b981"; // Emerald-500
+                                    }
+
+                                    return (
+                                        <Geography
+                                            key={geo.rsmKey}
+                                            geography={geo}
+                                            fill={fillColor}
+                                            stroke="#09090b"
+                                            strokeWidth={0.5}
+                                            onMouseEnter={(e: React.MouseEvent<SVGElement>) => {
+                                                setTooltipContent(`${countryName}: ${count} event(s)`);
+                                            }}
+                                            onMouseMove={(e: React.MouseEvent<SVGElement>) => {
+                                                setTooltipPosition({ x: e.clientX, y: e.clientY });
+                                            }}
+                                            onMouseLeave={() => {
+                                                setTooltipContent(null);
+                                                setTooltipPosition(null);
+                                            }}
+                                            style={{
+                                                default: { outline: "none", transition: "fill 250ms ease" },
+                                                hover: {
+                                                    fill: count > 0 ? "#34d399" : "#27272a", // bright neon green if active, else slightly lighter zinc-800
+                                                    stroke: count > 0 ? "#10b981" : "#52525b",
+                                                    strokeWidth: 1,
+                                                    outline: "none",
+                                                    cursor: "pointer",
+                                                    transition: "all 150ms ease",
+                                                },
+                                                pressed: { outline: "none" }
+                                            }}
+                                        />
+                                    );
+                                })
+                            }
+                        </Geographies>
+                    </ZoomableGroup>
+                </ComposableMap>
+
+                {/* Zoom Controls */}
+                <div className="absolute bottom-4 right-4 flex flex-col gap-1.5 z-10">
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleZoomIn}
+                        className="w-full h-8 p-0 rounded bg-background/80 border border-border/50 hover:bg-muted font-bold text-lg select-none cursor-pointer"
+                    >
+                        +
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleZoomOut}
+                        className="w-full    h-8 p-0 rounded bg-background/80 border border-border/50 hover:bg-muted font-bold text-lg select-none cursor-pointer"
+                    >
+                        −
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleReset}
+                        className="px-2 h-8 rounded bg-background/80 border border-border/50 hover:bg-muted text-[10px] font-semibold uppercase tracking-wider select-none cursor-pointer"
+                    >
+                        Reset
+                    </Button>
+                </div>
+            </div>
+
+            {/* Sidebar Column */}
+            <div className="border border-border/30 rounded-md bg-zinc-950/20 p-4 flex flex-col h-[380px]">
+                <h3 className="text-sm font-semibold mb-4 text-foreground flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-emerald-500" />
+                    Top Countries Breakdown
+                </h3>
+                <ScrollArea className="flex-1 pr-2">
+                    {countryData.length > 0 ? (
+                        <div className="space-y-4">
+                            {countryData.map((item, index) => {
+                                const percentage = maxCount > 0 ? (item.value / maxCount) * 100 : 0;
+                                return (
+                                    <div key={item.name} className="flex flex-col gap-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="font-medium text-foreground truncate max-w-[150px]">
+                                                {index + 1}. {item.name}
+                                            </span>
+                                            <span className="text-muted-foreground font-mono font-semibold">
+                                                {item.value} hits
+                                            </span>
+                                        </div>
+                                        <div className="w-full bg-muted/60 h-2 rounded-full overflow-hidden border border-border/30">
+                                            <div
+                                                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground text-xs p-4 gap-2">
+                            <Globe className="w-8 h-8 opacity-30 animate-pulse text-emerald-500" />
+                            <span>No geographic data available yet.</span>
+                            <span className="text-[10px] opacity-60">Events will show up here as they are logged.</span>
+                        </div>
+                    )}
+                </ScrollArea>
+            </div>
+
+            {/* Glowing Mouse Hover Tooltip */}
+            {tooltipContent && tooltipPosition && (
+                <div
+                    className="fixed z-50 pointer-events-none bg-background/95 border border-border/80 backdrop-blur-md px-3 py-2 rounded-md shadow-2xl text-xs font-semibold text-foreground flex items-center gap-2"
+                    style={{
+                        left: tooltipPosition.x + 15,
+                        top: tooltipPosition.y + 15,
+                    }}
+                >
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    {tooltipContent}
+                </div>
+            )}
+        </div>
     );
 }

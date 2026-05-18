@@ -14,12 +14,16 @@ import axios from 'axios';
 import { AnalyticsSection } from "./components/analytics";
 import { PricingSection } from "./components/pricing";
 import { FeaturesSection } from "./components/features";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { status } = useSession();
+  const router = useRouter();
 
 
   const handleShorten = async (e: React.FormEvent) => {
@@ -88,10 +92,13 @@ export default function LandingPage() {
           </motion.div>
 
           {/* MAIN FORM CARD */}
+          
           <div className="w-full max-w-2xl mx-auto space-y-6 relative">
             <Card className="border-border/40 bg-card/40 backdrop-blur-xl shadow-2xl overflow-hidden ring-1 ring-white/10">
               <CardContent className="p-6">
-                <form onSubmit={handleShorten} className="flex flex-col md:flex-row gap-3">
+                <form onSubmit={status === "authenticated" ? (e) => {
+                  e.preventDefault();
+                  router.push("/shorten-url")} : handleShorten} className="flex flex-col md:flex-row gap-3">
                   <div className="relative flex-1">
                     <Input
                       type="url"
