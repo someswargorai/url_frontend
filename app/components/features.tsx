@@ -66,7 +66,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 py-10 px-10">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 py-10 px-2 md:px-10">
       {features.map((feature, index) => (
         <motion.div
          key={index}

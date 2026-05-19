@@ -79,13 +79,13 @@ export default function LandingPage() {
             <Badge variant="secondary" className="mb-4 px-4 py-4 border-primary/10 bg-gray-50 dark:bg-transparent text-primary hover:bg-primary/20 transition-colors text-xs">
               <span className="text-md font-medium tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">More than just a link shortener</span>
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+            <h1 className="text-3xl md:text-7xl font-extrabold tracking-tight mb-6">
               Shorten Links. <br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
                 Expand Reach.
               </span>
             </h1>
-            <p className="text-md md:text-md text-muted-foreground max-w-2xl mx-auto mb-10">
+            <p className="text-sm md:text-md text-muted-foreground max-w-2xl mx-auto mb-10">
               Create short, branded links in seconds. Track performance, optimize for conversion, 
               and take control of your digital presence.
             </p>
@@ -105,13 +105,13 @@ export default function LandingPage() {
                       placeholder="Paste your long link here..."
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
-                      className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4"
+                      className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4 placeholder:text-sm md:placeholder:text-lg"
                     />
                   </div>
                   <Button 
                     type="submit" 
                     disabled={loading} 
-                    className="h-14 px-8 font-bold text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25"
+                    className="h-14 px-8 font-bold text-xs md:text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25"
                   >
                     {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Scissors className="mr-2 h-5 w-5" />}
                     {loading ? "Creating..." : "Shorten Now"}
@@ -155,9 +155,9 @@ export default function LandingPage() {
 
           {/* Social Proof */}
           <div className="mt-16 flex flex-wrap justify-center items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-             <div className="flex items-center gap-2 font-bold text-xl"><Star className="fill-current h-5 w-5" /> TRUSTPILOT</div>
-             <div className="font-bold text-xl uppercase tracking-tighter">ProductHunt</div>
-             <div className="font-bold text-xl uppercase tracking-tighter">TechCrunch</div>
+             <div className="flex items-center gap-2 font-bold text-md md:text-xl"><Star className="fill-current h-5 w-5" /> TRUSTPILOT</div>
+             <div className="font-bold text-md md:text-xl uppercase tracking-tighter">ProductHunt</div>
+             <div className="font-bold text-md md:text-xl uppercase tracking-tighter">TechCrunch</div>
           </div>
         </div>
       </section>
@@ -176,19 +176,19 @@ export default function LandingPage() {
         <div className="container px-4 mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">10M+</p>
+              <p className="text-lg md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">10M+</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Links Created</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">500M+</p>
+              <p className="text-lg md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">500M+</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Clicks Tracked</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">99.9%</p>
+              <p className="text-lg md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">99.9%</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Uptime Rate</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">24/7</p>
+              <p className="text-lg md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 mb-2">24/7</p>
               <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Support</p>
             </div>
           </div>
@@ -199,11 +199,11 @@ export default function LandingPage() {
       <section className="py-24 container px-4">
         <div className="bg-primary rounded-3xl p-8 md:p-16 text-primary-foreground text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to shorten your links?</h2>
-          <p className="text-primary-foreground/80 text-lg mb-10 max-w-xl mx-auto">
+          <h2 className="text-xl md:text-5xl font-bold mb-6">Ready to shorten your links?</h2>
+          <p className="text-primary-foreground/80 text-sm md:text-lg mb-10 max-w-xl mx-auto">
             Join thousands of creators and businesses who use our platform to manage their links effectively.
           </p>
-          <Button size="lg" variant="secondary" className="h-14 px-10 text-lg font-bold " onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+          <Button size="lg" variant="secondary" className="h-14 px-10 text-xs md:text-lg font-bold " onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             Get Started for Free
           </Button>
         </div>

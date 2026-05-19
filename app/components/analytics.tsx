@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 
 export function AnalyticsSection() {
   return (
-    <section id="analytics" className="py-24 bg-secondary/30 px-10">
+    <section id="analytics" className="py-12 md:py-24 bg-secondary/30 px-1.5 md:px-10">
       <div className="container px-4 mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           
@@ -15,11 +15,11 @@ export function AnalyticsSection() {
             <Badge variant="outline" className="px-4 py-1 border-gray-100 text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
               Real-time Insights
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+            <h2 className="text-2xl md:text-5xl font-bold leading-tight">
               Know exactly who is <br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">clicking your links.</span>
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-sm md:text-lg text-muted-foreground">
               Our advanced analytics engine strips away the mystery. Get granular data 
               on every interaction without compromising user privacy.
             </p>
@@ -48,9 +48,9 @@ export function AnalyticsSection() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative p-1 bg-gradient-to-br from-primary/20 to-violet-500/20 rounded-[2rem]"
+              className="relative bg-gradient-to-br from-primary/20 to-violet-500/20 rounded-md"
             >
-              <Card className="rounded-[1.8rem] border-none shadow-2xl bg-card/90 backdrop-blur-xl">
+              <Card className="rounded-md border-none shadow-2xl bg-card/90 backdrop-blur-xl">
                 <CardContent className="p-6 space-y-6">
                   <div className="flex justify-between items-center border-b pb-4 border-border/50">
                     <span className="font-bold">Link Analytics</span>

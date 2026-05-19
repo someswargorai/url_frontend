@@ -17,10 +17,10 @@ export function PricingSection() {
 
   return (
     <section id="pricing" className="py-24 relative">
-      <div className="container px-4 mx-auto text-center">
+      <div className="container px-2 md:px-4 mx-auto text-center">
         <div className="max-w-2xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Simple, honest pricing.</h2>
-          <p className="text-muted-foreground text-lg text-balance">
+          <h2 className="text-2xl md:text-5xl font-bold mb-4">Simple, honest pricing.</h2>
+          <p className="text-muted-foreground text-sm md:text-lg text-balance">
             One single payment. Lifetime access. No hidden fees or recurring subscriptions.
           </p>
         </div>
@@ -66,7 +66,7 @@ export function PricingSection() {
             </CardContent>
 
             <CardFooter className="px-8 pb-10">
-              <Button className="w-full h-14 text-lg font-bold rounded-md group shadow-lg shadow-primary/20">
+              <Button className="w-full h-14 text-xs md:text-lg font-bold rounded-md group shadow-lg shadow-primary/20">
                 Get Access Now
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
