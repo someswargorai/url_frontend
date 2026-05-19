@@ -41,7 +41,7 @@ import {
     Loader2,
 } from "lucide-react";
 
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from "react-simple-maps";
 import {
     ChartContainer,
     ChartTooltipContent,
@@ -71,6 +71,8 @@ interface ProjectAnalytics {
     devices: { count: number, _id: string }[];
     cities: { count: number, _id: string }[];
     os: { count: number, _id: string }[];
+    todayEvents?: number;
+    eventGrowth?: number;
 }
 
 interface EventLog {
@@ -337,13 +339,12 @@ export default function ProjectDashboardPage() {
             </motion.div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="bg-muted/50 p-1 rounded-sm w-full overflow-x-auto scrollbar-none flex-nowrap justify-start">
+                <TabsList className="bg-muted/50 p-1 rounded-sm w-full overflow-x-auto scrollbar-none flex-nowrap justify-start h-12!">
                     <TabsTrigger value="overview" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Overview</TabsTrigger>
                     <TabsTrigger value="analytics" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Analytics</TabsTrigger>
                     <TabsTrigger value="insights" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Insights</TabsTrigger>
                     <TabsTrigger value="logs" className="data-[state=active]:bg-card cursor-pointer rounded-sm flex-shrink-0">Live Logs</TabsTrigger>
                     <TabsTrigger value="ai-analyst" className="data-[state=active]:bg-indigo-500/10 data-[state=active]:text-indigo-400 cursor-pointer rounded-sm flex-shrink-0">
-                        <WandSparkles className="w-4 h-4 mr-2" />
                         AI Analyst
                     </TabsTrigger>
                 </TabsList>
@@ -371,7 +372,7 @@ export default function ProjectDashboardPage() {
                                 <p className="text-sm font-medium mb-2">SDK Example</p>
                                 <div className="bg-[#0d1117] border border-border/50 rounded-md p-4 overflow-x-auto">
                                     <pre className="text-sm text-zinc-300 font-mono">
-{`import { trackEvent } from "shorty_package";
+{`import { trackEvent } from "shorty-analytics-sdk";
 
 await trackEvent("${project.projectApiKey}", {
   event: "user_signup",
@@ -422,7 +423,7 @@ await trackEvent("${project.projectApiKey}", {
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6">
-                            <GlobalMapSection countryData={countryData} />
+                            <GlobalMapSection countryData={cityData} />
                         </CardContent>
                     </Card>
 
@@ -603,7 +604,7 @@ await trackEvent("${project.projectApiKey}", {
                                         {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                                     </div>
                                     <div className={`max-w-[80%] rounded-xl p-4 text-sm ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted/50 border border-border/50 text-foreground"}`}>
-                                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-0 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }} />
+                                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-0 leading-relaxed text-xs" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }} />
                                     </div>
                                 </div>
                             ))}
@@ -623,7 +624,7 @@ await trackEvent("${project.projectApiKey}", {
                         <div className="p-4 border-t border-border/50 bg-muted/20">
                             <form
                                 onSubmit={(e) => { e.preventDefault(); handleSendChat(); }}
-                                className="flex gap-2 group"
+                                className="flex gap-2"
                             >
                                 <Input
                                     type="text"
@@ -670,7 +671,7 @@ function StatsCard({ title, value, icon }: { title: string; value: string | numb
             <CardContent className="p-6 flex items-center justify-between">
                 <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{title}</p>
-                    <h2 className="text-2xl font-bold">{value}</h2>
+                    <h2 className="text-lg font-bold">{value}</h2>
                 </div>
                 <div className="p-3 rounded-lg bg-muted border border-border/50">
                     {icon}
@@ -728,6 +729,7 @@ function ChartSection({
                                     tickLine={false}
                                     tick={{ fill: '#888', fontSize: 12 }}
                                     width={100}
+                                
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
@@ -736,7 +738,7 @@ function ChartSection({
                                 />
                                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                                     {data.map((item, index) => (
-                                        <Cell key={`cell-${index}-${item.name}`} fill={palette[index % palette.length]} />
+                                        <Cell key={`cell-${index}-${item.name}`} fill={palette[index % palette.length]}/>
                                     ))}
                                 </Bar>
                             </BarChart>
@@ -778,15 +780,72 @@ interface GeographyFeature {
     };
 }
 
+interface CityMarker {
+    name: string;
+    count: number;
+    coordinates: [number, number];
+}
+
+interface RsmGeographyFeature {
+    rsmKey: string;
+    properties: {
+        name?: string;
+        [key: string]: unknown;
+    };
+    geometry?: Record<string, unknown>;
+    [key: string]: unknown;
+}
+
 function GlobalMapSection({ countryData }: { countryData: ChartData[] }) {
-    const [mounted, setMounted] = useState(true);
+    const [mounted, setMounted] = useState(false);
     const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
     const [tooltipContent, setTooltipContent] = useState<string | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+    const [cityMarkers, setCityMarkers] = useState<CityMarker[]>([]);
+    const [loadingMap, setLoadingMap] = useState(true);
 
     const maxCount = useMemo(() => {
         if (countryData.length === 0) return 0;
         return Math.max(...countryData.map(c => c.value));
+    }, [countryData]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        const fetchCityCoordinates = async () => {
+            if (!countryData || countryData.length === 0) {
+                setLoadingMap(false);
+                return;
+            }
+            
+            const markers: CityMarker[] = [];
+            
+            for (const city of countryData) {
+                // Skip if Unknown
+                if (!city.name || city.name === "Unknown") continue;
+                try {
+                    // Slight delay to respect free geocoding API rate limits
+                    await new Promise(r => setTimeout(r, 200)); 
+                    const res = await axios.get(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city.name)}&format=json&limit=1`);
+                    if (res.data && res.data.length > 0) {
+                        markers.push({
+                            name: city.name,
+                            count: city.value,
+                            coordinates: [parseFloat(res.data[0].lon), parseFloat(res.data[0].lat)]
+                        });
+                    }
+                } catch (err) {
+                    console.error("Geocoding error for", city.name, err);
+                }
+            }
+            setCityMarkers(markers);
+            setLoadingMap(false);
+        };
+        
+        fetchCityCoordinates();
     }, [countryData]);
 
     const handleZoomIn = () => {
@@ -819,7 +878,13 @@ function GlobalMapSection({ countryData }: { countryData: ChartData[] }) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
             {/* Map Column */}
-            <div className="lg:col-span-2 relative border border-border/30 rounded-md bg-zinc-950/20 p-2 h-[380px] overflow-hidden flex items-center justify-center group select-none">
+            <div className="lg:col-span-2 relative border border-border/50 rounded-md p-2 h-[380px] overflow-hidden flex items-center justify-center group select-none">
+                {loadingMap && (
+                    <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border/50 text-[10px] text-muted-foreground">
+                        <Loader2 className="w-3 h-3 animate-spin text-emerald-500" />
+                        Plotting cities...
+                    </div>
+                )}
                 <ComposableMap
                     projection="geoEqualEarth"
                     projectionConfig={{
@@ -834,61 +899,57 @@ function GlobalMapSection({ countryData }: { countryData: ChartData[] }) {
                         center={position.coordinates}
                         onMoveEnd={handleMoveEnd}
                     >
+                        {/* Render base map geometries */}
                         <Geographies geography={geoUrl}>
-                            {({ geographies }: { geographies: GeographyFeature[] }) =>
-                                geographies.map((geo: GeographyFeature) => {
-                                    const countryName = geo.properties.name || "";
-                                    const dataItem = countryData.find(c => {
-                                        const topoNorm = normalizeCountryName(countryName);
-                                        const dataNorm = normalizeCountryName(c.name);
-                                        return topoNorm === dataNorm || topoNorm.includes(dataNorm) || dataNorm.includes(topoNorm);
-                                    });
-                                    const count = dataItem ? dataItem.value : 0;
-
-                                    let fillColor = "#18181b"; // Zinc-900 base
-                                    if (count > 0) {
-                                        const factor = maxCount > 0 ? count / maxCount : 0;
-                                        if (factor <= 0.2) fillColor = "#064e3b"; // Emerald-900
-                                        else if (factor <= 0.4) fillColor = "#065f46"; // Emerald-800
-                                        else if (factor <= 0.6) fillColor = "#047857"; // Emerald-700
-                                        else if (factor <= 0.8) fillColor = "#059669"; // Emerald-600
-                                        else fillColor = "#10b981"; // Emerald-500
-                                    }
-
-                                    return (
-                                        <Geography
-                                            key={geo.rsmKey}
-                                            geography={geo}
-                                            fill={fillColor}
-                                            stroke="#09090b"
-                                            strokeWidth={0.5}
-                                            onMouseEnter={(e: React.MouseEvent<SVGElement>) => {
-                                                setTooltipContent(`${countryName}: ${count} event(s)`);
-                                            }}
-                                            onMouseMove={(e: React.MouseEvent<SVGElement>) => {
-                                                setTooltipPosition({ x: e.clientX, y: e.clientY });
-                                            }}
-                                            onMouseLeave={() => {
-                                                setTooltipContent(null);
-                                                setTooltipPosition(null);
-                                            }}
-                                            style={{
-                                                default: { outline: "none", transition: "fill 250ms ease" },
-                                                hover: {
-                                                    fill: count > 0 ? "#34d399" : "#27272a", // bright neon green if active, else slightly lighter zinc-800
-                                                    stroke: count > 0 ? "#10b981" : "#52525b",
-                                                    strokeWidth: 1,
-                                                    outline: "none",
-                                                    cursor: "pointer",
-                                                    transition: "all 150ms ease",
-                                                },
-                                                pressed: { outline: "none" }
-                                            }}
-                                        />
-                                    );
-                                })
+                            {({ geographies }: { geographies: RsmGeographyFeature[] }) =>
+                                geographies.map((geo: RsmGeographyFeature) => (
+                                    <Geography
+                                        key={geo.rsmKey}
+                                        geography={geo}
+                                        fill="#18181b"
+                                        stroke="#27272a"
+                                        strokeWidth={0.5}
+                                        style={{
+                                            default: { outline: "none" },
+                                            hover: { fill: "#27272a", outline: "none" },
+                                            pressed: { outline: "none" }
+                                        }}
+                                    />
+                                ))
                             }
                         </Geographies>
+
+                        {/* Render City Markers */}
+                        {cityMarkers.map((marker, idx) => {
+                            const factor = maxCount > 0 ? marker.count / maxCount : 0.5;
+                            // scale radius between 3 and 12 based on count
+                            const radius = 1 + factor * 6;
+                            return (
+                                <Marker 
+                                    key={idx} 
+                                    coordinates={marker.coordinates}
+                                    onMouseEnter={(e: React.MouseEvent<SVGElement>) => {
+                                        setTooltipContent(`${marker.name}: ${marker.count} event(s)`);
+                                    }}
+                                    onMouseMove={(e: React.MouseEvent<SVGElement>) => {
+                                        setTooltipPosition({ x: e.clientX, y: e.clientY });
+                                    }}
+                                    onMouseLeave={() => {
+                                        setTooltipContent(null);
+                                        setTooltipPosition(null);
+                                    }}
+                                >
+                                    <circle 
+                                        r={radius} 
+                                        fill="#10b981" 
+                                        stroke="#065f46" 
+                                        strokeWidth={1.2}
+                                        className="transition-all duration-300 hover:fill-[#34d399] hover:stroke-[#10b981] cursor-pointer"
+                                        style={{ opacity: 0.85 }}
+                                    />
+                                </Marker>
+                            );
+                        })}
                     </ZoomableGroup>
                 </ComposableMap>
 
@@ -922,10 +983,10 @@ function GlobalMapSection({ countryData }: { countryData: ChartData[] }) {
             </div>
 
             {/* Sidebar Column */}
-            <div className="border border-border/30 rounded-md bg-zinc-950/20 p-4 flex flex-col h-[380px]">
+            <div className="border border-border/50 rounded-md  p-4 flex flex-col h-[380px]">
                 <h3 className="text-sm font-semibold mb-4 text-foreground flex items-center gap-2">
                     <Globe className="w-4 h-4 text-emerald-500" />
-                    Top Countries Breakdown
+                    Top Cities Breakdown
                 </h3>
                 <ScrollArea className="flex-1 pr-2">
                     {countryData.length > 0 ? (

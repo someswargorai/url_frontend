@@ -43,7 +43,7 @@ export default function DocumentationPage() {
             <div className="mb-12 space-y-4 text-center md:text-left relative">
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl -z-10" />
                 <Badge variant="outline" className="px-3 py-1 bg-background/50 backdrop-blur-sm border-primary/20 text-primary mb-4">
-                    <Code2 className="w-4 h-4 mr-2 inline-block" /> v1.0.0
+                    <Code2 className="w-4 h-4 mr-2 inline-block" /> v1.0.2
                 </Badge>
                 <p className="text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/60">
                     Developer Documentation 
@@ -112,18 +112,18 @@ export default function DocumentationPage() {
                         </CardHeader>
                         <CardContent className="pt-6">
                             <p className="text-muted-foreground mb-4">
-                                The easiest way to use our API is by installing the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty_package</code>.
+                                The easiest way to use our API is by installing the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty-analytics-sdk</code>.
                             </p>
                             <CodeBlock
                                 id="install-npm"
                                 language="bash"
-                                code="npm install shorty_package"
+                                code="npm i shorty-analytics-sdk"
                             />
                             <p className="text-muted-foreground mt-6 mb-4">Or with yarn:</p>
                             <CodeBlock
                                 id="install-yarn"
                                 language="bash"
-                                code="yarn add shorty_package"
+                                code="yarn add shorty-analytics-sdk"
                             />
                         </CardContent>
                     </Card>
@@ -147,7 +147,7 @@ export default function DocumentationPage() {
                             <CodeBlock
                                 id="usage-js"
                                 language="javascript"
-                                code={`const { createShortUrl } = require("shorty_package");
+                                code={`const { createShortUrl } = require("shorty-analytics-sdk");
 
 async function generateShortLink() {
 const apiKey = "YOUR_API_KEY"; // Retrieve this from your environment variables
@@ -191,12 +191,12 @@ generateShortLink();`}
                             <div>
                                 <h3 className="text-md font-semibold mb-2">1. Initialize the Event Ingestion</h3>
                                 <p className="text-muted-foreground mb-4">
-                                    Import the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">trackEvent</code> function from the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty_package</code>.
+                                    Import the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">trackEvent</code> function from the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty-analytics-sdk</code>.
                                 </p>
                                 <CodeBlock
                                     id="event-sdk-usage"
                                     language="javascript"
-                                    code={`const { trackEvent } = require("shorty_package");
+                                    code={`const { trackEvent } = require("shorty-analytics-sdk");
 
 async function captureUserBehavior() {
   const projectKey = "pk_your_project_key_here";

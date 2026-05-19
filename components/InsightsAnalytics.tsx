@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   MousePointer,
   TrendingUp,
+  TrendingDown,
   DollarSign,
   AlertCircle,
   ChevronRight,
@@ -26,6 +27,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 // --- INTERFACES ---
 interface EventLog {
@@ -55,6 +62,29 @@ interface ProjectAnalytics {
   cities: { count: number; _id: string }[];
   os: { count: number; _id: string }[];
   devices: { count: number; _id: string }[];
+  activeUsers?: number;
+  todayActiveUsers?: number;
+  activeUsersGrowth?: number;
+  activePaths?: { path: string; count: number }[];
+  engagementMetrics?: { engagementRate: string; avgDepth: string };
+  todayEvents?: number;
+  eventGrowth?: number;
+  revenueData?: {
+    totalRevenue: number;
+    campaignAttribution: {
+      source: string;
+      count: number;
+      revenue: string;
+      conversion: string;
+    }[];
+  };
+  funnelAnalysis?: {
+    name: string;
+    count: number;
+    todayCount?: number;
+    growth?: number;
+    conversionFromPrevious: string;
+  }[];
 }
 
 interface UserJourney {
@@ -95,234 +125,59 @@ export default function InsightsAnalytics({
   const [expandedStep, setExpandedStep] = useState<string | null>(null);
 
   // --- 1. DYNAMIC REAL-TIME VISITORS ---
-  const dynamicActiveUsers = useMemo(() => {
-    if (!logs || logs.length === 0) return 0;
-    // Count unique users in the logs array
-    const uniqueUsers = logs.map(
-      (log) => log.userId || log.anonymousId || "unknown",
-    );
-    return uniqueUsers.length;
-  }, [logs]);
+  const dynamicActiveUsers = analytics?.activeUsers || 0;
 
-  // Active pages/events distribution from live logs
-  const dynamicActivePaths = useMemo(() => {
-    if (!logs || logs.length === 0) return [];
-    const counts: Record<string, number> = {};
-    logs.slice(0, 15).forEach((log) => {
-      const path =
-        log.metadata?.path || log.metadata?.url || `/${log.eventName}`;
-      counts[path] = (counts[path] || 0) + 1;
-    });
-    return Object.entries(counts)
-      .map(([path, count]) => ({ path, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
-  }, [logs]);
+  // Active pages/events distribution from API
+  const dynamicActivePaths = analytics?.activePaths || [];
 
   // --- 2. DYNAMIC FUNNEL BUILDING ---
-  // We dynamically build a funnel using the top 4 events actually logged by the developer
-  const funnelSteps = useMemo(() => {
-    if (!analytics?.topEvents || analytics.topEvents.length === 0) return [];
-    return analytics.topEvents.slice(0, 4).map((evt) => ({
-      name: evt._id,
-      count: evt.count,
-      description: `Aggregated count of logged '${evt._id}' events`,
-    }));
-  }, [analytics]);
+  const funnelAnalysis = useMemo(() => analytics?.funnelAnalysis || [], [
+    analytics?.funnelAnalysis,
+  ]);
+
+  const overallConversion = useMemo(() => {
+    if (funnelAnalysis.length < 2) return "0.0%";
+    const firstCount = funnelAnalysis[0].count;
+    const lastCount = funnelAnalysis[funnelAnalysis.length - 1].count;
+    return firstCount > 0
+      ? ((lastCount / firstCount) * 100).toFixed(1) + "%"
+      : "0.0%";
+  }, [funnelAnalysis]);
 
   const biggestDropStep = useMemo(() => {
-    if (funnelSteps.length < 2) return "N/A";
+    if (funnelAnalysis.length < 2) return "N/A";
     let maxDrop = -1;
     let stepName = "";
-    for (let i = 0; i < funnelSteps.length - 1; i++) {
-      const drop = funnelSteps[i].count - funnelSteps[i + 1].count;
+    for (let i = 0; i < funnelAnalysis.length - 1; i++) {
+      const drop = funnelAnalysis[i].count - funnelAnalysis[i + 1].count;
       if (drop > maxDrop) {
         maxDrop = drop;
-        stepName = `'${funnelSteps[i].name}' ➔ '${funnelSteps[i + 1].name}'`;
+        stepName = `'${funnelAnalysis[i].name}' ➔ '${
+          funnelAnalysis[i + 1].name
+        }'`;
       }
     }
     return stepName;
-  }, [funnelSteps]);
-
-  const overallConversion = useMemo(() => {
-    if (funnelSteps.length < 2) return "0.0%";
-    return (
-      (
-        (funnelSteps[funnelSteps.length - 1].count / funnelSteps[0].count) *
-        100
-      ).toFixed(1) + "%"
-    );
-  }, [funnelSteps]);
-
-  // --- 3. DYNAMIC SESSIONS & USER TIMELINES ---
-  const sessionsData = useMemo(() => {
-    if (userJourneys && userJourneys.length > 0) {
-      const sessions: Record<string, EventLog[]> = {};
-      userJourneys.forEach((j) => {
-        sessions[j.userId] = j.events;
-      });
-      const list = userJourneys.map((j) => j.userId);
-      const frustration = {
-        rageClicks: userJourneys.reduce((sum, j) => sum + j.rageClicks, 0),
-        deadClicks: Math.floor(userJourneys.length * 0.15),
-        avgScroll: "68%",
-      };
-      return { sessions, list, frustration };
-    }
-
-    if (!logs || logs.length === 0) {
-      return {
-        sessions: {},
-        list: [],
-        frustration: { rageClicks: 0, deadClicks: 0, avgScroll: "65%" },
-      };
-    }
-
-    const sessions: Record<string, EventLog[]> = {};
-    logs.forEach((log) => {
-      const userKey = log.userId || log.anonymousId || "Anonymous Guest";
-      if (!sessions[userKey]) {
-        sessions[userKey] = [];
-      }
-      sessions[userKey].push(log);
-    });
-
-    let rageClicks = 0;
-    let deadClicks = 0;
-
-    Object.values(sessions).forEach((userLogs) => {
-      const sorted = [...userLogs].sort(
-        (a, b) =>
-          new Date(a.timestamp || 0).getTime() -
-          new Date(b.timestamp || 0).getTime(),
-      );
-      for (let i = 0; i < sorted.length - 2; i++) {
-        const diff1 =
-          new Date(sorted[i + 1].timestamp || 0).getTime() -
-          new Date(sorted[i].timestamp || 0).getTime();
-        const diff2 =
-          new Date(sorted[i + 2].timestamp || 0).getTime() -
-          new Date(sorted[i + 1].timestamp || 0).getTime();
-        if (
-          sorted[i].eventName === sorted[i + 1].eventName &&
-          sorted[i + 1].eventName === sorted[i + 2].eventName &&
-          diff1 < 2500 &&
-          diff2 < 2500
-        ) {
-          rageClicks++;
-          i += 2;
-        }
-      }
-    });
-
-    logs.forEach((log) => {
-      if (
-        log.eventName.toLowerCase().includes("click") &&
-        log.metadata?.isStatic
-      ) {
-        deadClicks++;
-      }
-    });
-
-    return {
-      sessions,
-      list: Object.keys(sessions),
-      frustration: {
-        rageClicks,
-        deadClicks: deadClicks || Math.floor(logs.length * 0.08),
-        avgScroll: "62%",
-      },
-    };
-  }, [logs, userJourneys]);
-
-  const userSessions = sessionsData.sessions;
-  const uniqueUserList = sessionsData.list;
+  }, [funnelAnalysis]);
 
   // --- 4. DYNAMIC UTM & REVENUE ATTRIBUTION ---
-  // Scan metadata for UTM coordinates and sum up transaction amounts
-  const dynamicRevenueData = useMemo(() => {
-    let total = 0;
-    const utmCounts: Record<string, { count: number; revenue: number }> = {};
+  const dynamicRevenueData = analytics?.revenueData || {
+    totalRevenue: 0,
+    campaignAttribution: [],
+  };
 
-    logs.forEach((log) => {
-      const meta = log.metadata || {};
-      // Scan for price / revenue
-      const amt = Number(
-        meta.amount || meta.price || meta.revenue || meta.value || 0,
-      );
-      if (amt > 0) {
-        total += amt;
-      }
-
-      // Scan for UTM Campaign parameters
-      const source = String(log?.source?.referrer || "Direct / Organic");
-      if (!utmCounts[source]) {
-        utmCounts[source] = { count: 0, revenue: 0 };
-      }
-      utmCounts[source].count++;
-      if (amt > 0) {
-        utmCounts[source].revenue += amt;
-      }
-    });
-
-    const attributionList = Object.entries(utmCounts)
-      .map(([source, data]) => ({
-        source,
-        count: data.count,
-        revenue: data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : "$0",
-        conversion: ((data.count / logs.length) * 100).toFixed(1) + "%",
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    return {
-      totalRevenue: total,
-      campaignAttribution: attributionList,
-    };
-  }, [logs]);
-
-  // --- 5. DYNAMIC API & DEVELOPER TELEMETRY ---
-  const dynamicApiPerformance = useMemo(() => {
-    if (!logs || logs.length === 0)
-      return { latency: "115ms", successRate: "100%" };
-    let latSum = 0;
-    let latCount = 0;
-    let failCount = 0;
-
-    logs.forEach((log) => {
-      const meta = log.metadata || {};
-      // Sum latency if logged
-      if (meta.latency || meta.duration) {
-        latSum += Number(meta.latency || meta.duration);
-        latCount++;
-      }
-      if (
-        log.eventName.toLowerCase().includes("error") ||
-        Number(meta.status) >= 400 ||
-        meta.error
-      ) {
-        failCount++;
-      }
-    });
-
-    const successRate =
-      logs.length > 0
-        ? (((logs.length - failCount) / logs.length) * 100).toFixed(1) + "%"
-        : "100%";
-    const avgLatency =
-      latCount > 0 ? `${(latSum / latCount).toFixed(0)}ms` : "124ms";
-
-    return {
-      latency: avgLatency,
-      successRate,
-    };
-  }, [logs]);
+  // --- 5. DYNAMIC EXPERIENCE & ENGAGEMENT METRICS ---
+  const dynamicEngagementMetrics = analytics?.engagementMetrics || {
+    engagementRate: "0%",
+    avgDepth: "0.0",
+  };
 
   return (
     <div className="space-y-6">
       {/* Top Row: Real-Time Active Users & Live Diagnostics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Live Pulse Card */}
-        <Card className="rounded-md border-border/50 bg-gradient-to-br from-card/85 to-zinc-300/20 overflow-hidden relative backdrop-blur-xl">
+        <Card className="rounded-md border-border/50 relative backdrop-blur-xl">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
@@ -330,29 +185,37 @@ export default function InsightsAnalytics({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                Real-Time Visitors
+                Visitors
               </span>
-              <Badge
-                variant="outline"
-                className="border-emerald-500/20 text-emerald-400 bg-emerald-500/5 text-[10px]"
-              >
-                Dynamic Live Pulse
-              </Badge>
             </div>
-            <CardTitle className="text-3xl font-extrabold text-foreground flex items-baseline gap-2 pt-1 font-mono">
+            <CardTitle className="text-3xl font-extrabold text-foreground font-mono pt-1">
               {dynamicActiveUsers}
-              <span className="text-xs font-medium text-muted-foreground font-sans">
-                active sessions
-              </span>
             </CardTitle>
+            <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground font-sans ">
+              <span className="font-semibold text-foreground">
+                Today: {analytics?.todayActiveUsers || 0}
+              </span>
+              {analytics?.activeUsersGrowth !== undefined && (
+                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${
+                  analytics.activeUsersGrowth >= 0 ? "text-emerald-400" : "text-rose-400"
+                }`}>
+                  {analytics.activeUsersGrowth >= 0 ? (
+                    <TrendingUp className="w-3 h-3" />
+                  ) : (
+                    <TrendingDown className="w-3 h-3" />
+                  )}
+                  {analytics.activeUsersGrowth >= 0 ? "+" : ""}{analytics.activeUsersGrowth}% from yesterday
+                </span>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="pb-4">
-            <div className="space-y-2 mt-2">
+            <div className="space-y-2 mt-2 overflow-auto  h-16.25">
               {dynamicActivePaths.length > 0 ? (
                 dynamicActivePaths.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between text-xs"
+                    className="flex items-center justify-between text-xs "
                   >
                     <span className="text-muted-foreground truncate max-w-[180px]">
                       {item.path}
@@ -377,14 +240,28 @@ export default function InsightsAnalytics({
             <CardDescription className="text-xs uppercase tracking-wider font-semibold">
               Project Load telemetry
             </CardDescription>
-            <CardTitle className="text-2xl font-bold flex items-baseline gap-2 font-mono">
+            <CardTitle className="text-3xl font-extrabold text-foreground font-mono pt-1">
               {analytics?.totalEvents || 0}
-              <span className="text-emerald-400 text-xs font-semibold flex items-center gap-0.5 font-sans">
-                <TrendingUp className="w-3.5 h-3.5" /> Events Logged
-              </span>
             </CardTitle>
+            <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground font-sans">
+              <span className="font-semibold text-foreground">
+                Today: {analytics?.todayEvents || 0}
+              </span>
+              {analytics?.eventGrowth !== undefined && (
+                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${
+                  analytics.eventGrowth >= 0 ? "text-emerald-400" : "text-rose-400"
+                }`}>
+                  {analytics.eventGrowth >= 0 ? (
+                    <TrendingUp className="w-3 h-3" />
+                  ) : (
+                    <TrendingDown className="w-3 h-3" />
+                  )}
+                  {analytics.eventGrowth >= 0 ? "+" : ""}{analytics.eventGrowth}% from yesterday
+                </span>
+              )}
+            </div>
           </CardHeader>
-          <CardContent className="pb-4 text-xs text-muted-foreground">
+          <CardContent className="pb-4 text-xs text-muted-foreground mt-1">
             Total aggregated user interaction points logged in this project
             dashboard database dynamically.
           </CardContent>
@@ -394,38 +271,38 @@ export default function InsightsAnalytics({
         <Card className="rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs uppercase tracking-wider font-semibold">
-              User Experience Diagnostics
+              User Engagement Diagnostics
             </CardDescription>
             <CardTitle className="text-2xl font-bold flex items-baseline gap-2 font-mono">
-              {dynamicApiPerformance.successRate}
+              {dynamicEngagementMetrics.engagementRate}
               <span className="text-emerald-400 text-xs font-semibold flex items-center gap-0.5 font-sans">
-                API Success Rate
+                Multi-Event Sessions
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pb-4 text-xs text-muted-foreground">
-            Calculated dynamically from loaded event dispatches. Latency average
-            is currently optimized at{" "}
-            <span className="text-foreground font-semibold font-mono">
-              {dynamicApiPerformance.latency}
-            </span>
-            .
+            Calculated in real-time from the full database. Average interactions
+            optimized at{" "}
+            <span className="text-foreground font-semibold">
+              {dynamicEngagementMetrics.avgDepth} events
+            </span>{" "}
+            per unique session.
           </CardContent>
         </Card>
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="flex border-b border-border/50 pb-px gap-1 overflow-x-auto scrollbar-none flex-nowrap -mx-4 px-4 md:-mx-0 md:px-0">
+      <div className="flex border-b border-border/50 pb-px overflow-x-auto scrollbar-none flex-nowrap -mx-4 px-4 md:-mx-0 md:px-0">
         <Button
           variant="ghost"
           onClick={() => setActiveSection("funnels")}
           className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
             activeSection === "funnels"
-              ? "border-emerald-500 text-emerald-400 bg-emerald-500/[0.03]"
+              ? " text-emerald-400 bg-emerald-500/[0.03]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Target className="w-4 h-4 mr-2" />
+          <Target className="w-4 h-4" />
           Dynamic Funnels
         </Button>
         <Button
@@ -433,11 +310,11 @@ export default function InsightsAnalytics({
           onClick={() => setActiveSection("session_replay")}
           className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
             activeSection === "session_replay"
-              ? "border-emerald-500 text-emerald-400 bg-emerald-500/[0.03]"
+              ? " text-emerald-400 bg-emerald-500/[0.03]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <MousePointer className="w-4 h-4 mr-2" />
+          <MousePointer className="w-4 h-4" />
           Timeline
         </Button>
         <Button
@@ -445,12 +322,12 @@ export default function InsightsAnalytics({
           onClick={() => setActiveSection("revenue")}
           className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
             activeSection === "revenue"
-              ? "border-emerald-500 text-emerald-400 bg-emerald-200/[0.03]"
+              ? " text-emerald-400 bg-emerald-200/[0.03]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <DollarSign className="w-4 h-4 mr-2" />
-          Campaign Attribution
+          <DollarSign className="w-4 h-4" />
+          Referrer Attribution
         </Button>
 
         <Button
@@ -458,11 +335,11 @@ export default function InsightsAnalytics({
           onClick={() => setActiveSection("ai_insights")}
           className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
             activeSection === "ai_insights"
-              ? "border-emerald-500 text-emerald-400 bg-emerald-500/[0.03]"
+              ? " text-emerald-400 bg-emerald-500/[0.03]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Bell className="w-4 h-4 mr-2" />
+          <Bell className="w-4 h-4" />
           Smart Recommendations
         </Button>
       </div>
@@ -486,47 +363,73 @@ export default function InsightsAnalytics({
                         top events
                       </CardDescription>
                     </div>
-                    {funnelSteps.length >= 2 && (
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-500/20 text-emerald-400 font-mono"
-                      >
+                    {funnelAnalysis.length >= 2 && (
+                      <Badge variant="outline" className=" font-mono">
                         Conversion Ratio: {overallConversion}
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {funnelSteps.length > 0 ? (
-                    funnelSteps.map((step, idx) => {
-                      const percentage =
-                        funnelSteps[0].count > 0
-                          ? (step.count / funnelSteps[0].count) * 100
-                          : 0;
-
-                      return (
-                        <div
-                          key={step.name}
-                          className="relative flex flex-col gap-2 group"
-                        >
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-foreground flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-full bg-zinc-800 border border-border/80 flex items-center justify-center font-mono text-[10px] text-emerald-400">
+                  {funnelAnalysis.length > 0 ? (
+                    <div className="flex flex-col items-center max-w-lg mx-auto py-4 h-[300px] overflow-y-auto">
+                      {funnelAnalysis.map((step, idx) => (
+                        <div key={step.name} className="flex flex-col w-full">
+                          {/* The Step Box */}
+                          <div className="w-full flex items-center justify-between p-4 rounded-xl bg-muted/40 border border-border/50 shadow-sm backdrop-blur-sm relative z-10 transition-transform hover:scale-[1.01]">
+                            <div className="flex items-center gap-3">
+                              <span className="w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs  font-semibold shadow-inner">
                                 {idx + 1}
                               </span>
-                              {step.name}
-                            </span>
+                              <span className="font-semibold text-foreground text-sm tracking-wide">
+                                {step.name}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className="text-xs font-bold font-mono text-foreground bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 text-emerald-400">
+                                {step.count.toLocaleString()}{" "}
+                                <span className="text-[9px] font-sans text-muted-foreground ml-0.5 uppercase tracking-wider">
+                                  total
+                                </span>
+                              </span>
+                              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                                <span>Today: {step.todayCount || 0}</span>
+                                {step.growth !== undefined && (
+                                  <span className={`font-semibold flex items-center gap-0.5 ${
+                                    step.growth >= 0 ? "text-emerald-400" : "text-rose-400"
+                                  }`}>
+                                    {step.growth >= 0 ? (
+                                      <TrendingUp className="w-3 h-3" />
+                                    ) : (
+                                      <TrendingDown className="w-3 h-3" />
+                                    )}
+                                    {step.growth >= 0 ? "+" : ""}{step.growth}% from yesterday
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="w-full bg-muted/30 h-2 rounded-full border border-border/30 overflow-hidden relative">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-700"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
+                          {/* The Drop-off Connector */}
+                          {idx < funnelAnalysis.length - 1 && (
+                            <div className="flex flex-col items-center justify-center -my-1 relative z-0">
+                              <div className="w-px h-8 bg-border/80"></div>
+                              <Badge
+                                variant="outline"
+                                className="bg-card text-[11px] text-muted-foreground border-border/60 py-1.5 px-3 z-10 shadow-sm flex items-center gap-1.5 font-medium tracking-wide"
+                              >
+                                <span className="text-emerald-500 text-sm">
+                                  ↓
+                                </span>
+                                {funnelAnalysis[idx + 1].conversionFromPrevious}{" "}
+                                conversion
+                              </Badge>
+                              <div className="w-px h-8 bg-border/80"></div>
+                            </div>
+                          )}
                         </div>
-                      );
-                    })
+                      ))}
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground text-xs gap-3">
                       <Target className="w-8 h-8 opacity-40 text-emerald-500" />
@@ -560,11 +463,11 @@ export default function InsightsAnalytics({
                   Funnel Bottlenecks
                 </h4>
                 <div className="space-y-4 text-xs text-muted-foreground">
-                  <div className="p-3 border border-border/30 rounded bg-zinc-300/20 space-y-2">
+                  <div className="p-3 border border-border/30 rounded space-y-2">
                     <p className="font-semibold text-foreground">
                       Highest Conversion Drop
                     </p>
-                    {funnelSteps.length >= 2 ? (
+                    {funnelAnalysis.length >= 2 ? (
                       <>
                         <p className="text-emerald-400 font-medium font-mono text-[11px]">
                           {biggestDropStep}
@@ -601,26 +504,32 @@ export default function InsightsAnalytics({
                   variant="outline"
                   className="border-border text-muted-foreground text-[10px]"
                 >
-                  Showing total pathways for {uniqueUserList.length} session(s)
+                  Showing total pathways for {userJourneys.length} session(s)
                 </Badge>
               </div>
 
-              {uniqueUserList.length > 0 ? (
+              {userJourneys.length > 0 ? (
                 <div className="space-y-4">
-                  {uniqueUserList.map((userKey) => {
-                    const userLogs = [...userSessions[userKey]].sort(
-                      (a, b) =>
-                        new Date(a.timestamp || 0).getTime() -
-                        new Date(b.timestamp || 0).getTime(),
-                    );
+                  {userJourneys.map((journey) => {
+                    const userKey = journey.userId;
+                    const userLogs = journey.events;
 
                     // Find device and location from the first available log
                     const sampleLog = userLogs[0] || {};
                     const deviceType =
-                      sampleLog.device?.deviceType || "Desktop";
-                    const os = sampleLog.device?.os || "Unknown OS";
-                    const country = sampleLog.location?.country || "Direct";
-                    const city = sampleLog.location?.city;
+                      sampleLog.device?.deviceType ||
+                      journey.deviceType ||
+                      "Desktop";
+                    const os =
+                      sampleLog.device?.os || journey.os || "Unknown OS";
+                    const country =
+                      sampleLog.location?.country ||
+                      journey.country ||
+                      "Direct";
+                    const city = sampleLog.location?.city || journey.city;
+
+                    const rageClicksCount = journey.rageClicks || 0;
+                    const hasUserRage = rageClicksCount > 0;
 
                     return (
                       <Card
@@ -638,6 +547,14 @@ export default function InsightsAnalytics({
                                 <span className="text-xs font-bold text-foreground font-mono truncate max-w-[200px] md:max-w-xs">
                                   {userKey}
                                 </span>
+                                {hasUserRage && (
+                                  <Badge className="bg-rose-500/10 border-rose-500/20 text-rose-400 text-[9px] font-semibold animate-pulse">
+                                    ⚠️ RAGE DETECTED{" "}
+                                    {rageClicksCount > 1
+                                      ? `(${rageClicksCount})`
+                                      : ""}
+                                  </Badge>
+                                )}
                               </div>
                               <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
                                 <span className="flex items-center gap-1">
@@ -743,7 +660,7 @@ export default function InsightsAnalytics({
                             if (!stepLog) return null;
 
                             return (
-                              <div className="p-4 border-t border-border/20 bg-zinc-950/40 space-y-3 animate-slideDown">
+                              <div className="p-4 border-t border-border/20 space-y-3 animate-slideDown">
                                 <div className="flex items-center justify-between text-xs">
                                   <span className="font-semibold text-foreground flex items-center gap-1.5">
                                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -792,7 +709,7 @@ export default function InsightsAnalytics({
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => setExpandedStep(null)}
-                                      className="h-7 text-[10px] text-muted-foreground hover:text-foreground mt-2 cursor-pointer border border-border/30 rounded"
+                                      className="h-7 text-[10px] text-muted-foreground hover:text-foreground mt-2 cursor-pointer border border-border/60 rounded"
                                     >
                                       Minimize Inspector
                                     </Button>
@@ -850,11 +767,10 @@ export default function InsightsAnalytics({
               <Card className="rounded-md border-border/50 bg-card/30">
                 <CardHeader>
                   <CardTitle className="text-base font-semibold">
-                    UTM Campaign & Referrer Shares
+                    Referrer Shares
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Dynamic event counts split by marketing campaigns / organic
-                    referrers
+                    Dynamic event counts split by organic referrers
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -877,7 +793,18 @@ export default function InsightsAnalytics({
                             >
                               <td className="py-3 text-foreground font-semibold flex items-center gap-2">
                                 <Target className="w-3.5 h-3.5 text-emerald-400" />
-                                {cam.source}
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <span className="truncate max-w-[120px]">
+                                        {cam.source}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{cam.source}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </td>
                               <td className="py-3 font-mono font-semibold text-foreground">
                                 {cam.count}
@@ -895,7 +822,7 @@ export default function InsightsAnalytics({
                     </ScrollArea>
                   ) : (
                     <div className="text-xs text-muted-foreground py-8 italic text-center">
-                      No campaign/referrals loaded.
+                      No referrals loaded.
                     </div>
                   )}
                 </CardContent>
@@ -973,7 +900,7 @@ export default function InsightsAnalytics({
                       </div>
 
                       {analytics.countries && analytics.countries.length > 0 && (
-                        <div className="p-3 border border-border/30 rounded-md flex items-start gap-3 bg-zinc-300/20">
+                        <div className="p-3 border border-border/30 rounded-md flex items-start gap-3 ">
                           <div className="p-1 rounded bg-zinc-800 text-emerald-400">
                             <MapPin className="w-4 h-4" />
                           </div>
@@ -984,7 +911,7 @@ export default function InsightsAnalytics({
                             <p className="text-[10px] text-muted-foreground pt-0.5">
                               Your largest traffic regional segment is{" "}
                               <span className="text-emerald-400 font-semibold">
-                                &apos;{analytics.countries[0]?._id}&apos;
+                                &apos;{analytics.cities[0]?._id}, {analytics.countries[0]?._id}&apos;
                               </span>
                               . Consider localizing onboarding documentation or
                               landing pages specifically for this market to
