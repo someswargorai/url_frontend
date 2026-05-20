@@ -16,7 +16,22 @@ import {
   Target,
   HelpCircle,
   ChevronDown,
+  ChartArea,
+  Users,
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 import {
   Card,
   CardContent,
@@ -33,6 +48,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { RevenueAnalytics } from "./RevenueAnalytics";
 
 // --- INTERFACES ---
 interface EventLog {
@@ -55,7 +71,7 @@ interface EventLog {
   };
 }
 
-interface ProjectAnalytics {
+export interface ProjectAnalytics {
   totalEvents: number;
   topEvents: { count: number; _id: string }[];
   countries: { count: number; _id: string }[];
@@ -85,6 +101,26 @@ interface ProjectAnalytics {
     growth?: number;
     conversionFromPrevious: string;
   }[];
+  activeUsersTimelineDay?: { date: string; count: number }[];
+  activeUsersTimelineWeek?: { date: string; count: number }[];
+  activeUsersTimelineMonth?: { date: string; count: number }[];
+  activeUsersTimelineYear?: { date: string; count: number }[];
+  revenueTimelineDay?: { date: string; profit: number }[];
+  revenueTimelineWeek?: { date: string; profit: number }[];
+  revenueTimelineMonth?: { date: string; profit: number }[];
+  revenueTimelineYear?: { date: string; profit: number }[];
+  retentionData?: {
+    todaysCount: number;
+    yesterdayCount: number;
+    sevenDayCount: number;
+    thirtyDayCount: number;
+    oneDayRetentionCount: number;
+    oneDayRetentionRate: number;
+    sevenDayRetentionCount: number;
+    sevenDayRetentionRate: number;
+    thirtyDayRetentionCount: number;
+    thirtyDayRetentionRate: number;
+  };
 }
 
 interface UserJourney {
@@ -111,18 +147,51 @@ interface InsightsProps {
 
 export default function InsightsAnalytics({
   analytics,
-  logs,
   userJourneys = [],
-  userJourneysLoading = false,
   hasMoreJourneys = false,
   loadingMoreJourneys = false,
   onLoadMoreJourneys,
 }: InsightsProps) {
-  // --- STATE ---
+
   const [activeSection, setActiveSection] = useState<
-    "funnels" | "session_replay" | "revenue" | "developer" | "ai_insights"
+    "funnels" | "session_replay" | "revenue" | "developer" | "ai_insights" | "engagement_analytics" | "active_users"
   >("funnels");
   const [expandedStep, setExpandedStep] = useState<string | null>(null);
+  const [timeframe, setTimeframe] = useState<"day" | "week" | "month" | "year">("day");
+
+  const activeUsersData = useMemo(() => {
+    switch (timeframe) {
+      case "day":
+        return analytics?.activeUsersTimelineDay || [];
+      case "week":
+        return analytics?.activeUsersTimelineWeek || [];
+      case "month":
+        return analytics?.activeUsersTimelineMonth || [];
+      case "year":
+        return analytics?.activeUsersTimelineYear || [];
+      default:
+        return [];
+    }
+  }, [analytics, timeframe]);
+
+  const formatDate = (dateStr: string, currentFrame: "day" | "week" | "month" | "year") => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    
+    switch (currentFrame) {
+      case "day":
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      case "week":
+        return "Wk " + date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      case "month":
+        return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+      case "year":
+        return date.getFullYear().toString();
+      default:
+        return date.toLocaleDateString();
+    }
+  };
 
   // --- 1. DYNAMIC REAL-TIME VISITORS ---
   const dynamicActiveUsers = analytics?.activeUsers || 0;
@@ -159,12 +228,6 @@ export default function InsightsAnalytics({
     }
     return stepName;
   }, [funnelAnalysis]);
-
-  // --- 4. DYNAMIC UTM & REVENUE ATTRIBUTION ---
-  const dynamicRevenueData = analytics?.revenueData || {
-    totalRevenue: 0,
-    campaignAttribution: [],
-  };
 
   // --- 5. DYNAMIC EXPERIENCE & ENGAGEMENT METRICS ---
   const dynamicEngagementMetrics = analytics?.engagementMetrics || {
@@ -327,7 +390,7 @@ export default function InsightsAnalytics({
           }`}
         >
           <DollarSign className="w-4 h-4" />
-          Referrer Attribution
+          Revenue
         </Button>
 
         <Button
@@ -342,6 +405,32 @@ export default function InsightsAnalytics({
           <Bell className="w-4 h-4" />
           Smart Recommendations
         </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveSection("engagement_analytics")}
+          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+            activeSection === "engagement_analytics"
+              ? " text-emerald-400 bg-emerald-500/[0.03]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <ChartArea className="w-4 h-4" />
+           Engagement Analytics
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveSection("active_users")}
+          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+            activeSection === "active_users"
+              ? " text-emerald-400 bg-emerald-500/[0.03]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Active Users
+        </Button>
+
+       
       </div>
 
       {/* Tab Panels */}
@@ -759,102 +848,16 @@ export default function InsightsAnalytics({
           </div>
         )}
 
-        {/* --- CAMPAIGN & UTM TAB (DYNAMIC) --- */}
+        {/* --- REVENUE & PROFIT TAB --- */}
         {activeSection === "revenue" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-            {/* Campaigns Table */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card className="rounded-md border-border/50 bg-card/30">
-                <CardHeader>
-                  <CardTitle className="text-base font-semibold">
-                    Referrer Shares
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Dynamic event counts split by organic referrers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {dynamicRevenueData.campaignAttribution.length > 0 ? (
-                    <ScrollArea className="w-full">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="border-b border-border/50 text-muted-foreground font-semibold">
-                            <th className="py-2.5">Campaign Source</th>
-                            <th className="py-2.5">Dynamic Hits</th>
-                            <th className="py-2.5">Attributed Revenue</th>
-                            <th className="py-2.5">Traffic Share</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border/20 font-medium">
-                          {dynamicRevenueData.campaignAttribution.map((cam) => (
-                            <tr
-                              key={cam.source}
-                              className="hover:bg-zinc-800/10"
-                            >
-                              <td className="py-3 text-foreground font-semibold flex items-center gap-2">
-                                <Target className="w-3.5 h-3.5 text-emerald-400" />
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <span className="truncate max-w-[120px]">
-                                        {cam.source}
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{cam.source}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </td>
-                              <td className="py-3 font-mono font-semibold text-foreground">
-                                {cam.count}
-                              </td>
-                              <td className="py-3 font-mono font-semibold text-emerald-400">
-                                {cam.revenue}
-                              </td>
-                              <td className="py-3 font-mono text-muted-foreground">
-                                {cam.conversion}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </ScrollArea>
-                  ) : (
-                    <div className="text-xs text-muted-foreground py-8 italic text-center">
-                      No referrals loaded.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Attribution Guide */}
-            <div className="space-y-6">
-              <Card className="rounded-md border-border/50 bg-card/30 p-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 text-emerald-400 flex items-center gap-1.5">
-                  <HelpCircle className="w-4 h-4" />
-                  How to Track Campaigns
-                </h4>
-                <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
-                  <p>
-                    To enable fully dynamic campaigns or financial tracking in
-                    this tab, pass custom campaign or payment parameters within
-                    the metadata object:
-                  </p>
-                  <pre className="text-[10px] font-mono p-3 bg-zinc-950 rounded border border-border/40 text-emerald-400 overflow-x-auto">
-                    {`await trackEvent("KEY", {
-  event: "checkout",
-  metadata: {
-    utm_source: "google_ads",
-    amount: 49 // tracks revenue
-  }
-})`}
-                  </pre>
-                </div>
-              </Card>
-            </div>
-          </div>
+          <RevenueAnalytics
+            revenueDay={analytics?.revenueTimelineDay || []}
+            revenueWeek={analytics?.revenueTimelineWeek || []}
+            revenueMonth={analytics?.revenueTimelineMonth || []}
+            revenueYear={analytics?.revenueTimelineYear || []}
+            totalRevenue={analytics?.revenueData?.totalRevenue || 0}
+            campaignAttribution={analytics?.revenueData?.campaignAttribution || []}
+          />
         )}
 
         {/* --- SMART RECOMMENDATIONS TAB (DYNAMIC) --- */}
@@ -931,6 +934,338 @@ export default function InsightsAnalytics({
             </div>
           </div>
         )}
+
+        {/* --- ACTIVE USERS TIMELINE TAB --- */}
+        {activeSection === "active_users" && (
+          <div className="space-y-6 animate-fadeIn">
+            <Card className="rounded-md border-border/50 bg-card/30">
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle className="text-base font-semibold">
+                    Active Users Trend
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Unique active users tracked over time
+                  </CardDescription>
+                </div>
+                {/* Timeframe Selector tabs */}
+                <div className="flex bg-muted/65 p-1 rounded-sm gap-1 self-start sm:self-auto">
+                  {(["day", "week", "month", "year"] as const).map((t) => (
+                    <Button
+                      key={t}
+                      variant="ghost"
+                      onClick={() => setTimeframe(t)}
+                      className={`capitalize rounded-sm text-[10px] font-semibold tracking-wider px-3 py-1.5 h-auto cursor-pointer transition-all ${
+                        timeframe === t
+                          ? "bg-card text-emerald-400 border border-border/20 shadow-sm"
+                          : "text-muted-foreground hover:text-foreground border-transparent"
+                      }`}
+                    >
+                      {t}
+                    </Button>
+                  ))}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="h-[350px] w-full mt-4">
+                  {activeUsersData && activeUsersData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={activeUsersData}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id="activeUsersGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
+                        <XAxis
+                          dataKey="date"
+                          tickFormatter={(tick) => formatDate(tick, timeframe)}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: "#71717a", fontSize: 10 }}
+                        />
+                        <YAxis
+                          allowDecimals={false}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: "#71717a", fontSize: 10 }}
+                        />
+                        <RechartsTooltip
+                          cursor={{ stroke: "#10b981", strokeWidth: 1, strokeDasharray: "4 4" }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-zinc-950/95 border border-border/50 p-2.5 rounded shadow-xl backdrop-blur-md">
+                                  <p className="text-[9px] text-muted-foreground uppercase font-semibold">
+                                    {formatDate(data.date, timeframe)}
+                                  </p>
+                                  <p className="text-xs font-bold text-emerald-400 font-mono mt-0.5">
+                                    {data.count} <span className="text-[9px] text-foreground font-sans font-medium">active user(s)</span>
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="count"
+                          stroke="#10b981"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#activeUsersGrad)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground text-xs gap-2">
+                      <TrendingUp className="w-8 h-8 opacity-40 text-emerald-500" />
+                      <span>No active user data recorded for this period.</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* --- USER RETENTION (ENGAGEMENT ANALYTICS) TAB --- */}
+        {activeSection === "engagement_analytics" && (() => {
+          const retentionData = analytics?.retentionData || {
+            yesterdayCount: 0,
+            todaysCount: 0,
+            oneDayRetentionCount: 0,
+            oneDayRetentionRate: 0,
+            sevenDayCount: 0,
+            sevenDayRetentionCount: 0,
+            sevenDayRetentionRate: 0,
+            thirtyDayCount: 0,
+            thirtyDayRetentionCount: 0,
+            thirtyDayRetentionRate: 0
+          };
+          const yesterdayCount = retentionData.yesterdayCount || 0;
+          const todaysCount = retentionData.todaysCount || 0;
+          const oneDayRetentionCount = retentionData.oneDayRetentionCount || 0;
+// 1-Day retention rate
+const retentionRate = retentionData.oneDayRetentionRate || (yesterdayCount > 0 ? (oneDayRetentionCount / yesterdayCount) * 100 : 0);
+// 7-Day retention data
+const sevenDayCount = retentionData.sevenDayCount || 0;
+const sevenDayRetentionRate = retentionData.sevenDayRetentionRate || (sevenDayCount > 0 ? (retentionData.sevenDayRetentionCount / sevenDayCount) * 100 : 0);
+// 30-Day retention data
+const thirtyDayCount = retentionData.thirtyDayCount || 0;
+const thirtyDayRetentionRate = retentionData.thirtyDayRetentionRate || (thirtyDayCount > 0 ? (retentionData.thirtyDayRetentionCount / thirtyDayCount) * 100 : 0);
+          
+
+          const chartData = [
+            { name: "Yesterday Active", count: yesterdayCount, fill: "#3f3f46" },
+            { name: "Retained Today (1D)", count: oneDayRetentionCount, fill: "#10b981" },
+            { name: "Today Total Active", count: todaysCount, fill: "#0ea5e9" }
+          ];
+
+          return (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Retention rate indicator */}
+                <Card className="rounded-md border-border/50 bg-card/30 flex flex-col justify-between p-6">
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">User Retention Rate</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      Percentage of yesterday&apos;s active users who returned today.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-6 mt-6">
+                    <div className="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                      {/* SVG Progress Circle */}
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle
+                          cx="48"
+                          cy="48"
+                          r="40"
+                          className="stroke-zinc-800"
+                          strokeWidth="8"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="48"
+                          cy="48"
+                          r="40"
+                          className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                          strokeWidth="8"
+                          fill="transparent"
+                          strokeDasharray={`${2 * Math.PI * 40}`}
+                          strokeDashoffset={`${2 * Math.PI * 40 * (1 - retentionRate / 100)}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span className="absolute text-base font-bold font-mono text-emerald-400">
+                        {retentionRate.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Cohort Status</div>
+                      <div className="text-xs font-bold text-foreground mt-1">
+                        {retentionRate >= 50
+                          ? "Excellent Retention"
+                          : retentionRate >= 20
+                          ? "Moderate Retention"
+                          : yesterdayCount === 0
+                          ? "No Baseline Data"
+                          : "Needs Optimization"}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+                  {/* 7-Day Retention Rate */}
+                  <Card className="rounded-md border-border/50 bg-card/30 flex flex-col justify-between p-6">
+                    <div>
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        7-Day Retention Rate
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                        Percentage of users active 7 days ago who returned today.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-6 mt-6">
+                      <div className="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="48" cy="48" r="40" className="stroke-zinc-800" strokeWidth="8" fill="transparent" />
+                          <circle
+                            cx="48"
+                            cy="48"
+                            r="40"
+                            className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                            strokeWidth="8"
+                            fill="transparent"
+                            strokeDasharray={`${2 * Math.PI * 40}`}
+                            strokeDashoffset={`${2 * Math.PI * 40 * (1 - sevenDayRetentionRate / 100)}`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span className="absolute text-base font-bold font-mono text-emerald-400">
+                          {sevenDayRetentionRate.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-semibold">
+                          Cohort Status
+                        </div>
+                        <div className="text-xs font-bold text-foreground mt-1">
+                          {sevenDayRetentionRate >= 50
+                            ? "Excellent Retention"
+                            : sevenDayRetentionRate >= 20
+                            ? "Moderate Retention"
+                            : sevenDayCount === 0
+                            ? "No Baseline Data"
+                            : "Needs Optimization"}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* 30-Day Retention Rate */}
+                  <Card className="rounded-md border-border/50 bg-card/30 flex flex-col justify-between p-6">
+                    <div>
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        30-Day Retention Rate
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                        Percentage of users active 30 days ago who returned today.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-6 mt-6">
+                      <div className="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="48" cy="48" r="40" className="stroke-zinc-800" strokeWidth="8" fill="transparent" />
+                          <circle
+                            cx="48"
+                            cy="48"
+                            r="40"
+                            className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                            strokeWidth="8"
+                            fill="transparent"
+                            strokeDasharray={`${2 * Math.PI * 40}`}
+                            strokeDashoffset={`${2 * Math.PI * 40 * (1 - thirtyDayRetentionRate / 100)}`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span className="absolute text-base font-bold font-mono text-emerald-400">
+                          {thirtyDayRetentionRate.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-semibold">
+                          Cohort Status
+                        </div>
+                        <div className="text-xs font-bold text-foreground mt-1">
+                          {thirtyDayRetentionRate >= 50
+                            ? "Excellent Retention"
+                            : thirtyDayRetentionRate >= 20
+                            ? "Moderate Retention"
+                            : thirtyDayCount === 0
+                            ? "No Baseline Data"
+                            : "Needs Optimization"}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                {/* Retention Stats Bar Chart Card */}
+                <Card className="md:col-span-3 rounded-md border-border/50 bg-card/30 p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Active User Retention Breakdown</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Visualizing active user sets from yesterday against retained users today.
+                    </p>
+                  </div>
+                  <div className="h-[200px] w-full mt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#27272a" />
+                        <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#71717a", fontSize: 10 }} allowDecimals={false} />
+                        <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#71717a", fontSize: 10 }} width={110} />
+                        <RechartsTooltip
+                          cursor={{ fill: "rgba(255, 255, 255, 0.03)" }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-zinc-950/95 border border-border/50 p-2.5 rounded shadow-xl backdrop-blur-md">
+                                  <p className="text-[10px] text-muted-foreground uppercase font-semibold">{data.name}</p>
+                                  <p className="text-xs font-bold text-emerald-400 font-mono mt-0.5">
+                                    {data.count} <span className="text-[9px] text-foreground font-sans font-medium">user(s)</span>
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={20}>
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Retention Cohort Diagnostics */}
+              <Card className="rounded-md border-border/50 bg-card/30 p-6">
+                <h3 className="text-sm font-semibold mb-2 text-foreground">Retention Cohort Diagnostics</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  This module measures user loyalty and engagement by cross-referencing <code className="text-emerald-400 font-mono">userId</code> and <code className="text-emerald-400 font-mono">anonymousId</code> sets active during the current 24-hour period against those active in the preceding 24 hours. The intersection of these groups gives you the quantity of returning (retained) users. High retention highlights sticky product mechanics, whereas low retention suggests a need for re-engagement strategies or optimized workflows.
+                </p>
+              </Card>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

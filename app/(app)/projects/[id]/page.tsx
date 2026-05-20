@@ -61,19 +61,8 @@ import { toast } from "sonner";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { renderMarkdown } from "../../show-stats/[id]/page";
 import { Input } from "@/components/ui/input";
-import InsightsAnalytics from "@/components/InsightsAnalytics";
+import InsightsAnalytics, { ProjectAnalytics } from "@/components/InsightsAnalytics";
 
-
-interface ProjectAnalytics {
-    totalEvents: number;
-    topEvents: { count: number, _id: string }[];
-    countries: { count: number, _id: string }[];
-    devices: { count: number, _id: string }[];
-    cities: { count: number, _id: string }[];
-    os: { count: number, _id: string }[];
-    todayEvents?: number;
-    eventGrowth?: number;
-}
 
 interface EventLog {
     _id: string;
@@ -757,28 +746,6 @@ function ChartSection({
 // --- GLOBAL WORLD MAP COMPONENT ---
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-
-const normalizeCountryName = (name: string): string => {
-    if (!name) return "";
-    const lower = name.toLowerCase().trim();
-    if (lower === "united states" || lower === "usa" || lower === "united states of america") {
-        return "united states";
-    }
-    if (lower === "united kingdom" || lower === "uk" || lower === "gb") {
-        return "united kingdom";
-    }
-    if (lower === "korea" || lower === "south korea" || lower === "korea, republic of") {
-        return "south korea";
-    }
-    return lower;
-};
-
-interface GeographyFeature {
-    rsmKey: string;
-    properties: {
-        name?: string;
-    };
-}
 
 interface CityMarker {
     name: string;
