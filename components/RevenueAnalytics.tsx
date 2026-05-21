@@ -143,9 +143,9 @@ export function RevenueAnalytics({
   const currentData = dataMap[period];
 
   // Derive KPIs from current period data
-  const { totalProfit, avgProfit, peak, growth } = useMemo(() => {
+  const { totalProfit, currentPeriodProfit, avgProfit, peak, growth } = useMemo(() => {
     if (!currentData.length)
-      return { totalProfit: 0, avgProfit: 0, peak: 0, growth: 0 };
+      return { totalProfit: 0, currentPeriodProfit: 0, avgProfit: 0, peak: 0, growth: 0 };
     const profits = currentData.map((d) => d.profit);
     const total = profits.reduce((a, b) => a + b, 0);
     const avg = total / profits.length;
@@ -158,7 +158,7 @@ export function RevenueAnalytics({
     } else if (last > 0) {
       growthPct = 100;
     }
-    return { totalProfit: total, avgProfit: avg, peak: peakVal, growth: growthPct };
+    return { totalProfit: total, currentPeriodProfit: last, avgProfit: avg, peak: peakVal, growth: growthPct };
   }, [currentData]);
 
   const hasData = currentData.length > 0 && totalProfit > 0;
@@ -192,7 +192,7 @@ export function RevenueAnalytics({
             {PERIOD_LABELS[period]} Profit
           </span>
           <span className="text-2xl font-extrabold font-mono text-foreground">
-            {formatCurrency(totalProfit)}
+            {formatCurrency(currentPeriodProfit)}
           </span>
           <span
             className={`text-[10px] font-semibold flex items-center gap-0.5 ${
@@ -505,20 +505,28 @@ export function RevenueAnalytics({
           <code className="text-emerald-400 font-mono bg-emerald-500/10 px-1 rounded">
             metadata
           </code>{" "}
-          object of any event to have it counted as revenue:
+          object of any event to have it counted as revenue. To populate the Revenue by Referrer graph, also include a{" "}
+          <code className="text-emerald-400 font-mono bg-emerald-500/10 px-1 rounded">
+            source
+          </code>{" "}
+          or{" "}
+          <code className="text-emerald-400 font-mono bg-emerald-500/10 px-1 rounded">
+            metadata.source
+          </code>{" "}
+          field:
         </p>
         <pre className="text-[10px] font-mono p-3 bg-zinc-950 rounded border border-border/40 text-emerald-400 overflow-x-auto">
-          {`await trackEvent("YOUR_API_KEY", "purchase", {\n  metadata: {\n    plan: "pro",\n    amount: 49.99  // ← required for revenue graphs\n  }\n});`}
+          {`await trackEvent("YOUR_API_KEY", "purchase", {
+  metadata: {
+    plan: "pro",
+    amount: 49.99  // ← required for revenue graphs
+  },
+  source: {
+    referrer: "https://twitter.com/..."  // ← required for referrer breakdown
+  }
+});`}
         </pre>
-        <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
-          The backend aggregates these values per day/week/month/year using a{" "}
-          <code className="text-emerald-400 font-mono">$dateTrunc</code> pipeline.
-          Requires{" "}
-          <Badge variant="outline" className="text-[9px] font-mono py-0">
-            MongoDB 5.0+
-          </Badge>
-          .
-        </p>
+        
       </Card>
     </div>
   );

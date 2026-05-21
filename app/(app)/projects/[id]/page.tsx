@@ -62,6 +62,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { renderMarkdown } from "../../show-stats/[id]/page";
 import { Input } from "@/components/ui/input";
 import InsightsAnalytics, { ProjectAnalytics } from "@/components/InsightsAnalytics";
+import { Charts } from "@/app/components/charts";
 
 
 interface EventLog {
@@ -271,6 +272,15 @@ export default function ProjectDashboardPage() {
         return data.map(item => ({ name: item._id || "Unknown", value: item.count }));
     };
 
+    const formatHourRange = (hour: number) => {
+        const format = (h: number) => {
+            const period = h >= 12 ? "PM" : "AM";
+            const hour12 = h % 12 || 12;
+            return `${hour12} ${period}`;
+        };
+        return `${format(hour)} - ${format((hour + 1) % 24)}`;
+    };
+
     const eventData = useMemo(() => processData(analytics?.topEvents), [analytics]);
     const countryData = useMemo(() => processData(analytics?.countries), [analytics]);
     const cityData = useMemo(() => processData(analytics?.cities), [analytics]);
@@ -415,6 +425,13 @@ await trackEvent("${project.projectApiKey}", {
                             <GlobalMapSection countryData={cityData} />
                         </CardContent>
                     </Card>
+
+                     <Charts
+                            title="Peak Traffic"
+                            description="Busiest hour per day across your site"
+                            data={analytics?.peakTrafficOnDateAndHour}
+                           
+                        />
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Top Events Chart */}
@@ -722,7 +739,6 @@ function ChartSection({
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                    position={{x:0, y:0}}
                                     content={<ChartTooltipContent />}
                                 />
                                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
@@ -765,7 +781,7 @@ interface RsmGeographyFeature {
 
 function GlobalMapSection({ countryData }: { countryData: ChartData[] }) {
     const [mounted, setMounted] = useState(false);
-    const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
+    const [position, setPosition] = useState({ coordinates: [33, 20] as [number, number], zoom: 2 });
     const [tooltipContent, setTooltipContent] = useState<string | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
     const [cityMarkers, setCityMarkers] = useState<CityMarker[]>([]);

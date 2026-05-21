@@ -121,6 +121,11 @@ export interface ProjectAnalytics {
     thirtyDayRetentionCount: number;
     thirtyDayRetentionRate: number;
   };
+  peakTrafficOnDateAndHour:{
+    _id: string;
+    peakTraffic: number;
+    peakHour: number;
+  }[]
 }
 
 interface UserJourney {
@@ -1052,14 +1057,14 @@ export default function InsightsAnalytics({
           const yesterdayCount = retentionData.yesterdayCount || 0;
           const todaysCount = retentionData.todaysCount || 0;
           const oneDayRetentionCount = retentionData.oneDayRetentionCount || 0;
-// 1-Day retention rate
-const retentionRate = retentionData.oneDayRetentionRate || (yesterdayCount > 0 ? (oneDayRetentionCount / yesterdayCount) * 100 : 0);
-// 7-Day retention data
-const sevenDayCount = retentionData.sevenDayCount || 0;
-const sevenDayRetentionRate = retentionData.sevenDayRetentionRate || (sevenDayCount > 0 ? (retentionData.sevenDayRetentionCount / sevenDayCount) * 100 : 0);
-// 30-Day retention data
-const thirtyDayCount = retentionData.thirtyDayCount || 0;
-const thirtyDayRetentionRate = retentionData.thirtyDayRetentionRate || (thirtyDayCount > 0 ? (retentionData.thirtyDayRetentionCount / thirtyDayCount) * 100 : 0);
+          // 1-Day retention rate
+          const retentionRate = retentionData.oneDayRetentionRate || (yesterdayCount > 0 ? (oneDayRetentionCount / yesterdayCount) * 100 : 0);
+          // 7-Day retention data
+          const sevenDayCount = retentionData.sevenDayCount || 0;
+          const sevenDayRetentionRate = retentionData.sevenDayRetentionRate || (sevenDayCount > 0 ? (retentionData.sevenDayRetentionCount / sevenDayCount) * 100 : 0);
+          // 30-Day retention data
+          const thirtyDayCount = retentionData.thirtyDayCount || 0;
+          const thirtyDayRetentionRate = retentionData.thirtyDayRetentionRate || (thirtyDayCount > 0 ? (retentionData.thirtyDayRetentionCount / thirtyDayCount) * 100 : 0);
           
 
           const chartData = [
