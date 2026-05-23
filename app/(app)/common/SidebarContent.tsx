@@ -9,6 +9,9 @@ import {
   Coffee,
   ChevronRight,
   Globe,
+  Wallet,
+  KeyRound,
+  FolderBookmark,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -30,7 +33,7 @@ const menuItems = [
   {
     title: "Projects",
     href: "/projects",
-    icon: Globe,
+    icon: FolderBookmark ,
   },
   {
     title: "My URLs",
@@ -40,12 +43,17 @@ const menuItems = [
   {
     title: "Api Key",
     href: "/apikey",
-    icon: Globe
+    icon: KeyRound  
   },
   {
     title: "Custom Domain",
     href: "/custom-domain",
     icon: Globe,
+  },
+  {
+    title: "Manage Subscription",
+    href: "/subscription",
+    icon: Wallet,
   },
   {
     title: "Documentation",
