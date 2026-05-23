@@ -168,6 +168,10 @@ export default function ProjectDashboardPage() {
             }
         } catch (error) {
             console.error("Error fetching user journeys:", error);
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
         } finally {
             setUserJourneysLoading(false);
             setLoadingMoreJourneys(false);
@@ -197,6 +201,10 @@ export default function ProjectDashboardPage() {
             }
         } catch (error) {
             console.error("Error fetching logs:", error);
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
         } finally {
             setLogsLoading(false);
             setLoadingMore(false);
@@ -228,7 +236,10 @@ export default function ProjectDashboardPage() {
                 fetchUserJourneys(1);
             } catch (error) {
                 console.error("Error fetching project data:", error);
-                toast.error("Failed to load project dashboard.");
+                if (axios?.isAxiosError(error)) {
+                    const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                    toast.error(message); 
+                }
             } finally {
                 setLoading(false);
             }
@@ -260,6 +271,10 @@ export default function ProjectDashboardPage() {
             );
             setChatMessages(prev => [...prev, { role: "ai", text: response.data.aiResponse }]);
         } catch (error) {
+            if (axios?.isAxiosError(error)) {
+                   const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                    toast.error(message);
+            }
             console.error("AI Chat Error:", error);
             setChatMessages(prev => [...prev, { role: "ai", text: "Sorry, I encountered an error while analyzing your data. Please try again." }]);
         } finally {
@@ -272,14 +287,6 @@ export default function ProjectDashboardPage() {
         return data.map(item => ({ name: item._id || "Unknown", value: item.count }));
     };
 
-    const formatHourRange = (hour: number) => {
-        const format = (h: number) => {
-            const period = h >= 12 ? "PM" : "AM";
-            const hour12 = h % 12 || 12;
-            return `${hour12} ${period}`;
-        };
-        return `${format(hour)} - ${format((hour + 1) % 24)}`;
-    };
 
     const eventData = useMemo(() => processData(analytics?.topEvents), [analytics]);
     const countryData = useMemo(() => processData(analytics?.countries), [analytics]);

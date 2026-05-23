@@ -30,6 +30,7 @@ import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface UrlAnalytics {
     _id: string;
@@ -66,6 +67,10 @@ export default function AnalyticsPage() {
                 setUrls(response.data?.url || []);
             } catch (error) {
                 console.error(error);
+                if (axios?.isAxiosError(error)) {
+                    const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                    toast.error(message); 
+                }
             } finally {
                 setLoading(false);
             }

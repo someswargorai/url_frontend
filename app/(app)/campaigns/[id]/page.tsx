@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/chart";
 import { Dialog, DialogContent, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 interface CampaignAnalytics {
     campaign: {
@@ -116,7 +117,10 @@ export default function CampaignStatsPage() {
                 });
                 setAnalytics(response.data.analytics);
             } catch (error) {
-                console.error("Error fetching stats:", error);
+                if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
             } finally {
                 setLoading(false);
             }
@@ -140,6 +144,10 @@ export default function CampaignStatsPage() {
             setAiInsights(parsed);
         } catch (error) {
             console.error("Failed to fetch AI insights:", error);
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
             setAiError("Failed to load AI insights. Please try again later.");
         } finally {
             setAiLoading(false);

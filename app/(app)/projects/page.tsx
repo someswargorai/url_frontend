@@ -115,8 +115,10 @@ export default function ProjectsPage() {
       setCreateName("");
       setCreateDesc("");
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to create project.");
+      if (axios?.isAxiosError(error)) {
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message); 
+      }
     } finally {
       setCreateLoading(false);
     }
@@ -133,9 +135,12 @@ export default function ProjectsPage() {
         >
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Projects (Event Tracking)</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Projects (Event Tracking)
+              </h1>
               <p className="text-zinc-400 mt-2 text-sm max-w-lg">
-                Create projects to get API keys and track custom developer events within your applications.
+                Create projects to get API keys and track custom developer
+                events within your applications.
               </p>
             </div>
           </div>
@@ -187,7 +192,8 @@ export default function ProjectsPage() {
                   No Projects Found
                 </h2>
                 <p className="text-muted-foreground max-w-md mb-6 text-sm">
-                  You don&apos;t have any tracking projects yet. Create one to start sending custom events!
+                  You don&apos;t have any tracking projects yet. Create one to
+                  start sending custom events!
                 </p>
                 <Button onClick={() => setIsCreateOpen(true)} variant="outline">
                   Create First Project
@@ -229,7 +235,9 @@ export default function ProjectsPage() {
                             className="rounded-sm bg-indigo-500/10 border-indigo-500/20 text-indigo-400 font-mono text-xs cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigator.clipboard.writeText(project.projectApiKey);
+                              navigator.clipboard.writeText(
+                                project.projectApiKey,
+                              );
                               toast.success("API Key copied to clipboard!");
                             }}
                           >

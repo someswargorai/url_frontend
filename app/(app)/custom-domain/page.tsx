@@ -66,7 +66,6 @@ export default function CustomDomainPage() {
   const [domainInput, setDomainInput] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [copiedToken, setCopiedToken] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const getTxtRecordHost = (domainName: string) => {
@@ -143,7 +142,10 @@ export default function CustomDomainPage() {
       }
     } catch (error) {
       console.error("Error fetching domain:", error);
-      toast.error("Failed to load custom domain configurations.");
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
+      }
     } finally {
       setLoading(false);
     }
@@ -199,8 +201,9 @@ export default function CustomDomainPage() {
       }
     } catch (error) {
       console.error("Error adding domain:", error);
-      if(axios?.isAxiosError(error)) {
-        toast.error(error?.response?.data?.message || "Failed to add domain.");
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
       }
     } finally {
       setActionLoading(false);
@@ -227,8 +230,9 @@ export default function CustomDomainPage() {
       }
     } catch (error) {
       console.error("Error verifying domain:", error);
-      if(axios?.isAxiosError(error)) {
-        toast.error(error?.response?.data?.message || "Verification failed. Please check your DNS setup.");
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
       }
     } finally {
       setActionLoading(false);
@@ -256,8 +260,9 @@ export default function CustomDomainPage() {
       }
     } catch (error) {
       console.error("Error deleting domain:", error);
-      if(axios?.isAxiosError(error)) {
-        toast.error(error?.response?.data?.message || "Failed to delete domain.");
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
       }
     } finally {
       setActionLoading(false);

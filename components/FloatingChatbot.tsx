@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquareText, X, Send, Loader2, Sparkles } from "lucide-react";
-import { Button } from "./ui/button";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "model";
@@ -62,6 +62,10 @@ export function FloatingChatbot() {
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Failed to fetch AI response:", error);
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
+      }
       const errorMessage: Message = { role: "model", parts: [{ text: "Sorry, I'm having trouble connecting right now. Please try again." }] };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

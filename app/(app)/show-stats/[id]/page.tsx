@@ -120,6 +120,10 @@ export default function ShowStatsPage() {
                 setClickHistory(response.data.clickStateWithMinutes || []);
             } catch (error) {
                 console.error("Error fetching stats:", error);
+                if (axios?.isAxiosError(error)) {
+                    const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                    toast.error(message); 
+                }
             } finally {
                 setLoading(false);
             }
@@ -142,6 +146,10 @@ export default function ShowStatsPage() {
             const parsed = JSON.parse(cleanedText);
             setAiInsights(parsed);
         } catch (error) {
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
             console.error("Failed to fetch AI insights:", error);
             setAiError("Failed to load AI insights. Please try again later.");
         } finally {
@@ -164,6 +172,10 @@ export default function ShowStatsPage() {
             }
         } catch (error) {
             console.error("Error updating URL:", error);
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
         }
     };
     const processData = (data: string[] | undefined): ChartData[] => {

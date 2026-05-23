@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 
@@ -36,13 +36,11 @@ import {
   CreditCard,
   RefreshCw,
   ExternalLink,
-  ShieldCheck,
-  HeadphonesIcon,
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Subscription = {
   _id: string;
@@ -64,58 +62,153 @@ type Plan = {
   period: string;
   description: string;
   icon: React.ReactNode;
+  iconBg: string;
+  iconColor: string;
+  highlight: boolean;
+  badge: string | null;
+  featured: boolean;
+  cta: string;
   checkoutLink: string | null;
   features: string[];
   missing: string[];
-  highlight: boolean;
+  
 };
-
-// ─── Plan definitions ─────────────────────────────────────────────────────────
 
 const PLANS: Plan[] = [
   {
     name: "Free",
     price: "₹0",
     period: "forever",
-    description: "Basic access, no card needed",
-    icon: <Zap className="size-4" />,
+    description: "Get started, no card required",
+    icon: <Zap className="h-6 w-6" />,
+    iconBg: "bg-gray-100 dark:bg-gray-800",
+    iconColor: "text-gray-500",
+    badge: null,
+    featured: false,
     checkoutLink: null,
+    cta: "Get started free",
     highlight: false,
-    features: ["10 short links", "Basic analytics", "QR code generator"],
-    missing: ["Custom domains", "Priority support", "Campaign tracking"],
+    features: [
+      "10 short links",
+      "5 campaigns",
+      "Base62 short code generation",
+      "Instant Redis-cached redirects",
+      "Public & private link visibility",
+      "QR code generation & download",
+      "QR scan tracking",
+      "Funnel & retention analytics",
+      "Revenue tracking",
+      "User journey analytics",
+      "AI assistant",
+      "Click analytics (total, unique, trends)",
+      "Geographic analytics (country, city)",
+      "Device & browser analytics",
+      "Traffic source & referrer tracking",
+      "Basic event tracking",
+      "Weekly email reports",
+      "JWT authentication",
+    ],
+    missing: [
+      "Only 10 short links (vs 60 in Base)",
+      "Only 5 campaigns (vs 10 in Base)",
+      "Custom domains",
+      "API keys & SDK access",
+      "Campaign management & ROI (Only 5 campaigns)",
+      "Priority support",
+    ],
   },
   {
     name: "Base Plan",
     price: "₹95",
     period: "month",
     description: "For individuals who need more",
-    icon: <Crown className="size-4" />,
-    checkoutLink: process.env.NEXT_PUBLIC_POLAR_BASE_CHECKOUT_LINK ?? null,
+    icon: <Crown className="h-6 w-6" />,
+    iconBg: "bg-violet-100 dark:bg-violet-900/30",
+    iconColor: "text-violet-600 dark:text-violet-400",
+    badge: "Most popular",
+    featured: true,
     highlight: true,
+    checkoutLink: process.env.NEXT_PUBLIC_POLAR_BASE_CHECKOUT_LINK!,
+    cta: "Get Base plan",
     features: [
-      "Unlimited short links",
-      "Full analytics dashboard",
-      "QR code generator",
-      "Custom branded codes",
+      "60 short links",
+      "10 campaigns",
+      "5 projects (isolated workspaces)",
+      "1 custom domain",
+      "1 API key & SDK access",
+      "Base62 short code generation",
+      "Custom aliases & slugs",
+      "Instant Redis-cached redirects",
+      "Public & private link visibility",
+      "QR code generation & download",
+      "QR scan tracking",
+      "Full click analytics dashboard",
+      "Geographic analytics (country, region, city)",
+      "Device, browser & OS analytics",
+      "Traffic source & referrer tracking",
+      "Custom event tracking",
+      "Funnel analytics & conversion tracking",
+      "Retention analytics (Day-1, Day-7, Day-30)",
+      "Revenue tracking from event metadata",
+      "Campaign ROI & attribution",
+      "User journey analytics",
+      "Activity feed & event timeline",
+      "DAU & engagement analytics",
+      "Weekly automated email reports",
+      "AI floating assistant",
       "Priority support",
     ],
-    missing: ["Campaign tracking"],
+    missing: [
+      "Only 60 short links (vs 120 in Pro)",
+      "Only 10 campaigns (vs 20 in Pro)",
+      "Only 1 Api key (vs 2 in Pro) with no SDK access",
+      "Multiple API keys",
+      "Dedicated support",
+    ],
   },
   {
     name: "Pro Plan",
     price: "₹300",
     period: "month",
     description: "For teams and power users",
-    icon: <Sparkles className="size-4" />,
-    checkoutLink: process.env.NEXT_PUBLIC_POLAR_PRO_CHECKOUT_LINK ?? null,
+    icon: <Sparkles className="h-6 w-6" />,
+    iconBg: "bg-amber-100 dark:bg-amber-900/30",
+    iconColor: "text-amber-600 dark:text-amber-400",
+    badge: null,
+    featured: false,
     highlight: false,
+    checkoutLink: process.env.NEXT_PUBLIC_POLAR_PRO_CHECKOUT_LINK!,
+    cta: "Get Pro plan",
     features: [
-      "Everything in Base",
-      "Custom domains",
-      "Campaign tracking",
-      "Team access",
-      "API access",
+      "120 short links",
+      "20 campaigns",
+      "20 projects (isolated workspaces)",
+      "1 custom domain",
+      "2 API keys & SDK access",
+      "Everything in Base plan",
+      "Base62 short code generation",
+      "Custom aliases & slugs",
+      "Instant Redis-cached redirects",
+      "Public & private link visibility",
+      "QR code generation & download",
+      "QR scan tracking",
+      "Full click analytics dashboard",
+      "Geographic analytics (country, region, city)",
+      "Device, browser & OS analytics",
+      "Traffic source & referrer tracking",
+      "Custom event tracking",
+      "Funnel analytics & conversion tracking",
+      "Retention analytics (Day-1, Day-7, Day-30)",
+      "Revenue tracking from event metadata",
+      "Campaign ROI & attribution",
+      "User journey analytics",
+      "Activity feed & event timeline",
+      "DAU & engagement analytics",
+      "Weekly automated email reports",
+      "AI floating assistant",
       "Dedicated support",
+      "RabbitMQ-backed email processing",
+      "Scalable background job processing",
     ],
     missing: [],
   },
@@ -149,8 +242,6 @@ const FAQ = [
   },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-IN", {
     day: "numeric",
@@ -167,8 +258,6 @@ function statusColor(status: string) {
   return "bg-red-500/10 text-red-600 border-red-200 dark:border-red-800";
 }
 
-// ─── Skeleton loader ──────────────────────────────────────────────────────────
-
 function BillingSkeleton() {
   return (
     <div className="space-y-6">
@@ -182,8 +271,6 @@ function BillingSkeleton() {
     </div>
   );
 }
-
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function BillingPage() {
   const { data: session } = useSession();
@@ -203,8 +290,12 @@ export default function BillingPage() {
           { headers: { Authorization: `Bearer ${session.access_token}` } },
         );
         if (res.data?.success) setSubscription(res.data.plan ?? null);
-      } catch {
+      } catch(error){
         // no subscription yet — that's fine
+        if (axios?.isAxiosError(error)) {
+                  const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                  toast.error(message); 
+              }
       } finally {
         setLoading(false);
       }
@@ -222,10 +313,11 @@ export default function BillingPage() {
         { headers: { Authorization: `Bearer ${session?.access_token}` } },
       );
       window.open(res.data.url, "_blank");
-    } catch {
-      toast.error("Couldn't open portal", {
-        description: "Please try again in a moment.",
-      });
+    } catch(error) {
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
+      }
     } finally {
       setPortalLoading(false);
     }
@@ -261,13 +353,12 @@ export default function BillingPage() {
     subscription?.subscriptionStatus === "active";
 
   const hasActiveSub = subscription?.subscriptionStatus === "active";
-  // ── Render ──────────────────────────────────────────────────────────────────
-
+ 
   if (loading) return <BillingSkeleton />;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-      {/* ── Header ── */}
+     
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -410,7 +501,7 @@ export default function BillingPage() {
                   className={`relative flex flex-col h-full transition-all duration-200 ${
                     current
                       ? "border-emerald-400 dark:border-emerald-600 ring-1 ring-emerald-400/40"
-                      : plan.highlight && !hasActiveSub
+                      :  !hasActiveSub
                       ? "border-violet-400 dark:border-violet-600 ring-1 ring-violet-400/30"
                       : "border"
                   }`}
@@ -449,21 +540,23 @@ export default function BillingPage() {
                   </CardHeader>
 
                   <CardContent className="flex-1 space-y-2.5 pb-5">
-                    {plan.features.map((f) => (
-                      <div key={f} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="text-xs">{f}</span>
-                      </div>
-                    ))}
-                    {plan.missing.map((f) => (
-                      <div
-                        key={f}
-                        className="flex items-start gap-2 opacity-35"
-                      >
-                        <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                        <span className="text-xs">{f}</span>
-                      </div>
-                    ))}
+                    <ScrollArea className="h-40">
+                        {plan.features.map((f) => (
+                        <div key={f} className="flex items-start gap-2 mt-2 first:mt-0">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                            <span className="text-xs">{f}</span>
+                        </div>
+                        ))}
+                        {plan.missing.map((f) => (
+                        <div
+                            key={f}
+                            className="flex items-start gap-2 opacity-35 mt-2 first:mt-0"
+                        >
+                            <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                            <span className="text-xs">{f}</span>
+                        </div>
+                        ))}
+                    </ScrollArea>
                   </CardContent>
 
                   <div className="px-6 pb-6">

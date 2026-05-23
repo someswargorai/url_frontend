@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const plans = [
   {
@@ -25,8 +26,34 @@ const plans = [
     featured: false,
     checkoutLink: null,
     cta: "Get started free",
-    features: ["10 short links", "Basic analytics", "QR code generator"],
-    missing: ["Custom domains", "Priority support", "Campaign tracking"],
+    features: [
+      "10 short links",
+      "5 campaigns",
+      "Base62 short code generation",
+      "Instant Redis-cached redirects",
+      "Public & private link visibility",
+      "QR code generation & download",
+      "QR scan tracking",
+      "Funnel & retention analytics",
+      "Revenue tracking",
+      "User journey analytics",
+      "AI assistant",
+      "Click analytics (total, unique, trends)",
+      "Geographic analytics (country, city)",
+      "Device & browser analytics",
+      "Traffic source & referrer tracking",
+      "Basic event tracking",
+      "Weekly email reports",
+      "JWT authentication",
+    ],
+    missing: [
+      "Only 10 short links (vs 60 in Base)",
+      "Only 5 campaigns (vs 10 in Base)",
+      "Custom domains",
+      "API keys & SDK access",
+      "Campaign management & ROI (Only 5 campaigns)",
+      "Priority support",
+    ],
   },
   {
     name: "Base Plan",
@@ -41,13 +68,40 @@ const plans = [
     checkoutLink: process.env.NEXT_PUBLIC_POLAR_BASE_CHECKOUT_LINK,
     cta: "Get Base plan",
     features: [
-      "Unlimited short links",
-      "Full analytics dashboard",
-      "QR code generator",
-      "Custom branded codes",
+      "60 short links",
+      "10 campaigns",
+      "5 projects (isolated workspaces)",
+      "1 custom domain",
+      "1 API key & SDK access",
+      "Base62 short code generation",
+      "Custom aliases & slugs",
+      "Instant Redis-cached redirects",
+      "Public & private link visibility",
+      "QR code generation & download",
+      "QR scan tracking",
+      "Full click analytics dashboard",
+      "Geographic analytics (country, region, city)",
+      "Device, browser & OS analytics",
+      "Traffic source & referrer tracking",
+      "Custom event tracking",
+      "Funnel analytics & conversion tracking",
+      "Retention analytics (Day-1, Day-7, Day-30)",
+      "Revenue tracking from event metadata",
+      "Campaign ROI & attribution",
+      "User journey analytics",
+      "Activity feed & event timeline",
+      "DAU & engagement analytics",
+      "Weekly automated email reports",
+      "AI floating assistant",
       "Priority support",
     ],
-    missing: ["Campaign tracking"],
+    missing: [
+      "Only 60 short links (vs 120 in Pro)",
+      "Only 10 campaigns (vs 20 in Pro)",
+      "Only 1 Api key (vs 2 in Pro) with no SDK access",
+      "Multiple API keys",
+      "Dedicated support",
+    ],
   },
   {
     name: "Pro Plan",
@@ -62,12 +116,35 @@ const plans = [
     checkoutLink: process.env.NEXT_PUBLIC_POLAR_PRO_CHECKOUT_LINK,
     cta: "Get Pro plan",
     features: [
-      "Everything in Base",
-      "Custom domains",
-      "Campaign tracking",
-      "Team access",
-      "API access",
+      "120 short links",
+      "20 campaigns",
+      "20 projects (isolated workspaces)",
+      "1 custom domain",
+      "2 API keys & SDK access",
+      "Everything in Base plan",
+      "Base62 short code generation",
+      "Custom aliases & slugs",
+      "Instant Redis-cached redirects",
+      "Public & private link visibility",
+      "QR code generation & download",
+      "QR scan tracking",
+      "Full click analytics dashboard",
+      "Geographic analytics (country, region, city)",
+      "Device, browser & OS analytics",
+      "Traffic source & referrer tracking",
+      "Custom event tracking",
+      "Funnel analytics & conversion tracking",
+      "Retention analytics (Day-1, Day-7, Day-30)",
+      "Revenue tracking from event metadata",
+      "Campaign ROI & attribution",
+      "User journey analytics",
+      "Activity feed & event timeline",
+      "DAU & engagement analytics",
+      "Weekly automated email reports",
+      "AI floating assistant",
       "Dedicated support",
+      "RabbitMQ-backed email processing",
+      "Scalable background job processing",
     ],
     missing: [],
   },
@@ -230,7 +307,7 @@ export function PricingSection() {
                     </div>
                   )}
 
-                  <CardHeader className={cn("pt-8 pb-4", (plan.badge || current) && "pt-10")}>
+                  <CardHeader className={cn("pt-8 pb-4")}>
                     <div className="flex items-center gap-3 mb-4">
                       <div className={cn("p-2 rounded-xl", plan.iconBg)}>
                         <span className={plan.iconColor}>{plan.icon}</span>
@@ -250,6 +327,7 @@ export function PricingSection() {
                       </span>
                     </div>
 
+                
                     {/* renews at info */}
                     {current && activePlan?.renewsAt && (
                       <p className="text-xs text-muted-foreground mt-1">
@@ -264,18 +342,22 @@ export function PricingSection() {
                   </CardHeader>
 
                   <CardContent className="flex-1 px-6 pb-6 space-y-3">
-                    {plan.features.map((feature) => (
-                      <div key={feature} className="flex items-center gap-2.5">
-                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    ))}
+                    <ScrollArea className="h-40">
+                      {plan.features.map((feature) => (
+                        <div key={feature} className="flex items-center gap-3 mt-2 first:mt-0">
+                          <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                          <span className="text-sm  ">{feature}</span>
+                        </div>
+                      ))}
+                    
+                    
                     {plan.missing.map((feature) => (
-                      <div key={feature} className="flex items-center gap-2.5 opacity-40">
+                      <div key={feature} className="flex items-center gap-3 opacity-40 mt-2 first:mt-0">
                         <XCircle className="h-4 w-4 shrink-0" />
                         <span className="text-sm">{feature}</span>
                       </div>
                     ))}
+                    </ScrollArea>
                   </CardContent>
 
                   <CardFooter className="px-6 pb-6">

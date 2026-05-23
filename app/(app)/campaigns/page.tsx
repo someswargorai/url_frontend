@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Card,
@@ -77,7 +77,10 @@ export default function CampaignsPage() {
       setCampaigns(response.data?.campaigns || []);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to load campaigns.");
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
+      }
     } finally {
       setLoading(false);
     }
@@ -120,7 +123,10 @@ export default function CampaignsPage() {
       fetchCampaigns();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create campaign.");
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
+      }
     } finally {
       setCreateLoading(false);
     }

@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { Navbar } from "./common/Navbar";
 import Providers from "./providers/sessionProvider";
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -65,6 +66,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Analytics/>
+        <Toaster/>
         <Providers>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Navbar />

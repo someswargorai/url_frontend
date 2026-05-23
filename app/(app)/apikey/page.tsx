@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Table,
     TableBody,
@@ -79,7 +79,10 @@ export default function ApikeyPage() {
                 setApiKeys(response.data?.apiKeys || []);
             } catch (error) {
                 console.error("Error fetching API keys:", error);
-                toast.error("Failed to load API keys.");
+                if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
             } finally {
                 setLoading(false);
             }
@@ -133,7 +136,10 @@ export default function ApikeyPage() {
             setTimeout(() => setJustCreated(null), 5000);
         } catch (error) {
             console.error("Error creating key:", error);
-            toast.error("Failed to create API key.");
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
         } finally {
             setActionLoading(false);
         }
@@ -155,7 +161,10 @@ export default function ApikeyPage() {
             toast.success("API key deleted successfully.");
         } catch (error) {
             console.error("Error deleting key:", error);
-            toast.error("Failed to delete API key.");
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
         } finally {
             setActionLoading(false);
         }

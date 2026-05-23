@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   MousePointer,
   TrendingUp,
@@ -14,7 +14,6 @@ import {
   Bell,
   Clock,
   Target,
-  HelpCircle,
   ChevronDown,
   ChartArea,
   Users,
@@ -40,17 +39,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { RevenueAnalytics } from "./RevenueAnalytics";
-
-// --- INTERFACES ---
 interface EventLog {
   _id: string;
   eventName: string;

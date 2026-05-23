@@ -54,6 +54,10 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error(error);
+        if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
+      }
       }
     };
     fetchCampaigns();
@@ -95,8 +99,9 @@ export default function DashboardPage() {
         toast.success("URL shortened successfully!");
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data?.message);
+      if (axios?.isAxiosError(error)) {
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message); 
       }
     } finally {
       setLoading(false);

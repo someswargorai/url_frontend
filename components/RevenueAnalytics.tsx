@@ -27,17 +27,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-// ---------------------------------------------------------------------------
-// ⚠️  DEVELOPER NOTE
-// The revenue graphs are driven by the `metadata.amount` field on each event.
-// Make sure every revenue-generating event includes a numeric `amount` value:
-//
-//   trackEvent(API_KEY, "purchase", { amount: 49.99 });
-//
-// Without this field, all profit values will be zero and charts will be empty.
-// ---------------------------------------------------------------------------
 
 interface RevenuePoint {
   date: string;

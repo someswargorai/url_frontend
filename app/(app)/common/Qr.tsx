@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 import { Download } from "lucide-react";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function QR({ shortUrl }:{
     shortUrl: string
@@ -17,7 +19,11 @@ export default function QR({ shortUrl }:{
             const data = await QRCode.toDataURL(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/${shortUrl}`)
             setQr(data);
          } catch (error) {
-            console.error(error)
+            console.error(error);
+            if (axios?.isAxiosError(error)) {
+                const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+                toast.error(message); 
+            }
          }
       }
       fetchQr();
