@@ -74,15 +74,15 @@ export function Navbar() {
             <div className="h-6 w-[1px] ml-3 bg-border/60 mx-1 block" />
 
             {session ? (
-              <div className="flex items-center">
+              <div className="flex items-center ">
                 <Button
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="rounded-full"
+                  className="rounded-full "
                 >
-                  <Link href={"/shorten-url"} className="flex items-center gap-2 font-semibold">
-                    <Avatar className="size-8">
+                  <Link href={"/shorten-url"} className="flex items-center gap-2 font-semibold ">
+                    <Avatar className="size-8 ">
                       <AvatarImage src={session?.user?.image || ""} />
                       <AvatarFallback className="text-xs">{session?.user?.name?.charAt(0).toUpperCase() || ""}</AvatarFallback>
                     </Avatar>

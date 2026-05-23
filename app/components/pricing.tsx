@@ -325,10 +325,8 @@ export function PricingSection() {
                       <span className="text-muted-foreground text-sm font-medium">
                         {plan.period === "forever" ? "free forever" : `/ ${plan.period}`}
                       </span>
-                    </div>
-
-                
-                    {/* renews at info */}
+                      {/* renews at info */}
+                    
                     {current && activePlan?.renewsAt && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Renews on{" "}
@@ -339,6 +337,10 @@ export function PricingSection() {
                         })}
                       </p>
                     )}
+                    </div>
+
+                
+                    
                   </CardHeader>
 
                   <CardContent className="flex-1 px-6 pb-6 space-y-3">
