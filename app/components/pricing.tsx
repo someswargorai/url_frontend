@@ -57,7 +57,7 @@ const plans = [
   },
   {
     name: "Base Plan",
-    price: "₹95",
+    price: "₹190",
     period: "month",
     description: "For individuals who need more",
     icon: <Crown className="h-6 w-6" />,
@@ -105,7 +105,7 @@ const plans = [
   },
   {
     name: "Pro Plan",
-    price: "₹300",
+    price: "₹475",
     period: "month",
     description: "For teams and power users",
     icon: <Sparkles className="h-6 w-6" />,

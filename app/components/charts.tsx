@@ -92,7 +92,7 @@ const processedData = React.useMemo(() => {
                     nameKey="views"
                     labelFormatter={(value, payload) => {
                         const peakHour = payload?.[0]?.payload?.peakHour
-                        const date = new Date(value).toLocaleDateString("en-US", {
+                        const date = new Date(value).toLocaleDateString("en-In", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",

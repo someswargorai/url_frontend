@@ -52,19 +52,28 @@ export default function AnalyticsPage() {
     const [loading, setLoading] = useState(true);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [page,setPage] = useState(1);
+    const [totalPages,setTotalPages] = useState(1);
 
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
                 setLoading(true);
 
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/url/analytics`, {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/url/analytics?page=${page}&limit=${5}`, {
                     headers: {
                         "Authorization": `Bearer ${session?.access_token}`
                     }
                 });
 
-                setUrls(response.data?.url || []);
+                const newUrls = response.data?.urls || [];
+
+                setUrls(prev => 
+                    page === 1 
+                    ? newUrls        
+                    : [...prev, ...newUrls]
+                );
+                setTotalPages(response.data?.pagination?.totalPages || 1);
             } catch (error) {
                 console.error(error);
                 if (axios?.isAxiosError(error)) {
@@ -78,7 +87,7 @@ export default function AnalyticsPage() {
         if (status === "authenticated") {
             fetchAnalytics();
         }
-    }, [session?.access_token, status]);
+    }, [session?.access_token, status, page]);
 
     return (
         <div className="min-h-screen ">
@@ -210,7 +219,15 @@ export default function AnalyticsPage() {
                                     </TableBody>
                                 </Table>
                             </div>
+                            
                         )}
+                        {page < totalPages && (
+                                    <div className="flex justify-center mt-4">
+                                        <Button className="cursor-pointer" onClick={() => setPage(prev => prev + 1)}>
+                                            Load more
+                                        </Button>
+                                    </div>
+                                )}
                     </CardContent>
                 </Card>
             </div>

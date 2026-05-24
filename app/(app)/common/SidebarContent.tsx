@@ -18,6 +18,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
+import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
+import { useTheme } from "next-themes";
+import { toast } from "sonner";
 
 const menuItems = [
   {
@@ -65,7 +68,22 @@ const menuItems = [
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { theme } = useTheme();
 
+  const buyCoffee = async () => {
+    const themeColor = theme === "light" ? "light" : "dark";
+    try {
+      const checkout = await PolarEmbedCheckout.create(process.env.NEXT_PUBLIC_POLAR_COFFEE_CHECKOUT_LINK!, {
+        theme: themeColor,
+      });
+      return checkout;
+    }catch(err){
+      console.error("Failed to open checkout", err);
+      toast.error("Couldn't open checkout")
+    }
+  }
+
+  
   return (
     <div className="flex h-full flex-col">
       {/* Brand header – visible inside mobile sheet */}
@@ -142,9 +160,10 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void } = {})
 
             <Button
               size="sm"
-              className="w-full bg-black hover:bg-black text-white font-bold rounded-lg p-4"
+              className="cursor-pointer w-full bg-black hover:bg-black text-white font-bold rounded-lg p-4"
+              onClick={buyCoffee}
             >
-              Donate $5.00
+              Donate ₹95.00
             </Button>
           </CardContent>
         </Card>

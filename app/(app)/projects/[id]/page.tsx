@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -63,6 +63,7 @@ import { renderMarkdown } from "../../show-stats/[id]/page";
 import { Input } from "@/components/ui/input";
 import InsightsAnalytics, { ProjectAnalytics } from "@/components/InsightsAnalytics";
 import { Charts } from "@/app/components/charts";
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
 
 
 interface EventLog {
@@ -113,17 +114,22 @@ export default function ProjectDashboardPage() {
     const router = useRouter();
     const { data: session, status } = useSession();
     
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const [search, setSearch]= useState("");
+    const [selectedFilter, setSelectedFilter] = useState<string>("");
     const [project, setProject] = useState<Project | null>(null);
     const [analytics, setAnalytics] = useState<ProjectAnalytics | null>(null);
     const [logs, setLogs] = useState<EventLog[]>([]);
     const [page, setPage] = useState<number>(1);
     const [hasMoreLogs, setHasMoreLogs] = useState<boolean>(true);
-   
-    
+    const [logFilter, setLogFilter] = useState<string[]>([]);
+    const [copied, setCopied] = useState(false);
+
+    // Loading states
     const [loading, setLoading] = useState(true);
     const [logsLoading, setLogsLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
-    const [copied, setCopied] = useState(false);
+    
 
     // Grouped User Journeys from Backend
     const [userJourneys, setUserJourneys] = useState<UserJourney[]>([]);
@@ -138,6 +144,18 @@ export default function ProjectDashboardPage() {
         { role: "ai", text: "Hello! I am your AI Analyst for this project. Ask me any question about your event logs, like 'Where is most of my traffic coming from?' or 'Which event is the most popular?'" }
     ]);
     const [chatLoading, setChatLoading] = useState(false);
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>{
+        const value = e.target.value;
+        if(debounceRef.current){
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(()=>{
+            setSearch(value);
+            setPage(1);
+            fetchLogs(1);
+        },500)
+    }
 
     const fetchUserJourneys = async (pageNum: number, isLoadMore: boolean = false) => {
         try {
@@ -185,7 +203,7 @@ export default function ProjectDashboardPage() {
             } else {
                 setLogsLoading(true);
             }
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/event/${id}/logs?page=${pageNum}&limit=10`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/event/${id}/logs?page=${pageNum}&limit=10&filter=${selectedFilter}&search=${search}`, {
                 headers: { Authorization: `Bearer ${session?.access_token}` },
             });
             const fetchedEvents = response.data.events || [];
@@ -211,6 +229,20 @@ export default function ProjectDashboardPage() {
         }
     };
 
+    useEffect(()=>{
+        async function fetchLogs () {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/event/${id}/filter-logs`, {
+                headers: { Authorization: `Bearer ${session?.access_token}` },
+            });
+            if(response?.data?.success){
+                setLogFilter(response.data.types || []);
+            }
+        }
+        if (status === "authenticated") {
+                fetchLogs();
+        }
+    },[id, session?.access_token, status]);
+
     useEffect(() => {
         const fetchDashboardData = async () => {
             if (status !== "authenticated" || !id) return;
@@ -228,9 +260,7 @@ export default function ProjectDashboardPage() {
                 });
                 setAnalytics(analyticsRes.data.analytics);
 
-                // Fetch Initial Logs
-                fetchLogs(1);
-
+               
                 // Fetch Grouped User Journeys
                 setJourneysPage(1);
                 fetchUserJourneys(1);
@@ -246,8 +276,14 @@ export default function ProjectDashboardPage() {
         };
 
         fetchDashboardData();
-    }, [id, session?.access_token, status]);
+    }, [id, session?.access_token, status, ]);
 
+    useEffect(()=>{
+        if(status === "authenticated"){
+            setTimeout(()=> fetchLogs(1),0)
+        }
+    },[id, session?.access_token,selectedFilter,search]);
+    
     const copyApiKey = () => {
         if (!project) return;
         navigator.clipboard.writeText(project.projectApiKey);
@@ -507,13 +543,55 @@ await trackEvent("${project.projectApiKey}", {
                 <TabsContent value="logs" className="space-y-6">
                     <Card className="rounded-md overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
                         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            
                             <div>
                                 <CardTitle className="text-xl">Live Event Logs</CardTitle>
                                 <CardDescription>Real-time feed of events ingested by this project.</CardDescription>
                             </div>
-                            <Button onClick={() => { setPage(1); fetchLogs(1); }} variant="outline" size="sm" className="gap-2 cursor-pointer rounded-sm w-full sm:w-auto justify-center">
-                                <List className="h-4 w-4" /> Refresh
-                            </Button>
+                            <div className="flex flex-col md:flex-row items-center gap-2 w-full sm:w-auto">
+                                <Input 
+                                    placeholder="Search logs by userIds ..." 
+                                    maxLength = {50}
+                                    onChange={handleSearch}    
+                                />
+                                <Select
+                                value={selectedFilter}
+                                onValueChange={(value) => {
+                                    if(value==="all"){
+                                        setSelectedFilter("");
+                                    }else{
+                                        setSelectedFilter(value);
+                                    }
+                                    setPage(1);
+                                    fetchLogs(1);
+                                }}
+                                >
+                                <SelectTrigger className="w-full md:max-w-[120px] truncate sm:w-auto">
+                                    <SelectValue placeholder="Filter logs" />
+                                </SelectTrigger>
+
+                                <SelectContent className="w-[200px]" align="center">
+                                     <SelectItem value="all">All</SelectItem>
+                                    {logFilter.length === 0 ? (
+                                    <div className="p-4 text-sm text-muted-foreground">
+                                        No log filters available.
+                                    </div>
+                                    ) : (
+                                    logFilter.map((eventName: string) => (
+                                        <SelectItem
+                                            key={eventName}
+                                            value={eventName}
+                                        >
+                                            {eventName}
+                                        </SelectItem>
+                                    ))
+                                    )}
+                                </SelectContent>
+                                </Select>
+                                <Button onClick={() => { setPage(1); fetchLogs(1); }} variant="outline" size="sm" className="gap-2 cursor-pointer rounded-sm w-full sm:w-auto justify-center">
+                                    <List className="h-4 w-4" /> Refresh
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent>
                             {logsLoading ? (
