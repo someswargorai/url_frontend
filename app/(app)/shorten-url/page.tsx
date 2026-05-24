@@ -118,30 +118,34 @@ export default function DashboardPage() {
 
   return (
     <div className="container px-4 mx-auto text-center">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* badge */}
+      <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border font-mono text-[11px] tracking-widest"
+        style={{ background: "rgba(0,229,160,0.05)", borderColor: "rgba(0,229,160,0.2)", color: "#00e5a0" }}
       >
-        <Badge
-          variant="secondary"
-          className="mb-4 px-4 py-4 border-primary/10 bg-gray-50 dark:bg-transparent text-primary hover:bg-primary/20 transition-colors text-xs"
-        >
-          <span className="text-md font-medium tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
-            More than just a link shortener
-          </span>
-        </Badge>
-        <h1 className="text-5xl font-extrabold tracking-tight mb-6">
-          Shorten Links. <br />
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
-            Expand Reach.
-          </span>
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-2xl mx-auto mb-10">
-          Create short, branded links in seconds. Track performance, optimize
-          for conversion, and take control of your digital presence.
-        </p>
-      </motion.div>
+        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00e5a0" }} />
+        more than just a link shortener
+      </div>
+
+      {/* headline */}
+      <h1
+        className="font-bold leading-none tracking-tight mb-6"
+        style={{ fontSize: "clamp(20px, 4vw, 76px)", letterSpacing: "-4px" }}
+      >
+        Shorten Links.
+        <br />
+        <span style={{ color: "#00e5a0" }}>Expand Reach.</span>
+      </h1>
+
+      <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto mb-12 font-light leading-relaxed">
+        Create short, branded links in seconds. Track performance, optimize for
+        conversion, and take control of your digital presence.
+      </p>
+    </motion.div>
 
       {/* MAIN FORM CARD */}
       <div className="w-full max-w-2xl mx-auto space-y-6 relative">

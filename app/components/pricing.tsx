@@ -252,7 +252,7 @@ export function PricingSection() {
   return (
     <section id="pricing" className="py-24 relative">
       <div className="container px-4 mx-auto">
-        <div className="max-w-2xl mx-auto mb-16 text-center">
+        <div className="max-w-3xl mx-auto mb-16 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -267,7 +267,7 @@ export function PricingSection() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
           {plans.map((plan, i) => {
             const current = isCurrentPlan(plan.name);
             const label = getButtonLabel(plan);

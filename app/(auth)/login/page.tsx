@@ -55,7 +55,7 @@ export default function Login() {
             </h1>
 
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              Continue with <span className="text-transparent bg-clip-text bg-linear-to-l from-primary via-violet-500 to-fuchsia-500">Google, GitHub, or LinkedIn</span> and jump into <span className="font-bold text-primary">Shorty.</span>
+              Continue with <span className="text-[#00e5a0]">Google, GitHub, or LinkedIn</span> and jump into <span className="font-bold text-primary">Shorty.</span>
             </p>
           </div>
 
@@ -119,7 +119,7 @@ export default function Login() {
 
         {/* Bottom subtle text */}
         <div className=" rounded-2xl p-2  border border-border/60 bg-background/30 ">
-            <p className="text-center text-xs   text-transparent bg-clip-text bg-linear-to-l from-primary via-violet-500 to-fuchsia-500 ">
+            <p className="text-center text-xs text-[#00e5a0]">
               Protected by enterprise-grade authentication
             </p>
         </div>

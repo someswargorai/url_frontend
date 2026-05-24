@@ -40,6 +40,10 @@ interface UrlAnalytics {
         count: number;
         timestamp: string;
     }[];
+    campaignId:{
+        _id:string;
+        name:string;
+    }
     createdAt: string;
     location: string[];
     device: string[];
@@ -168,6 +172,7 @@ export default function AnalyticsPage() {
                                     <TableHeader className="bg-white dark:bg-black">
                                         <TableRow className="border-white/10 hover:bg-transparent">
                                             <TableHead>Short URL</TableHead>
+                                            <TableHead>Campaign</TableHead>
                                             <TableHead>Destination</TableHead>
                                             <TableHead>Clicks</TableHead>
                                             <TableHead>Created</TableHead>
@@ -188,6 +193,15 @@ export default function AnalyticsPage() {
                                             >
                                                 <TableCell className="font-medium text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500 max-w-[200px] truncate">
                                                     {url.shortUrl}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {url?.campaignId ? (
+                                                        <Link className="hover:underline" href={`/campaigns/${url.campaignId._id}`}>{url.campaignId.name}</Link>
+                                                    ) : (
+                                                        <Badge className="bg-yellow-500/10 text-yellow-500 border-none">
+                                                            No Campaign
+                                                        </Badge>
+                                                    )}
                                                 </TableCell>
 
                                                 <TableCell className="max-w-[300px] truncate text-zinc-500 hover:underline">
