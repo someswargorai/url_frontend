@@ -392,10 +392,10 @@ export default function LandingPage() {
             { label: "storage",     val: "MongoDB · bulkWrite" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-2 shrink-0">
-              <span className="font-mono text-[10px]" style={{ color: "#2a2a3d" }}>
+              <span className="font-mono text-[10px] text-white" >
                 {item.label}
               </span>
-              <span className="font-mono text-[10px]" style={{ color: "#00e5a0", opacity: 0.7 }}>
+              <span className="font-mono text-[10px] text-white">
                 {item.val}
               </span>
             </div>
@@ -468,7 +468,7 @@ export default function LandingPage() {
         {/* main content */}
         <div className="relative px-8 md:px-20 py-16 md:py-24 text-center">
           {/* index label */}
-          <div className="font-mono text-[10px] text-muted-foreground/40 mb-8 tracking-widest">
+          <div className="font-mono text-[10px] text-white mb-8 tracking-widest">
             — start for free, upgrade when ready —
           </div>
 
@@ -478,7 +478,7 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1, duration: 0.4 }}
-            className="font-bold leading-none tracking-tight mb-6"
+            className="font-bold leading-none tracking-tight mb-6 text-white"
             style={{ fontSize: "clamp(32px, 5vw, 64px)", letterSpacing: "-3px" }}
           >
             Know your links.
@@ -521,7 +521,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               variant="outline"
-              className="h-12 px-8 font-mono text-xs"
+              className="h-12 px-8 font-mono text-xs hover:bg-white/5 rounded-lg"
               style={{ borderColor: "#1e1e2e", color: "var(--muted-foreground)" }}
               onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
             >
@@ -598,7 +598,7 @@ export default function LandingPage() {
         { label: "db",        val: "MongoDB"  },
       ].map((item) => (
         <div key={item.label} className="hidden md:flex items-center gap-2">
-          <span className="font-mono text-[9px] text-muted-foreground/40">{item.label}</span>
+          <span className="font-mono text-[9px] text-muted-foreground/40 text-white">{item.label}</span>
           <span className="font-mono text-[9px]" style={{ color: "#00e5a0", opacity: 0.6 }}>
             {item.val}
           </span>
@@ -628,7 +628,7 @@ export default function LandingPage() {
         className="font-bold tracking-tight"
         style={{ fontSize: "16px", letterSpacing: "-0.5px" }}
       >
-        Shorty<span style={{ color: "#00e5a0" }}>.</span>
+        <span style={{ color: "#00e5a0" }}>Shorty.</span>
       </span>
     </div>
 

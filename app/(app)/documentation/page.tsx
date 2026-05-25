@@ -151,7 +151,7 @@ export default function DocumentationPage() {
       className="min-h-screen"
       
     >
-      <div className="container mx-auto py-16 px-4 md:px-8 lg:px-12 max-w-5xl">
+      <div className="container mx-auto py-1 px-4 md:px-8 lg:px-12 max-w-5xl">
 
         {/* header */}
         <div className="mb-12">
@@ -247,7 +247,7 @@ export default function DocumentationPage() {
                           <Icon className="h-4 w-4" style={{ color: item.accent }} strokeWidth={1.5} />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                          <p className="font-semibold text-sm mb-1 text-white">{item.title}</p>
                           <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
                             {item.desc}
                           </p>

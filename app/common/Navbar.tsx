@@ -103,7 +103,7 @@ export function Navbar() {
             <ModeToggle />
 
             {/* divider */}
-            <div className="h-5 w-px mx-1" style={{ background: "#1e1e2e" }} />
+            <div className="h-5 w-px mx-1" style={{ background: "#1e1e2e40" }} />
 
             {session ? (
               <div className="flex items-center gap-2">

@@ -5,8 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Loader2, Copy, Check, Zap, Scissors, Globe } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Loader2, Copy, Check, Zap, Scissors } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
@@ -56,8 +55,8 @@ export default function DashboardPage() {
         console.error(error);
         if (axios?.isAxiosError(error)) {
           const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
-      }
+          toast.error(message);
+        }
       }
     };
     fetchCampaigns();
@@ -91,7 +90,7 @@ export default function DashboardPage() {
       if (response?.data) {
         if (response?.data?.domain) {
           setShortUrl(`${response?.data?.domain}/${response?.data?.url}`);
-        } else { 
+        } else {
           setShortUrl(
             `${process.env.NEXT_PUBLIC_FRONTEND_URL}/${response?.data?.url}`,
           );
@@ -100,8 +99,8 @@ export default function DashboardPage() {
       }
     } catch (error) {
       if (axios?.isAxiosError(error)) {
-          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message);
       }
     } finally {
       setLoading(false);
@@ -117,127 +116,170 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="container px-4 mx-auto text-center">
-        <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* badge */}
-      <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border font-mono text-[11px] tracking-widest"
-        style={{ background: "rgba(0,229,160,0.05)", borderColor: "rgba(0,229,160,0.2)", color: "#00e5a0" }}
-      >
-        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00e5a0" }} />
-        more than just a link shortener
+    <div className="min-h-[20vh] bg-background relative overflow-hidden flex flex-col justify-center items-center">
+      {/* background grid */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+       
+     
+        <div
+          className="absolute top-1/4 right-[10%] w-[300px] h-[300px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(124,109,240,0.05), transparent 70%)" }}
+        />
       </div>
 
-      {/* headline */}
-      <h1
-        className="font-bold leading-none tracking-tight mb-6"
-        style={{ fontSize: "clamp(20px, 7vw, 76px)", letterSpacing: "-1px" }}
-      >
-        Shorten Links.
-        <br />
-        <span style={{ color: "#00e5a0" }}>Expand Reach.</span>
-      </h1>
+      <div className="relative z-10 container mx-auto px-4 max-w-4xl space-y-8 flex flex-col items-center">
+        {/* Header and badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center text-center max-w-2xl gap-3"
+        >
+          {/* badge */}
+          <div
+            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full border font-mono text-[9px] uppercase tracking-widest bg-[#00e5a0]/5 border-[#00e5a0]/20 text-[#00e5a0]"
+          >
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#00e5a0]" />
+            more than just a link shortener
+          </div>
 
-      <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto mb-12 font-light leading-relaxed">
-        Create short, branded links in seconds. Track performance, optimize for
-        conversion, and take control of your digital presence.
-      </p>
-    </motion.div>
+          {/* headline */}
+          <h1
+            className="font-bold tracking-tight dark:text-white font-mono text-3xl md:text-5xl lg:text-6xl leading-none"
+            style={{ letterSpacing: "-1.5px" }}
+          >
+            Shorten Links. <br />
+            <span style={{ color: "#00e5a0" }}>Expand Reach.</span>
+          </h1>
 
-      {/* MAIN FORM CARD */}
-      <div className="w-full max-w-2xl mx-auto space-y-6 relative">
-        <Card className="border-border/40 bg-card/40 backdrop-blur-md shadow-md overflow-hidden ring-1 ring-white/10">
-          <CardContent className="p-6">
-            <form onSubmit={handleShorten} className="flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Input
-                    type="url"
-                    placeholder="Paste your long link here..."
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    className="h-14 bg-background/50 border-border/50 focus-visible:ring-primary/50 text-lg px-4 placeholder:text-xs md:placeholder:text-sm"
-                  />
+          <p className="text-zinc-400 text-xs md:text-sm font-light leading-relaxed max-w-md mt-2">
+            Create short, branded links in seconds. Track performance, optimize for
+            conversion, and take control of your digital presence.
+          </p>
+        </motion.div>
+
+        {/* MAIN FORM CARD inside Terminal frame */}
+        <div className="w-full max-w-2xl space-y-6 relative">
+          <Card className="rounded-xl border-[#1e1e2e] overflow-hidden bg-[#0d0d12]">
+            {/* Terminal topbar */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+              <div className="flex items-center gap-2">
+                {/* macOS window control dots */}
+                <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                  {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                    <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                  ))}
                 </div>
-                {campaigns.length > 0 && (
-                  <Select value={campaignId} onValueChange={setCampaignId}>
-                    <SelectTrigger className="h-14! w-full md:w-[200px] bg-background/50 border-border/50 focus:ring-primary/50">
-                      <SelectValue placeholder="Select Campaign" />
-                    </SelectTrigger>
-                    <SelectContent
-                      className="h-36! overflow-y-scroll"
-                      align="start"
-                    >
-                      {campaigns.map((camp) => (
-                        <SelectItem
-                          key={camp._id}
-                          value={camp._id}
-                          className="h-10!"
-                        >
-                          {camp.name} {camp.isDefault && "(Default)"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+                <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+                  system · shorten helper
+                </span>
               </div>
-              <Button
-              type="submit"
-              disabled={loading}
-              className="h-12 px-6 font-semibold text-sm gap-2 shrink-0 rounded-lg border-0"
-              style={{ background: "#00e5a0", color: "#000" }}
-            >
-              {loading
-                ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating...</>
-                : <><Scissors className="h-4 w-4" strokeWidth={1.5} /> Shorten Now</>
-              }
-            </Button>
-            </form>
-          </CardContent>
-        </Card>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#00e5a0]" />
+                <span className="font-mono text-[9px] text-[#00e5a0] uppercase tracking-wider">
+                  READY
+                </span>
+              </div>
+            </div>
 
-        <AnimatePresence>
-          {shortUrl && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-            >
-              <Card className="border-primary/30 bg-primary/5 backdrop-blur-md ring-1 ring-primary/20">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1 truncate text-left">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Zap className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="truncate">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Your Shortened Link
-                      </p>
-                      <p className="text-xl font-bold text-primary truncate tracking-tight">
-                        {shortUrl}
-                      </p>
-                    </div>
+            <CardContent className="p-6">
+              <form onSubmit={handleShorten} className="flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Input
+                      type="url"
+                      placeholder="Paste your long link here..."
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      className="h-12 bg-[#13131a] border-[#1e1e2e] text-white focus-visible:ring-1 focus-visible:ring-[#00e5a0] focus-visible:border-[#00e5a0] font-mono text-xs px-4 placeholder:text-zinc-500 rounded-lg"
+                    />
                   </div>
-                  <Button
-                    size="lg"
-                    className="shrink-0 rounded-xl gap-2 h-14 px-6"
-                    onClick={copyToClipboard}
-                  >
-                    {copied ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <Copy className="h-5 w-5" />
-                    )}
-                    {copied ? "Copied" : "Copy Link"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  {campaigns.length > 0 && (
+                    <Select value={campaignId} onValueChange={setCampaignId}>
+                      <SelectTrigger className="h-12! w-full md:w-[200px] bg-[#13131a] border-[#1e1e2e] text-white focus:ring-[#00e5a0] focus:border-[#00e5a0] font-mono text-xs rounded-lg">
+                        <SelectValue placeholder="Select Campaign" />
+                      </SelectTrigger>
+                      <SelectContent
+                        className="bg-[#0d0d12] border-[#1e1e2e] text-white font-mono text-xs max-h-36 overflow-y-auto"
+                        align="start"
+                      >
+                        {campaigns.map((camp) => (
+                          <SelectItem
+                            key={camp._id}
+                            value={camp._id}
+                            className="hover:bg-white/5 cursor-pointer text-xs"
+                          >
+                            {camp.name} {camp.isDefault && "(Default)"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="h-11 px-5 rounded-lg cursor-pointer bg-[#00e5a0] hover:bg-[#00e5a0]/90 text-black font-mono text-xs font-semibold border-0 transition-all duration-300 gap-2 w-full justify-center"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Shortening...
+                    </>
+                  ) : (
+                    <>
+                      <Scissors className="h-4 w-4" strokeWidth={1.5} /> Shorten Now
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Shortlink Result Container */}
+          <AnimatePresence>
+            {shortUrl && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <Card className="rounded-xl border-[#00e5a0]/30 bg-[#00e5a0]/5 overflow-hidden backdrop-blur-md">
+                  <CardContent className="p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1 truncate text-left">
+                      <div className="p-2.5 bg-[#00e5a0]/10 border border-[#00e5a0]/25 rounded-lg text-[#00e5a0] shrink-0">
+                        <Zap className="h-5 w-5" />
+                      </div>
+                      <div className="truncate">
+                        <p className="font-mono text-[9px] text-[#00e5a0] uppercase tracking-wider">
+                          Your Shortened Link
+                        </p>
+                        <p className="text-base md:text-lg font-bold font-mono text-white truncate tracking-tight mt-0.5">
+                          {shortUrl}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={copyToClipboard}
+                      className="shrink-0 h-11 px-5 bg-[#00e5a0] hover:bg-[#00e5a0]/90 text-black font-mono text-xs font-semibold border-0 transition-all duration-300 rounded-lg cursor-pointer flex items-center gap-2"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          Copy Link
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

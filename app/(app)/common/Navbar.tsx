@@ -43,8 +43,8 @@ export function Navbar() {
                        <Button
               variant="ghost"
               size="icon"
-              className="hidden sm:flex h-8 w-8 rounded-lg p-0"
-              style={{ border: "1px solid #1e1e2e" }}
+              className="hidden sm:flex h-8 w-8 rounded-lg p-0 border-gray-200"
+            
               asChild
             >
               <Link href="https://github.com/someswargorai/url_frontend.git" target="_blank">

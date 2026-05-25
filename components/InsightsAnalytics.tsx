@@ -140,6 +140,42 @@ interface InsightsProps {
   onLoadMoreJourneys?: () => void;
 }
 
+function TerminalBar({ label, right }: { label: string; right?: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0 mr-1">
+          {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+            <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+          ))}
+        </div>
+        <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+        <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+          {label}
+        </span>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+function InsightPanel({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <Card className={`rounded-xl border-[#1e1e2e] bg-[#0d0d12] overflow-hidden ${className}`}>
+      <TerminalBar label={label} />
+      {children}
+    </Card>
+  );
+}
+
 export default function InsightsAnalytics({
   analytics,
   userJourneys = [],
@@ -235,56 +271,70 @@ export default function InsightsAnalytics({
       {/* Top Row: Real-Time Active Users & Live Diagnostics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Live Pulse Card */}
-        <Card className="rounded-md border-border/50 relative backdrop-blur-xl">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                Visitors
+        <Card className="rounded-xl border-[#1e1e2e] overflow-hidden bg-[#0d0d12]">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                  <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                ))}
+              </div>
+              <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+                system · active visitors
               </span>
             </div>
-            <CardTitle className="text-3xl font-extrabold text-foreground font-mono pt-1">
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5a0] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00e5a0]"></span>
+              </span>
+              <span className="font-mono text-[9px] text-[#00e5a0] uppercase tracking-wider">
+                LIVE
+              </span>
+            </div>
+          </div>
+          <CardHeader className="pb-2 pt-4 px-6">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-light">Real-Time Visitors</span>
+            <CardTitle className="text-3xl font-bold font-mono pt-1" style={{ color: "#00e5a0" }}>
               {dynamicActiveUsers}
             </CardTitle>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground font-sans ">
-              <span className="font-semibold text-foreground">
-                Today: {analytics?.todayActiveUsers || 0}
+            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-500 font-mono">
+              <span className="font-semibold text-zinc-400">
+                TODAY: {analytics?.todayActiveUsers || 0}
               </span>
               {analytics?.activeUsersGrowth !== undefined && (
-                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${
-                  analytics.activeUsersGrowth >= 0 ? "text-emerald-400" : "text-rose-400"
+                <span className={`font-semibold flex items-center gap-0.5 ${
+                  analytics.activeUsersGrowth >= 0 ? "text-[#00e5a0]" : "text-rose-400"
                 }`}>
                   {analytics.activeUsersGrowth >= 0 ? (
                     <TrendingUp className="w-3 h-3" />
                   ) : (
                     <TrendingDown className="w-3 h-3" />
                   )}
-                  {analytics.activeUsersGrowth >= 0 ? "+" : ""}{analytics.activeUsersGrowth}% from yesterday
+                  {analytics.activeUsersGrowth >= 0 ? "+" : ""}{analytics.activeUsersGrowth}%
                 </span>
               )}
             </div>
           </CardHeader>
-          <CardContent className="pb-4">
-            <div className="space-y-2 mt-2 overflow-auto  h-16.25">
+          <CardContent className="pb-4 px-6">
+            <div className="space-y-2 mt-2 overflow-auto h-[70px]">
               {dynamicActivePaths.length > 0 ? (
                 dynamicActivePaths.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between text-xs "
+                    className="flex items-center justify-between text-xs font-mono"
                   >
-                    <span className="text-muted-foreground truncate max-w-[180px]">
+                    <span className="text-zinc-500 truncate max-w-[180px] font-light">
                       {item.path}
                     </span>
-                    <span className="font-semibold text-foreground font-mono">
-                      {item.count} hit(s)
+                    <span className="font-semibold text-zinc-300">
+                      {item.count} hits
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="text-xs text-muted-foreground py-2 italic">
+                <div className="text-[10px] font-mono text-zinc-600 py-2 italic font-light">
                   Waiting for events...
                 </div>
               )}
@@ -293,139 +343,152 @@ export default function InsightsAnalytics({
         </Card>
 
         {/* Smart Comparison 1: Total Events Growth */}
-        <Card className="rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-semibold">
-              Project Load telemetry
-            </CardDescription>
-            <CardTitle className="text-3xl font-extrabold text-foreground font-mono pt-1">
+        <Card className="rounded-xl border-[#1e1e2e] overflow-hidden bg-[#0d0d12]">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                  <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                ))}
+              </div>
+              <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+                system · telemetry
+              </span>
+            </div>
+          </div>
+          <CardHeader className="pb-2 pt-4 px-6">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-light">Total Events Ingested</span>
+            <CardTitle className="text-3xl font-bold font-mono pt-1 text-white">
               {analytics?.totalEvents || 0}
             </CardTitle>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground font-sans">
-              <span className="font-semibold text-foreground">
-                Today: {analytics?.todayEvents || 0}
+            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-500 font-mono">
+              <span className="font-semibold text-zinc-400">
+                TODAY: {analytics?.todayEvents || 0}
               </span>
               {analytics?.eventGrowth !== undefined && (
-                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${
-                  analytics.eventGrowth >= 0 ? "text-emerald-400" : "text-rose-400"
+                <span className={`font-semibold flex items-center gap-0.5 ${
+                  analytics.eventGrowth >= 0 ? "text-[#00e5a0]" : "text-rose-400"
                 }`}>
                   {analytics.eventGrowth >= 0 ? (
                     <TrendingUp className="w-3 h-3" />
                   ) : (
                     <TrendingDown className="w-3 h-3" />
                   )}
-                  {analytics.eventGrowth >= 0 ? "+" : ""}{analytics.eventGrowth}% from yesterday
+                  {analytics.eventGrowth >= 0 ? "+" : ""}{analytics.eventGrowth}%
                 </span>
               )}
             </div>
           </CardHeader>
-          <CardContent className="pb-4 text-xs text-muted-foreground mt-1">
-            Total aggregated user interaction points logged in this project
-            dashboard database dynamically.
+          <CardContent className="pb-4 px-6 text-[10px] text-zinc-500 font-mono leading-relaxed mt-1 font-light">
+            Aggregated user interaction pathways logged in this project dashboard dynamically in real-time.
           </CardContent>
         </Card>
 
         {/* Smart Comparison 2: Device Analytics */}
-        <Card className="rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-semibold">
-              User Engagement Diagnostics
-            </CardDescription>
-            <CardTitle className="text-2xl font-bold flex items-baseline gap-2 font-mono">
+        <Card className="rounded-xl border-[#1e1e2e] overflow-hidden bg-[#0d0d12]">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                  <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                ))}
+              </div>
+              <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+                system · diagnostics
+              </span>
+            </div>
+          </div>
+          <CardHeader className="pb-2 pt-4 px-6">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-light">Engagement Rate</span>
+            <CardTitle className="text-2xl font-bold font-mono text-white flex items-baseline gap-2 pt-1">
               {dynamicEngagementMetrics.engagementRate}
-              <span className="text-emerald-400 text-xs font-semibold flex items-center gap-0.5 font-sans">
+              <span className="text-[#00e5a0] text-[9px] font-mono uppercase tracking-wider ml-1">
                 Multi-Event Sessions
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pb-4 text-xs text-muted-foreground">
-            Calculated in real-time from the full database. Average interactions
-            optimized at{" "}
-            <span className="text-foreground font-semibold">
-              {dynamicEngagementMetrics.avgDepth} events
-            </span>{" "}
-            per unique session.
+          <CardContent className="pb-4 px-6 text-[10px] text-zinc-500 font-mono leading-relaxed font-light">
+            Calculated dynamically from live logs. Average user interaction depth optimized at <span className="text-white font-semibold">{dynamicEngagementMetrics.avgDepth} events</span> per unique session.
           </CardContent>
         </Card>
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="flex border-b border-border/50 pb-px overflow-x-auto scrollbar-none flex-nowrap -mx-4 px-4 md:-mx-0 md:px-0">
+      <div className="bg-[#0d0d12] border border-[#1e1e2e] p-1.5 rounded-xl w-full flex overflow-x-auto scrollbar-none flex-no-wrap justify-start h-14 gap-2">
         <Button
           variant="ghost"
           onClick={() => setActiveSection("funnels")}
-          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+          className={`h-full px-4 rounded-lg font-mono text-xs uppercase transition-all flex-shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSection === "funnels"
-              ? " text-emerald-400 bg-emerald-500/[0.03]"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-[#13131a] text-[#00e5a0] border border-[#1e1e2e]"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <Target className="w-4 h-4" />
+          <Target className="w-3.5 h-3.5" />
           Dynamic Funnels
         </Button>
         <Button
           variant="ghost"
           onClick={() => setActiveSection("session_replay")}
-          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+          className={`h-full px-4 rounded-lg font-mono text-xs uppercase transition-all flex-shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSection === "session_replay"
-              ? " text-emerald-400 bg-emerald-500/[0.03]"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-[#13131a] text-[#00e5a0] border border-[#1e1e2e]"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <MousePointer className="w-4 h-4" />
+          <MousePointer className="w-3.5 h-3.5" />
           Timeline
         </Button>
         <Button
           variant="ghost"
           onClick={() => setActiveSection("revenue")}
-          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+          className={`h-full px-4 rounded-lg font-mono text-xs uppercase transition-all flex-shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSection === "revenue"
-              ? " text-emerald-400 bg-emerald-200/[0.03]"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-[#13131a] text-[#00e5a0] border border-[#1e1e2e]"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <DollarSign className="w-4 h-4" />
+          <DollarSign className="w-3.5 h-3.5" />
           Revenue
         </Button>
-
         <Button
           variant="ghost"
           onClick={() => setActiveSection("ai_insights")}
-          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+          className={`h-full px-4 rounded-lg font-mono text-xs uppercase transition-all flex-shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSection === "ai_insights"
-              ? " text-emerald-400 bg-emerald-500/[0.03]"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-[#13131a] text-[#00e5a0] border border-[#1e1e2e]"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <Bell className="w-4 h-4" />
-          Smart Recommendations
+          <Bell className="w-3.5 h-3.5" />
+          Recommendations
         </Button>
         <Button
           variant="ghost"
           onClick={() => setActiveSection("engagement_analytics")}
-          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+          className={`h-full px-4 rounded-lg font-mono text-xs uppercase transition-all flex-shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSection === "engagement_analytics"
-              ? " text-emerald-400 bg-emerald-500/[0.03]"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-[#13131a] text-[#00e5a0] border border-[#1e1e2e]"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <ChartArea className="w-4 h-4" />
-           Engagement Analytics
+          <ChartArea className="w-3.5 h-3.5" />
+          Engagement
         </Button>
         <Button
           variant="ghost"
           onClick={() => setActiveSection("active_users")}
-          className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all flex-shrink-0 ${
+          className={`h-full px-4 rounded-lg font-mono text-xs uppercase transition-all flex-shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSection === "active_users"
-              ? " text-emerald-400 bg-emerald-500/[0.03]"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "bg-[#13131a] text-[#00e5a0] border border-[#1e1e2e]"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-3.5 h-3.5" />
           Active Users
         </Button>
-
-       
       </div>
 
       {/* Tab Panels */}
@@ -435,52 +498,52 @@ export default function InsightsAnalytics({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
             {/* Interactive Funnel Steps */}
             <div className="lg:col-span-2 space-y-6">
-              <Card className="rounded-md border-border/50 bg-card/30">
-                <CardHeader>
+              <InsightPanel label="funnels - event pipeline">
+                <CardHeader className="px-6 pt-5 pb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-base font-semibold">
+                      <CardTitle className="font-mono text-sm text-white uppercase tracking-wider">
                         Event Pipeline Funnel
                       </CardTitle>
-                      <CardDescription className="text-xs">
+                      <CardDescription className="text-zinc-500 text-xs font-light">
                         Dynamic acquisition flow computed from your project’s
                         top events
                       </CardDescription>
                     </div>
                     {funnelAnalysis.length >= 2 && (
-                      <Badge variant="outline" className=" font-mono">
+                      <Badge variant="outline" className="border-[#00e5a0]/30 bg-[#00e5a0]/10 text-[#00e5a0] font-mono text-[10px]">
                         Conversion Ratio: {overallConversion}
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 px-6 pb-6">
                   {funnelAnalysis.length > 0 ? (
                     <div className="flex flex-col items-center max-w-lg mx-auto py-4 h-[300px] overflow-y-auto">
                       {funnelAnalysis.map((step, idx) => (
                         <div key={step.name} className="flex flex-col w-full">
                           {/* The Step Box */}
-                          <div className="w-full flex items-center justify-between p-4 rounded-xl bg-muted/40 border border-border/50 shadow-sm backdrop-blur-sm relative z-10 transition-transform hover:scale-[1.01]">
+                          <div className="w-full flex items-center justify-between p-4 rounded-lg bg-[#13131a] border border-[#1e1e2e] shadow-sm backdrop-blur-sm relative z-10 transition-transform hover:scale-[1.01]">
                             <div className="flex items-center gap-3">
-                              <span className="w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs  font-semibold shadow-inner">
+                              <span className="w-6 h-6 rounded-md bg-[#00e5a0]/10 text-[#00e5a0] border border-[#00e5a0]/20 flex items-center justify-center font-mono text-xs font-semibold shadow-inner">
                                 {idx + 1}
                               </span>
-                              <span className="font-semibold text-foreground text-sm tracking-wide">
+                              <span className="font-mono font-semibold text-zinc-200 text-sm tracking-wide">
                                 {step.name}
                               </span>
                             </div>
                             <div className="flex flex-col items-end gap-1">
-                              <span className="text-xs font-bold font-mono text-foreground bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 text-emerald-400">
+                              <span className="text-xs font-bold font-mono bg-[#00e5a0]/10 px-2.5 py-1 rounded border border-[#00e5a0]/20 text-[#00e5a0]">
                                 {step.count.toLocaleString()}{" "}
-                                <span className="text-[9px] font-sans text-muted-foreground ml-0.5 uppercase tracking-wider">
+                                <span className="text-[9px] font-sans text-zinc-500 ml-0.5 uppercase tracking-wider">
                                   total
                                 </span>
                               </span>
-                              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                              <div className="flex items-center gap-1.5 text-[10px] text-zinc-500">
                                 <span>Today: {step.todayCount || 0}</span>
                                 {step.growth !== undefined && (
                                   <span className={`font-semibold flex items-center gap-0.5 ${
-                                    step.growth >= 0 ? "text-emerald-400" : "text-rose-400"
+                                    step.growth >= 0 ? "text-[#00e5a0]" : "text-rose-400"
                                   }`}>
                                     {step.growth >= 0 ? (
                                       <TrendingUp className="w-3 h-3" />
@@ -497,38 +560,38 @@ export default function InsightsAnalytics({
                           {/* The Drop-off Connector */}
                           {idx < funnelAnalysis.length - 1 && (
                             <div className="flex flex-col items-center justify-center -my-1 relative z-0">
-                              <div className="w-px h-8 bg-border/80"></div>
+                              <div className="w-px h-8 bg-[#1e1e2e]"></div>
                               <Badge
                                 variant="outline"
-                                className="bg-card text-[11px] text-muted-foreground border-border/60 py-1.5 px-3 z-10 shadow-sm flex items-center gap-1.5 font-medium tracking-wide"
+                                className="bg-[#0d0d12] text-[11px] text-zinc-400 border-[#1e1e2e] py-1.5 px-3 z-10 shadow-sm flex items-center gap-1.5 font-medium tracking-wide"
                               >
-                                <span className="text-emerald-500 text-sm">
+                                <span className="text-[#00e5a0] text-sm">
                                   ↓
                                 </span>
                                 {funnelAnalysis[idx + 1].conversionFromPrevious}{" "}
                                 conversion
                               </Badge>
-                              <div className="w-px h-8 bg-border/80"></div>
+                              <div className="w-px h-8 bg-[#1e1e2e]"></div>
                             </div>
                           )}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground text-xs gap-3">
-                      <Target className="w-8 h-8 opacity-40 text-emerald-500" />
+                    <div className="flex flex-col items-center justify-center py-8 text-center text-zinc-500 text-xs gap-3 font-mono">
+                      <Target className="w-8 h-8 opacity-40 text-[#00e5a0]" />
                       <span>
                         No events recorded yet to build conversion pipelines.
                       </span>
-                      <p className="max-w-md text-[10px] opacity-70 leading-relaxed bg-zinc-300/40 p-3 border border-border/30 rounded">
+                      <p className="max-w-md text-[10px] opacity-70 leading-relaxed bg-[#13131a] p-3 border border-[#1e1e2e] rounded-lg">
                         To build custom funnels automatically, send different
                         sequential events using the SDK, for example:
                         <br />
-                        <code className="text-emerald-400 block pt-1">
+                        <code className="text-[#00e5a0] block pt-1">
                           trackEvent(&quot;YOUR_API_KEY&quot;,
                           &quot;homepage_view&quot;)
                         </code>
-                        <code className="text-emerald-400 block">
+                        <code className="text-[#00e5a0] block">
                           trackEvent(&quot;YOUR_API_KEY&quot;,
                           &quot;signup_completed&quot;)
                         </code>
@@ -536,24 +599,25 @@ export default function InsightsAnalytics({
                     </div>
                   )}
                 </CardContent>
-              </Card>
+              </InsightPanel>
             </div>
 
             {/* Funnel Diagnostics Sidebar */}
             <div className="space-y-6">
-              <Card className="rounded-md border-border/50 bg-card/30 p-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 text-emerald-400 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4" />
-                  Funnel Bottlenecks
-                </h4>
-                <div className="space-y-4 text-xs text-muted-foreground">
-                  <div className="p-3 border border-border/30 rounded space-y-2">
-                    <p className="font-semibold text-foreground">
+              <InsightPanel label="funnels - bottlenecks">
+                <div className="p-5">
+                  <h4 className="text-xs font-mono font-semibold uppercase tracking-wider mb-4 text-[#00e5a0] flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4" />
+                    Funnel Bottlenecks
+                  </h4>
+                  <div className="space-y-4 text-xs text-zinc-500">
+                    <div className="p-3 border border-[#1e1e2e] bg-[#13131a] rounded-lg space-y-2">
+                      <p className="font-semibold text-zinc-200">
                       Highest Conversion Drop
                     </p>
                     {funnelAnalysis.length >= 2 ? (
                       <>
-                        <p className="text-emerald-400 font-medium font-mono text-[11px]">
+                        <p className="text-[#00e5a0] font-medium font-mono text-[11px]">
                           {biggestDropStep}
                         </p>
                         <p className="text-[10px] opacity-75">
@@ -563,13 +627,14 @@ export default function InsightsAnalytics({
                         </p>
                       </>
                     ) : (
-                      <p className="text-muted-foreground italic text-[11px]">
+                      <p className="text-zinc-500 italic text-[11px]">
                         Insufficient sequential events to calculate bottlenecks.
                       </p>
                     )}
+                    </div>
                   </div>
                 </div>
-              </Card>
+              </InsightPanel>
             </div>
           </div>
         )}
@@ -579,18 +644,29 @@ export default function InsightsAnalytics({
           <div className="space-y-6 animate-fadeIn">
             {/* Stacked User Journeys */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-emerald-400" />
-                  Grouped User Journey Timelines
-                </h3>
-                <Badge
-                  variant="outline"
-                  className="border-border text-muted-foreground text-[10px]"
-                >
-                  Showing total pathways for {userJourneys.length} session(s)
-                </Badge>
-              </div>
+              <InsightPanel label="timeline - grouped journeys">
+                <div className="px-6 py-5 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-[#13131a] border border-[#1e1e2e] text-[#00e5a0]">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-mono text-sm text-white uppercase tracking-wider">
+                        Grouped User Journey Timelines
+                      </h3>
+                      <p className="text-zinc-500 text-xs font-light">
+                        Session pathways reconstructed from event order
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-[#1e1e2e] bg-[#13131a] text-zinc-400 text-[10px] font-mono"
+                  >
+                    {userJourneys.length} session(s)
+                  </Badge>
+                </div>
+              </InsightPanel>
 
               {userJourneys.length > 0 ? (
                 <div className="space-y-4">
@@ -618,17 +694,17 @@ export default function InsightsAnalytics({
                     return (
                       <Card
                         key={userKey}
-                        className="rounded-md border-border/50 bg-card/30 overflow-hidden relative"
+                        className="rounded-xl border-[#1e1e2e] bg-[#0d0d12] overflow-hidden relative"
                       >
                         {/* Top User Metadata Bar */}
-                        <div className="p-4 bg-muted/20 border-b border-border/20 flex flex-wrap items-center justify-between gap-4">
+                        <div className="p-4 bg-[#13131a] border-b border-[#1e1e2e] flex flex-wrap items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold border border-emerald-500/20 text-sm">
+                            <span className="w-8 h-8 rounded-lg bg-[#00e5a0]/10 text-[#00e5a0] flex items-center justify-center font-bold border border-[#00e5a0]/20 text-sm">
                               👤
                             </span>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-foreground font-mono truncate max-w-[200px] md:max-w-xs">
+                                <span className="text-xs font-bold text-zinc-200 font-mono truncate max-w-[200px] md:max-w-xs">
                                   {userKey}
                                 </span>
                                 {hasUserRage && (
@@ -640,7 +716,7 @@ export default function InsightsAnalytics({
                                   </Badge>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                              <div className="flex items-center gap-2 text-[10px] text-zinc-500 mt-0.5">
                                 <span className="flex items-center gap-1">
                                   {deviceType === "mobile" ? (
                                     <Smartphone className="w-3 h-3" />
@@ -651,7 +727,7 @@ export default function InsightsAnalytics({
                                 </span>
                                 <span>•</span>
                                 <span className="flex items-center gap-1">
-                                  <MapPin className="w-3 h-3 text-emerald-400" />
+                                  <MapPin className="w-3 h-3 text-[#00e5a0]" />
                                   {city && city !== "Unknown"
                                     ? `${city}, ${country}`
                                     : country}
@@ -662,7 +738,7 @@ export default function InsightsAnalytics({
 
                           <Badge
                             variant="outline"
-                            className="border-border text-muted-foreground font-mono text-[10px]"
+                            className="border-[#1e1e2e] text-zinc-400 bg-[#0d0d12] font-mono text-[10px]"
                           >
                             {userLogs.length} event(s) in journey
                           </Badge>
@@ -690,7 +766,7 @@ export default function InsightsAnalytics({
                               return (
                                 <React.Fragment key={evt._id}>
                                   {idx > 0 && (
-                                    <ChevronRight className="w-4 h-4 text-muted-foreground/60 flex-shrink-0" />
+                                    <ChevronRight className="w-4 h-4 text-zinc-600 flex-shrink-0" />
                                   )}
 
                                   <button
@@ -701,12 +777,12 @@ export default function InsightsAnalytics({
                                     }
                                     className={`px-3 py-1.5 rounded border text-[10px] font-semibold tracking-wide transition-all uppercase flex-shrink-0 flex items-center gap-1.5 hover:scale-105 active:scale-95 ${
                                       expandedStep === stepId
-                                        ? "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-md font-bold"
+                                        ? "bg-[#00e5a0] text-zinc-950 border-[#00e5a0] shadow-md font-bold"
                                         : isStepRage
                                         ? "bg-transparent text-rose-400 border-rose-500/20"
                                         : isConversion
                                         ? "bg-transparent text-amber-400 border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.05)]"
-                                        : "bg-transparent text-zinc-800 border-border/60 hover:text-foreground  hover:border-border"
+                                        : "bg-[#13131a] text-zinc-400 border-[#1e1e2e] hover:text-white hover:border-[#00e5a0]/30"
                                     }`}
                                   >
                                     {isStepRage && (
@@ -744,13 +820,13 @@ export default function InsightsAnalytics({
                             if (!stepLog) return null;
 
                             return (
-                              <div className="p-4 border-t border-border/20 space-y-3 animate-slideDown">
+                              <div className="p-4 border-t border-[#1e1e2e] bg-[#13131a]/50 space-y-3 animate-slideDown">
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-foreground flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                                  <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-[#00e5a0]" />
                                     Step {idx + 1} Payload Inspector
                                   </span>
-                                  <span className="text-[10px] text-muted-foreground font-mono">
+                                  <span className="text-[10px] text-zinc-500 font-mono">
                                     Time:{" "}
                                     {stepLog.timestamp
                                       ? new Date(
@@ -761,10 +837,10 @@ export default function InsightsAnalytics({
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <div className="md:col-span-2 space-y-1">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-semibold">
+                                    <p className="text-[10px] text-zinc-500 uppercase font-semibold">
                                       Metadata Parameters
                                     </p>
-                                    <pre className="text-[10px] font-mono p-3 bg-zinc-950 rounded border border-border/30 text-zinc-300 overflow-x-auto">
+                                    <pre className="text-[10px] font-mono p-3 bg-[#0d0d12] rounded-lg border border-[#1e1e2e] text-zinc-300 overflow-x-auto">
                                       {JSON.stringify(
                                         stepLog.metadata || {},
                                         null,
@@ -772,17 +848,17 @@ export default function InsightsAnalytics({
                                       )}
                                     </pre>
                                   </div>
-                                  <div className="space-y-2 text-[10px] text-muted-foreground">
+                                  <div className="space-y-2 text-[10px] text-zinc-500">
                                     <div>
-                                      <span className="font-semibold text-foreground">
+                                      <span className="font-semibold text-zinc-200">
                                         Event Key:
                                       </span>
-                                      <p className="font-mono text-emerald-400 pt-0.5">
+                                      <p className="font-mono text-[#00e5a0] pt-0.5">
                                         {stepLog.eventName}
                                       </p>
                                     </div>
                                     <div>
-                                      <span className="font-semibold text-foreground">
+                                      <span className="font-semibold text-zinc-200">
                                         Unique Log ID:
                                       </span>
                                       <p className="font-mono pt-0.5">
@@ -793,7 +869,7 @@ export default function InsightsAnalytics({
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => setExpandedStep(null)}
-                                      className="h-7 text-[10px] text-muted-foreground hover:text-foreground mt-2 cursor-pointer border border-border/60 rounded"
+                                      className="h-7 text-[10px] text-zinc-500 hover:text-white mt-2 cursor-pointer border border-[#1e1e2e] rounded bg-[#0d0d12]"
                                     >
                                       Minimize Inspector
                                     </Button>
@@ -814,11 +890,11 @@ export default function InsightsAnalytics({
                         disabled={loadingMoreJourneys}
                         variant="outline"
                         size="sm"
-                        className="gap-2 cursor-pointer border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 rounded-sm font-semibold text-xs py-2 px-4 shadow-[0_0_15px_rgba(16,185,129,0.05)] transition-all duration-300"
+                        className="gap-2 cursor-pointer border-[#00e5a0]/30 text-[#00e5a0] hover:bg-[#00e5a0]/10 rounded-lg font-semibold text-xs py-2 px-4 shadow-[0_0_15px_rgba(0,229,160,0.05)] transition-all duration-300"
                       >
                         {loadingMoreJourneys ? (
                           <>
-                            <span className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                            <span className="w-3.5 h-3.5 border-2 border-[#00e5a0] border-t-transparent rounded-full animate-spin" />
                             Loading More...
                           </>
                         ) : (
@@ -832,8 +908,8 @@ export default function InsightsAnalytics({
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground text-xs p-4 bg-card/10 rounded border border-dashed border-border/50">
-                  <MousePointer className="w-8 h-8 opacity-40 text-emerald-500 mb-2" />
+                <div className="flex flex-col items-center justify-center py-12 text-center text-zinc-500 text-xs p-4 bg-[#0d0d12] rounded-xl border border-dashed border-[#1e1e2e] font-mono">
+                  <MousePointer className="w-8 h-8 opacity-40 text-[#00e5a0] mb-2" />
                   <span>
                     No active user logs detected to trace user journeys.
                   </span>
@@ -860,30 +936,30 @@ export default function InsightsAnalytics({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
             {/* Recommendations List */}
             <div className="lg:col-span-3 space-y-6">
-              <Card className="rounded-md border-border/50 bg-card/30">
-                <CardHeader>
-                  <CardTitle className="text-base font-semibold">
+              <InsightPanel label="recommendations - audits">
+                <CardHeader className="px-6 pt-5 pb-4">
+                  <CardTitle className="font-mono text-sm text-white uppercase tracking-wider">
                     Algorithmic Audits & Alerts
                   </CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription className="text-zinc-500 text-xs font-light">
                     Custom logic recommendations deduced from dynamic database
                     telemetry
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 space-y-3">
+                <CardContent className="pt-0 px-6 pb-6 space-y-3">
                   {analytics?.topEvents && analytics.topEvents.length > 0 ? (
                     <div className="space-y-3 text-xs">
-                      <div className="p-3 border border-emerald-500/20 bg-emerald-500/5 rounded-md flex items-start gap-3">
-                        <div className="p-1 rounded bg-emerald-500/10 text-emerald-400">
+                      <div className="p-4 border border-[#00e5a0]/20 bg-[#00e5a0]/5 rounded-lg flex items-start gap-3">
+                        <div className="p-1.5 rounded-lg bg-[#00e5a0]/10 text-[#00e5a0] border border-[#00e5a0]/20">
                           <TrendingUp className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="font-semibold text-foreground">
+                          <p className="font-semibold text-zinc-200">
                             Optimize Around Primary Action
                           </p>
-                          <p className="text-[10px] text-muted-foreground pt-0.5">
+                          <p className="text-[10px] text-zinc-500 pt-0.5 leading-relaxed">
                             Your primary event is{" "}
-                            <span className="text-emerald-400 font-semibold font-mono">
+                            <span className="text-[#00e5a0] font-semibold font-mono">
                               &apos;{analytics.topEvents[0]?._id}&apos;
                             </span>
                             . It represents{" "}
@@ -898,17 +974,17 @@ export default function InsightsAnalytics({
                       </div>
 
                       {analytics.countries && analytics.countries.length > 0 && (
-                        <div className="p-3 border border-border/30 rounded-md flex items-start gap-3 ">
-                          <div className="p-1 rounded bg-zinc-800 text-emerald-400">
+                        <div className="p-4 border border-[#1e1e2e] bg-[#13131a] rounded-lg flex items-start gap-3">
+                          <div className="p-1.5 rounded-lg bg-[#0d0d12] text-[#00e5a0] border border-[#1e1e2e]">
                             <MapPin className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground">
+                            <p className="font-semibold text-zinc-200">
                               Target Regional Traffic
                             </p>
-                            <p className="text-[10px] text-muted-foreground pt-0.5">
+                            <p className="text-[10px] text-zinc-500 pt-0.5 leading-relaxed">
                               Your largest traffic regional segment is{" "}
-                              <span className="text-emerald-400 font-semibold">
+                              <span className="text-[#00e5a0] font-semibold">
                                 &apos;{analytics.cities[0]?._id}, {analytics.countries[0]?._id}&apos;
                               </span>
                               . Consider localizing onboarding documentation or
@@ -920,12 +996,12 @@ export default function InsightsAnalytics({
                       )}
                     </div>
                   ) : (
-                    <div className="text-xs text-muted-foreground py-8 italic text-center">
+                    <div className="text-xs text-zinc-500 py-8 italic text-center font-mono">
                       Insufficient data to deduce custom audits.
                     </div>
                   )}
                 </CardContent>
-              </Card>
+              </InsightPanel>
             </div>
           </div>
         )}
@@ -933,27 +1009,27 @@ export default function InsightsAnalytics({
         {/* --- ACTIVE USERS TIMELINE TAB --- */}
         {activeSection === "active_users" && (
           <div className="space-y-6 animate-fadeIn">
-            <Card className="rounded-md border-border/50 bg-card/30">
-              <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <InsightPanel label="active users - trend">
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 pt-5 pb-4">
                 <div>
-                  <CardTitle className="text-base font-semibold">
+                  <CardTitle className="font-mono text-sm text-white uppercase tracking-wider">
                     Active Users Trend
                   </CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription className="text-zinc-500 text-xs font-light">
                     Unique active users tracked over time
                   </CardDescription>
                 </div>
                 {/* Timeframe Selector tabs */}
-                <div className="flex bg-muted/65 p-1 rounded-sm gap-1 self-start sm:self-auto">
+                <div className="flex bg-[#13131a] border border-[#1e1e2e] p-1 rounded-lg gap-1 self-start sm:self-auto">
                   {(["day", "week", "month", "year"] as const).map((t) => (
                     <Button
                       key={t}
                       variant="ghost"
                       onClick={() => setTimeframe(t)}
-                      className={`capitalize rounded-sm text-[10px] font-semibold tracking-wider px-3 py-1.5 h-auto cursor-pointer transition-all ${
+                      className={`capitalize rounded-md text-[10px] font-mono font-semibold tracking-wider px-3 py-1.5 h-auto cursor-pointer transition-all ${
                         timeframe === t
-                          ? "bg-card text-emerald-400 border border-border/20 shadow-sm"
-                          : "text-muted-foreground hover:text-foreground border-transparent"
+                          ? "bg-[#0d0d12] text-[#00e5a0] border border-[#1e1e2e] shadow-sm"
+                          : "text-zinc-500 hover:text-zinc-300 border-transparent"
                       }`}
                     >
                       {t}
@@ -961,7 +1037,7 @@ export default function InsightsAnalytics({
                   ))}
                 </div>
               </CardHeader>
-              <CardContent className="pt-2">
+              <CardContent className="pt-2 px-6 pb-6">
                 <div className="h-[350px] w-full mt-4">
                   {activeUsersData && activeUsersData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -995,12 +1071,12 @@ export default function InsightsAnalytics({
                             if (active && payload && payload.length) {
                               const data = payload[0].payload;
                               return (
-                                <div className="bg-zinc-950/95 border border-border/50 p-2.5 rounded shadow-xl backdrop-blur-md">
-                                  <p className="text-[9px] text-muted-foreground uppercase font-semibold">
+                                <div className="bg-[#0d0d12]/95 border border-[#1e1e2e] p-2.5 rounded-lg shadow-xl backdrop-blur-md">
+                                  <p className="text-[9px] text-zinc-500 uppercase font-semibold">
                                     {formatDate(data.date, timeframe)}
                                   </p>
-                                  <p className="text-xs font-bold text-emerald-400 font-mono mt-0.5">
-                                    {data.count} <span className="text-[9px] text-foreground font-sans font-medium">active user(s)</span>
+                                  <p className="text-xs font-bold text-[#00e5a0] font-mono mt-0.5">
+                                    {data.count} <span className="text-[9px] text-zinc-400 font-sans font-medium">active user(s)</span>
                                   </p>
                                 </div>
                               );
@@ -1019,14 +1095,14 @@ export default function InsightsAnalytics({
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground text-xs gap-2">
-                      <TrendingUp className="w-8 h-8 opacity-40 text-emerald-500" />
+                    <div className="flex flex-col items-center justify-center h-full text-center text-zinc-500 text-xs gap-2 font-mono">
+                      <TrendingUp className="w-8 h-8 opacity-40 text-[#00e5a0]" />
                       <span>No active user data recorded for this period.</span>
                     </div>
                   )}
                 </div>
               </CardContent>
-            </Card>
+            </InsightPanel>
           </div>
         )}
 
@@ -1067,10 +1143,10 @@ export default function InsightsAnalytics({
             <div className="space-y-6 animate-fadeIn">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Retention rate indicator */}
-                <Card className="rounded-md border-border/50 bg-card/30 flex flex-col justify-between p-6">
+                <Card className="rounded-xl border-[#1e1e2e] bg-[#0d0d12] flex flex-col justify-between p-6">
                   <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">User Retention Rate</h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                    <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">User Retention Rate</h3>
+                    <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
                       Percentage of yesterday&apos;s active users who returned today.
                     </p>
                   </div>
@@ -1090,7 +1166,7 @@ export default function InsightsAnalytics({
                           cx="48"
                           cy="48"
                           r="40"
-                          className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                          className="stroke-[#00e5a0] transition-all duration-1000 ease-out"
                           strokeWidth="8"
                           fill="transparent"
                           strokeDasharray={`${2 * Math.PI * 40}`}
@@ -1098,13 +1174,13 @@ export default function InsightsAnalytics({
                           strokeLinecap="round"
                         />
                       </svg>
-                      <span className="absolute text-base font-bold font-mono text-emerald-400">
+                      <span className="absolute text-base font-bold font-mono text-[#00e5a0]">
                         {retentionRate.toFixed(1)}%
                       </span>
                     </div>
-                    <div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Cohort Status</div>
-                      <div className="text-xs font-bold text-foreground mt-1">
+                      <div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-semibold">Cohort Status</div>
+                        <div className="text-xs font-bold text-zinc-200 mt-1">
                         {retentionRate >= 50
                           ? "Excellent Retention"
                           : retentionRate >= 20
@@ -1117,12 +1193,12 @@ export default function InsightsAnalytics({
                   </div>
                 </Card>
                   {/* 7-Day Retention Rate */}
-                  <Card className="rounded-md border-border/50 bg-card/30 flex flex-col justify-between p-6">
+                  <Card className="rounded-xl border-[#1e1e2e] bg-[#0d0d12] flex flex-col justify-between p-6">
                     <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">
                         7-Day Retention Rate
                       </h3>
-                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
                         Percentage of users active 7 days ago who returned today.
                       </p>
                     </div>
@@ -1134,7 +1210,7 @@ export default function InsightsAnalytics({
                             cx="48"
                             cy="48"
                             r="40"
-                            className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                            className="stroke-[#00e5a0] transition-all duration-1000 ease-out"
                             strokeWidth="8"
                             fill="transparent"
                             strokeDasharray={`${2 * Math.PI * 40}`}
@@ -1142,15 +1218,15 @@ export default function InsightsAnalytics({
                             strokeLinecap="round"
                           />
                         </svg>
-                        <span className="absolute text-base font-bold font-mono text-emerald-400">
+                        <span className="absolute text-base font-bold font-mono text-[#00e5a0]">
                           {sevenDayRetentionRate.toFixed(1)}%
                         </span>
                       </div>
                       <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-semibold">
+                          <div className="text-[10px] text-zinc-500 uppercase font-semibold">
                           Cohort Status
                         </div>
-                        <div className="text-xs font-bold text-foreground mt-1">
+                        <div className="text-xs font-bold text-zinc-200 mt-1">
                           {sevenDayRetentionRate >= 50
                             ? "Excellent Retention"
                             : sevenDayRetentionRate >= 20
@@ -1164,12 +1240,12 @@ export default function InsightsAnalytics({
                   </Card>
 
                   {/* 30-Day Retention Rate */}
-                  <Card className="rounded-md border-border/50 bg-card/30 flex flex-col justify-between p-6">
+                  <Card className="rounded-xl border-[#1e1e2e] bg-[#0d0d12] flex flex-col justify-between p-6">
                     <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">
                         30-Day Retention Rate
                       </h3>
-                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
                         Percentage of users active 30 days ago who returned today.
                       </p>
                     </div>
@@ -1181,7 +1257,7 @@ export default function InsightsAnalytics({
                             cx="48"
                             cy="48"
                             r="40"
-                            className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                            className="stroke-[#00e5a0] transition-all duration-1000 ease-out"
                             strokeWidth="8"
                             fill="transparent"
                             strokeDasharray={`${2 * Math.PI * 40}`}
@@ -1189,15 +1265,15 @@ export default function InsightsAnalytics({
                             strokeLinecap="round"
                           />
                         </svg>
-                        <span className="absolute text-base font-bold font-mono text-emerald-400">
+                        <span className="absolute text-base font-bold font-mono text-[#00e5a0]">
                           {thirtyDayRetentionRate.toFixed(1)}%
                         </span>
                       </div>
                       <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-semibold">
+                          <div className="text-[10px] text-zinc-500 uppercase font-semibold">
                           Cohort Status
                         </div>
-                        <div className="text-xs font-bold text-foreground mt-1">
+                        <div className="text-xs font-bold text-zinc-200 mt-1">
                           {thirtyDayRetentionRate >= 50
                             ? "Excellent Retention"
                             : thirtyDayRetentionRate >= 20
@@ -1210,14 +1286,15 @@ export default function InsightsAnalytics({
                     </div>
                   </Card>
                 {/* Retention Stats Bar Chart Card */}
-                <Card className="md:col-span-3 rounded-md border-border/50 bg-card/30 p-6 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground">Active User Retention Breakdown</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Visualizing active user sets from yesterday against retained users today.
-                    </p>
-                  </div>
-                  <div className="h-[200px] w-full mt-4">
+                <InsightPanel label="engagement - retention breakdown" className="md:col-span-3">
+                  <div className="p-6">
+                    <div>
+                      <h3 className="font-mono text-sm text-white uppercase tracking-wider">Active User Retention Breakdown</h3>
+                      <p className="text-xs text-zinc-500 mt-0.5 font-light">
+                        Visualizing active user sets from yesterday against retained users today.
+                      </p>
+                    </div>
+                    <div className="h-[200px] w-full mt-4">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#27272a" />
@@ -1229,10 +1306,10 @@ export default function InsightsAnalytics({
                             if (active && payload && payload.length) {
                               const data = payload[0].payload;
                               return (
-                                <div className="bg-zinc-950/95 border border-border/50 p-2.5 rounded shadow-xl backdrop-blur-md">
-                                  <p className="text-[10px] text-muted-foreground uppercase font-semibold">{data.name}</p>
-                                  <p className="text-xs font-bold text-emerald-400 font-mono mt-0.5">
-                                    {data.count} <span className="text-[9px] text-foreground font-sans font-medium">user(s)</span>
+                                <div className="bg-[#0d0d12]/95 border border-[#1e1e2e] p-2.5 rounded-lg shadow-xl backdrop-blur-md">
+                                  <p className="text-[10px] text-zinc-500 uppercase font-semibold">{data.name}</p>
+                                  <p className="text-xs font-bold text-[#00e5a0] font-mono mt-0.5">
+                                    {data.count} <span className="text-[9px] text-zinc-400 font-sans font-medium">user(s)</span>
                                   </p>
                                 </div>
                               );
@@ -1247,17 +1324,20 @@ export default function InsightsAnalytics({
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
+                    </div>
                   </div>
-                </Card>
+                </InsightPanel>
               </div>
 
               {/* Retention Cohort Diagnostics */}
-              <Card className="rounded-md border-border/50 bg-card/30 p-6">
-                <h3 className="text-sm font-semibold mb-2 text-foreground">Retention Cohort Diagnostics</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  This module measures user loyalty and engagement by cross-referencing <code className="text-emerald-400 font-mono">userId</code> and <code className="text-emerald-400 font-mono">anonymousId</code> sets active during the current 24-hour period against those active in the preceding 24 hours. The intersection of these groups gives you the quantity of returning (retained) users. High retention highlights sticky product mechanics, whereas low retention suggests a need for re-engagement strategies or optimized workflows.
+              <InsightPanel label="engagement - diagnostics">
+                <div className="p-6">
+                  <h3 className="font-mono text-sm text-white uppercase tracking-wider mb-2">Retention Cohort Diagnostics</h3>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    This module measures user loyalty and engagement by cross-referencing <code className="text-[#00e5a0] font-mono">userId</code> and <code className="text-[#00e5a0] font-mono">anonymousId</code> sets active during the current 24-hour period against those active in the preceding 24 hours. The intersection of these groups gives you the quantity of returning (retained) users. High retention highlights sticky product mechanics, whereas low retention suggests a need for re-engagement strategies or optimized workflows.
                 </p>
-              </Card>
+                </div>
+              </InsightPanel>
             </div>
           );
         })()}

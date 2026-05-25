@@ -361,6 +361,82 @@ function shortCodeFromUrl(url: string) {
   return `${cleaned || "link"}-${Math.random().toString(36).slice(2, 5)}`;
 }
 
+const terminalDots = ["#ff5f57", "#febc2e", "#28c840"];
+
+function TerminalBar({ label, right }: { label: string; right?: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between border-b border-[#1e1e2e] bg-[#13131a] px-5 py-3">
+      <div className="flex items-center gap-2">
+        <div className="mr-1 flex shrink-0 items-center gap-1.5">
+          {terminalDots.map((color) => (
+            <span key={color} className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+          ))}
+        </div>
+        <div className="mx-1 h-4 w-px bg-[#1e1e2e]" />
+        <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">{label}</span>
+      </div>
+     
+    </div>
+  );
+}
+
+function TerminalCard({
+  label,
+  children,
+  className,
+  right,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <Card className={cn("overflow-hidden rounded-xl border-[#1e1e2e] bg-[#0d0d12]", className)}>
+      <TerminalBar label={label} right={right} />
+      {children}
+    </Card>
+  );
+}
+
+function TerminalHeader({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description?: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <CardHeader className="px-6 pb-4 pt-4">
+      <div className="flex items-center gap-3">
+        {icon ? (
+          <div className="rounded-lg border border-[#1e1e2e] bg-[#13131a] p-2.5 text-[#00e5a0]">{icon}</div>
+        ) : null}
+        <div>
+          <CardTitle className="font-mono text-sm uppercase tracking-wider text-white">{title}</CardTitle>
+          {description ? <CardDescription className="text-xs font-light text-zinc-500">{description}</CardDescription> : null}
+        </div>
+      </div>
+    </CardHeader>
+  );
+}
+
+const playgroundPrimaryButton =
+  "rounded-lg bg-[#00e5a0] px-5 py-5 font-mono text-xs font-semibold uppercase tracking-wider text-black shadow-[0_0_16px_rgba(0,229,160,0.14)] hover:bg-[#05d594]";
+
+const playgroundOutlineButton =
+  "rounded-lg border-[#1e1e2e] bg-[#13131a] px-5 py-5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 hover:bg-[#1a1a24] hover:text-[#00e5a0]";
+
+const playgroundFieldClass =
+  "rounded-lg border-[#1e1e2e] bg-[#13131a] text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-[#00e5a0]/35";
+
+const playgroundDialogContentClass =
+  "overflow-hidden rounded-xl border-[#1e1e2e] bg-[#0d0d12] p-0 text-zinc-200 shadow-2xl sm:max-w-[425px]";
+
+const playgroundLabelClass = "font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-500";
+
 function AnalyticsHighlight({
   title,
   description,
@@ -375,33 +451,25 @@ function AnalyticsHighlight({
   color?: string;
 }) {
   return (
-    <Card className="rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-      <CardHeader className="border-b border-border/50 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-md border border-border/50 bg-muted p-2">{icon}</div>
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="flex h-[300px] items-end gap-2 rounded-md border border-border/50 bg-muted/20 p-4">
+    <TerminalCard label={`analytics - ${title.toLowerCase()}`}>
+      <TerminalHeader title={title} description={description} icon={icon} />
+      <CardContent className="px-6 pb-6 pt-2">
+        <div className="flex h-[300px] items-end gap-2 rounded-lg border border-[#1e1e2e] bg-[#13131a] p-4">
           {data.map((value, index) => {
             const max = Math.max(...data);
             return (
               <div key={`${title}-${value}-${index}`} className="flex flex-1 flex-col items-center gap-2">
                 <div
-                  className={cn("w-full rounded-t-sm transition-all", color)}
+                  className={cn("w-full rounded-t-sm bg-[#00e5a0] transition-all shadow-[0_0_12px_rgba(0,229,160,0.25)]", color)}
                   style={{ height: `${Math.max(14, (value / max) * 245)}px` }}
                 />
-                <span className="text-[10px] text-muted-foreground">{index + 1}</span>
+                <span className="font-mono text-[10px] text-zinc-500">{index + 1}</span>
               </div>
             );
           })}
         </div>
       </CardContent>
-    </Card>
+    </TerminalCard>
   );
 }
 
@@ -421,30 +489,22 @@ function BreakdownCard({
   const max = Math.max(...data.map((item) => item.value));
 
   return (
-    <Card className="h-full rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-      <CardHeader className="border-b border-border/50 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-md border border-border/50 bg-muted p-2">{icon}</div>
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-6">
+    <TerminalCard label={`segment - ${title.toLowerCase()}`} className="h-full">
+      <TerminalHeader title={title} description={description} icon={icon} />
+      <CardContent className="space-y-4 px-6 pb-6 pt-2">
         {data.map((item) => (
           <div key={`${title}-${item.name}`} className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="max-w-[170px] truncate font-medium">{item.name}</span>
-              <span className="font-mono font-semibold text-muted-foreground">{item.value}</span>
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="max-w-[170px] truncate font-light text-zinc-300">{item.name}</span>
+              <span className="font-semibold text-[#00e5a0]">{item.value}</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full border border-border/30 bg-muted/60">
-              <div className={cn("h-full rounded-full", color)} style={{ width: `${(item.value / max) * 100}%` }} />
+            <div className="h-2 overflow-hidden rounded-full border border-[#1e1e2e] bg-[#13131a]">
+              <div className={cn("h-full rounded-full bg-[#00e5a0] shadow-[0_0_8px_rgba(0,229,160,0.35)]", color)} style={{ width: `${(item.value / max) * 100}%` }} />
             </div>
           </div>
         ))}
       </CardContent>
-    </Card>
+    </TerminalCard>
   );
 }
 
@@ -499,50 +559,40 @@ function DashboardAnalyticsGrid({ mode }: { mode: "url" | "campaign" | "project"
       />
 
       {mode === "project" ? (
-        <Card className="rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-          <CardHeader className="border-b border-border/50 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-md border border-border/50 bg-muted p-2">
-                <Globe className="h-5 w-5 text-emerald-400" />
-              </div>
-              <div>
-                <CardTitle>Global Traffic Map</CardTitle>
-                <CardDescription>Interactive heat map of project events globally.</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="grid gap-6 pt-6 lg:grid-cols-3">
-            <div className="relative h-[320px] overflow-hidden rounded-md border border-border/50 bg-zinc-950/20 lg:col-span-2">
+        <TerminalCard label="geo - global traffic map">
+          <TerminalHeader title="Global Traffic Map" description="Interactive heat map of project events globally." icon={<Globe className="h-5 w-5" />} />
+          <CardContent className="grid gap-6 px-6 pb-6 pt-2 lg:grid-cols-3">
+            <div className="relative h-[320px] overflow-hidden rounded-lg border border-[#1e1e2e] bg-[#13131a] lg:col-span-2">
               <div className="absolute left-[18%] top-[34%] h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_24px_rgba(52,211,153,0.8)]" />
               <div className="absolute left-[47%] top-[28%] h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.7)]" />
               <div className="absolute left-[69%] top-[46%] h-4 w-4 rounded-full bg-emerald-400 shadow-[0_0_28px_rgba(52,211,153,0.9)]" />
-              <div className="absolute inset-x-8 top-1/2 h-px bg-border/70" />
-              <div className="absolute inset-y-8 left-1/2 w-px bg-border/70" />
-              <div className="absolute bottom-4 left-4 rounded-full border border-border/50 bg-background/80 px-3 py-1.5 text-[10px] text-muted-foreground">
+              <div className="absolute inset-x-8 top-1/2 h-px bg-[#1e1e2e]" />
+              <div className="absolute inset-y-8 left-1/2 w-px bg-[#1e1e2e]" />
+              <div className="absolute bottom-4 left-4 rounded-full border border-[#1e1e2e] bg-[#0d0d12]/90 px-3 py-1.5 font-mono text-[10px] text-zinc-500">
                 Plotting cities...
               </div>
             </div>
-            <div className="h-[320px] rounded-md border border-border/50 p-4">
-              <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                <Globe className="h-4 w-4 text-emerald-500" />
+            <div className="h-[320px] rounded-lg border border-[#1e1e2e] bg-[#0d0d12] p-4">
+              <h4 className="mb-4 flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wider text-white">
+                <Globe className="h-4 w-4 text-[#00e5a0]" />
                 Top Cities Breakdown
               </h4>
               <div className="space-y-4">
                 {citySeries.map((city) => (
                   <div key={city.name} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium">{city.name}</span>
-                      <span className="font-mono text-muted-foreground">{city.value} hits</span>
+                    <div className="flex justify-between text-xs font-mono">
+                      <span className="font-light text-zinc-300">{city.name}</span>
+                      <span className="text-[#00e5a0]">{city.value} hits</span>
                     </div>
-                    <div className="h-2 rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-emerald-500" style={{ width: `${city.value * 2}%` }} />
+                    <div className="h-2 rounded-full border border-[#1e1e2e] bg-[#13131a]">
+                      <div className="h-full rounded-full bg-[#00e5a0] shadow-[0_0_8px_rgba(0,229,160,0.35)]" style={{ width: `${city.value * 2}%` }} />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </CardContent>
-        </Card>
+        </TerminalCard>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -568,13 +618,14 @@ function StatsCard({
   icon: React.ReactNode;
 }) {
   return (
-    <Card className="h-[132px] overflow-hidden rounded-md border-border/50 bg-card/50 shadow-sm backdrop-blur-xl">
+    <Card className="group relative h-[132px] overflow-hidden rounded-xl border-[#1e1e2e] bg-[#0d0d12] shadow-sm">
+      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#00e5a0] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       <CardContent className="flex h-full items-center justify-between p-6">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="mt-1 text-lg font-bold text-foreground">{value}</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{title}</p>
+          <p className="mt-1 font-mono text-2xl font-semibold text-[#00e5a0]">{value}</p>
         </div>
-        <div className="rounded-lg border border-border/50 bg-muted p-3 shadow-inner">
+        <div className="rounded-lg border border-[#1e1e2e] bg-[#13131a] p-3 text-[#00e5a0] shadow-inner">
           {icon}
         </div>
       </CardContent>
@@ -597,13 +648,13 @@ function PageHeading({
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3">
         {icon ? (
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#00e5a0]/20 bg-[#00e5a0]/10 text-[#00e5a0]">
             {icon}
           </div>
         ) : null}
         <div>
-          <h3 className="text-2xl font-bold tracking-tight">{title}</h3>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">{description}</p>
+          <h3 className="font-mono text-2xl font-bold tracking-tight text-white">{title}</h3>
+          <p className="mt-1 max-w-xl text-sm text-zinc-500">{description}</p>
         </div>
       </div>
       {action}
@@ -883,7 +934,7 @@ export default function PlayGroundSimulator() {
       </p>
 
       <div className="mx-auto w-full max-w-2xl space-y-6">
-        <Card className="overflow-hidden border-border/40 bg-card/40 shadow-md ring-1 ring-white/10 backdrop-blur-md">
+        <TerminalCard label="shortener - create link">
           <CardContent className="p-6">
             <form onSubmit={handleShorten} className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 md:flex-row">
@@ -892,10 +943,10 @@ export default function PlayGroundSimulator() {
                   placeholder="Paste your long link here..."
                   value={url}
                   onChange={(event) => setUrl(event.target.value)}
-                  className="h-14 flex-1 border-border/50 bg-background/50 px-4 text-lg focus-visible:ring-primary/50 placeholder:text-sm"
+                  className="h-14 flex-1 rounded-lg border-[#1e1e2e] bg-[#13131a] px-4 text-lg text-zinc-200 placeholder:text-sm focus-visible:ring-[#00e5a0]/40"
                 />
                 <Select value={campaignId} onValueChange={setCampaignId}>
-                  <SelectTrigger className="h-14! w-full border-border/50 bg-background/50 focus:ring-primary/50 md:w-[200px]">
+                  <SelectTrigger className="h-14! w-full rounded-lg border-[#1e1e2e] bg-[#13131a] text-zinc-200 focus:ring-[#00e5a0]/40 md:w-[200px]">
                     <SelectValue placeholder="Select Campaign" />
                   </SelectTrigger>
                   <SelectContent className="max-h-44 overflow-y-auto" align="start">
@@ -909,32 +960,32 @@ export default function PlayGroundSimulator() {
               </div>
               <Button
                 type="submit"
-                className="h-14 w-full text-md font-bold shadow-sm shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                className="h-14 w-full rounded-lg bg-[#00e5a0] text-md font-bold text-black shadow-sm shadow-[#00e5a0]/20 transition-all hover:scale-[1.01] hover:bg-[#05d594] active:scale-[0.99]"
               >
                 <Scissors className="mr-2 h-5 w-5" />
                 Shorten Now
               </Button>
             </form>
           </CardContent>
-        </Card>
+        </TerminalCard>
 
         {shortUrl ? (
-          <Card className="border-primary/30 bg-primary/5 ring-1 ring-primary/20 backdrop-blur-md">
+          <Card className="overflow-hidden rounded-xl border-[#00e5a0]/30 bg-[#00e5a0]/5 ring-1 ring-[#00e5a0]/20">
             <CardContent className="flex items-center justify-between gap-4 p-4">
               <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <Zap className="h-5 w-5 text-primary" />
+                <div className="rounded-lg bg-[#00e5a0]/10 p-2">
+                  <Zap className="h-5 w-5 text-[#00e5a0]" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Your Shortened Link
                   </p>
-                  <p className="truncate text-xl font-bold tracking-tight text-primary">{shortUrl}</p>
+                  <p className="truncate font-mono text-xl font-bold tracking-tight text-[#00e5a0]">{shortUrl}</p>
                 </div>
               </div>
               <Button
                 size="lg"
-                className="h-14 shrink-0 gap-2 rounded-xl px-5"
+                className="h-14 shrink-0 gap-2 rounded-lg bg-[#00e5a0] px-5 text-black hover:bg-[#05d594]"
                 onClick={() => copyText(shortUrl, "shortUrl")}
               >
                 {copied === "shortUrl" ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
@@ -990,7 +1041,7 @@ export default function PlayGroundSimulator() {
           title="Campaigns"
           description="Group your links into marketing campaigns to track macro-level performance across sources."
           action={
-            <Button onClick={() => setCreateCampaignOpen(true)} className="rounded-md py-5">
+            <Button onClick={() => setCreateCampaignOpen(true)} className={playgroundPrimaryButton}>
               <Plus className="h-4 w-4" />
               Create Campaign
             </Button>
@@ -998,17 +1049,18 @@ export default function PlayGroundSimulator() {
         />
 
         <Dialog open={createCampaignOpen} onOpenChange={setCreateCampaignOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className={playgroundDialogContentClass}>
+            <TerminalBar label="campaigns - create" />
             <form onSubmit={handleCreateCampaign}>
-              <DialogHeader>
-                <DialogTitle>Create Campaign</DialogTitle>
-                <DialogDescription>
+              <DialogHeader className="px-6 pt-5">
+                <DialogTitle className="font-mono text-base uppercase tracking-wider text-white">Create Campaign</DialogTitle>
+                <DialogDescription className="text-xs text-zinc-500">
                   Group links together to track overall marketing performance.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-4 px-6 py-5">
                 <div className="grid gap-2">
-                  <label htmlFor="campaign-name" className="text-sm font-medium">
+                  <label htmlFor="campaign-name" className={playgroundLabelClass}>
                     Campaign Name
                   </label>
                   <Input
@@ -1016,10 +1068,11 @@ export default function PlayGroundSimulator() {
                     value={newCampaignName}
                     onChange={(event) => setNewCampaignName(event.target.value)}
                     placeholder="e.g. Black Friday 2026"
+                    className={playgroundFieldClass}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <label htmlFor="campaign-desc" className="text-sm font-medium">
+                  <label htmlFor="campaign-desc" className={playgroundLabelClass}>
                     Description (Optional)
                   </label>
                   <textarea
@@ -1027,15 +1080,15 @@ export default function PlayGroundSimulator() {
                     value={newCampaignDesc}
                     onChange={(event) => setNewCampaignDesc(event.target.value)}
                     placeholder="Describe the goal of this campaign..."
-                    className="min-h-24 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    className={cn("min-h-24 resize-none px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px]", playgroundFieldClass)}
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setCreateCampaignOpen(false)}>
+              <DialogFooter className="border-t border-[#1e1e2e] bg-[#13131a] px-6 py-4">
+                <Button type="button" variant="outline" className={playgroundOutlineButton} onClick={() => setCreateCampaignOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={!newCampaignName.trim()}>
+                <Button type="submit" className={playgroundPrimaryButton} disabled={!newCampaignName.trim()}>
                   Create Campaign
                 </Button>
               </DialogFooter>
@@ -1056,29 +1109,26 @@ export default function PlayGroundSimulator() {
           />
         </div>
 
-        <Card className="mb-8 overflow-hidden rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-xl">Your Campaigns</CardTitle>
-            <CardDescription>Select a campaign to view aggregated insights and charts.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto rounded-md border border-border/50">
+        <TerminalCard label="campaigns - list" className="mb-8">
+          <TerminalHeader title="Your Campaigns" description="Select a campaign to view aggregated insights and charts." icon={<Globe className="h-5 w-5" />} />
+          <CardContent className="px-6 pb-6 pt-2">
+            <div className="overflow-x-auto rounded-lg border border-[#1e1e2e]">
               <Table className="min-w-[760px]">
-                <TableHeader className="bg-muted/50">
+                <TableHeader className="bg-[#13131a]">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead>Campaign Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Total Clicks</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Campaign Name</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Description</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Total Clicks</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Created</TableHead>
+                    <TableHead className="text-center font-mono text-[10px] uppercase tracking-widest text-zinc-400">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {campaigns.map((campaign) => (
-                    <TableRow key={campaign.id} className="hover:bg-muted/20">
+                    <TableRow key={campaign.id} className="hover:bg-white/[0.02]">
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold">{campaign.name}</span>
+                          <span className="font-mono font-semibold text-zinc-200">{campaign.name}</span>
                           {campaign.isDefault ? (
                             <Badge variant="secondary" className="h-5 bg-muted px-1.5 text-[10px]">
                               Default
@@ -1086,18 +1136,18 @@ export default function PlayGroundSimulator() {
                           ) : null}
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[260px] truncate text-sm text-muted-foreground">
+                      <TableCell className="max-w-[260px] truncate text-sm text-zinc-500">
                         {campaign.description}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className="rounded-sm border-primary/20 bg-primary/5 text-primary"
+                          className="rounded-sm border-[#00e5a0]/20 bg-[#00e5a0]/5 text-[#00e5a0]"
                         >
                           {campaign.totalClicks} Clicks
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-zinc-500">
                         <span className="flex items-center gap-2">
                           <Calendar className="h-3.5 w-3.5" />
                           {campaign.createdAt}
@@ -1119,7 +1169,7 @@ export default function PlayGroundSimulator() {
               </Table>
             </div>
           </CardContent>
-        </Card>
+        </TerminalCard>
 
       </div>
     );
@@ -1136,7 +1186,7 @@ export default function PlayGroundSimulator() {
         title="Projects (Event Tracking)"
         description="Create projects to get API keys and track custom developer events within your applications."
         action={
-          <Button onClick={() => setCreateProjectOpen(true)} className="rounded-md py-5">
+          <Button onClick={() => setCreateProjectOpen(true)} className={playgroundPrimaryButton}>
             <Plus className="h-4 w-4" />
             Create Project
           </Button>
@@ -1144,17 +1194,18 @@ export default function PlayGroundSimulator() {
       />
 
       <Dialog open={createProjectOpen} onOpenChange={setCreateProjectOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className={playgroundDialogContentClass}>
+          <TerminalBar label="projects - create" />
           <form onSubmit={handleCreateProject}>
-            <DialogHeader>
-              <DialogTitle>Create Event Tracking Project</DialogTitle>
-              <DialogDescription>
+            <DialogHeader className="px-6 pt-5">
+              <DialogTitle className="font-mono text-base uppercase tracking-wider text-white">Create Event Tracking Project</DialogTitle>
+              <DialogDescription className="text-xs text-zinc-500">
                 Create a project to generate an API key for your application.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 px-6 py-5">
               <div className="grid gap-2">
-                <label htmlFor="project-name" className="text-sm font-medium">
+                <label htmlFor="project-name" className={playgroundLabelClass}>
                   Project Name
                 </label>
                 <Input
@@ -1162,10 +1213,11 @@ export default function PlayGroundSimulator() {
                   value={newProjectName}
                   onChange={(event) => setNewProjectName(event.target.value)}
                   placeholder="e.g. My Next.js SaaS"
+                  className={playgroundFieldClass}
                 />
               </div>
               <div className="grid gap-2">
-                <label htmlFor="project-desc" className="text-sm font-medium">
+                <label htmlFor="project-desc" className={playgroundLabelClass}>
                   Description (Optional)
                 </label>
                 <textarea
@@ -1173,15 +1225,15 @@ export default function PlayGroundSimulator() {
                   value={newProjectDesc}
                   onChange={(event) => setNewProjectDesc(event.target.value)}
                   placeholder="What app is this for?"
-                  className="min-h-24 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  className={cn("min-h-24 resize-none px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px]", playgroundFieldClass)}
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCreateProjectOpen(false)}>
+            <DialogFooter className="border-t border-[#1e1e2e] bg-[#13131a] px-6 py-4">
+              <Button type="button" variant="outline" className={playgroundOutlineButton} onClick={() => setCreateProjectOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!newProjectName.trim()}>
+              <Button type="submit" className={playgroundPrimaryButton} disabled={!newProjectName.trim()}>
                 Create Project
               </Button>
             </DialogFooter>
@@ -1202,40 +1254,37 @@ export default function PlayGroundSimulator() {
         />
       </div>
 
-      <Card className="overflow-hidden rounded-md border-border/50 bg-card/50 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-xl">Your Tracking Projects</CardTitle>
-          <CardDescription>Select a project to view its API key, live logs, and analytics.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto rounded-md border border-border/50">
+      <TerminalCard label="projects - list">
+        <TerminalHeader title="Your Tracking Projects" description="Select a project to view its API key, live logs, and analytics." icon={<Database className="h-5 w-5" />} />
+        <CardContent className="px-6 pb-6 pt-2">
+          <div className="overflow-x-auto rounded-lg border border-[#1e1e2e]">
             <Table className="min-w-[780px]">
-              <TableHeader className="bg-muted/50">
+              <TableHeader className="bg-[#13131a]">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Project Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>API Key</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-center">Action</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Project Name</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Description</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">API Key</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Created</TableHead>
+                  <TableHead className="text-center font-mono text-[10px] uppercase tracking-widest text-zinc-400">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {projects.map((project) => (
-                  <TableRow key={project.id} className="hover:bg-muted/20">
-                    <TableCell className="font-semibold">{project.name}</TableCell>
-                    <TableCell className="max-w-[240px] truncate text-sm text-muted-foreground">
+                  <TableRow key={project.id} className="hover:bg-white/[0.02]">
+                    <TableCell className="font-mono font-semibold text-zinc-200">{project.name}</TableCell>
+                    <TableCell className="max-w-[240px] truncate text-sm text-zinc-500">
                       {project.description}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className="max-w-[220px] cursor-pointer truncate rounded-sm border-indigo-500/20 bg-indigo-500/10 font-mono text-xs text-indigo-400"
+                        className="max-w-[220px] cursor-pointer truncate rounded-sm border-[#00e5a0]/20 bg-[#00e5a0]/10 font-mono text-xs text-[#00e5a0]"
                         onClick={() => copyText(project.key, project.id)}
                       >
                         {copied === project.id ? "Copied" : project.key}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-zinc-500">
                       <span className="flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5" />
                         {project.createdAt}
@@ -1261,7 +1310,7 @@ export default function PlayGroundSimulator() {
           </div>
 
         </CardContent>
-      </Card>
+      </TerminalCard>
     </div>
     );
   };
@@ -1285,7 +1334,7 @@ export default function PlayGroundSimulator() {
         </div>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto rounded-sm bg-muted/50 p-1">
+      <div className="mb-6 flex h-14 gap-2 overflow-x-auto rounded-xl border border-[#1e1e2e] bg-[#0d0d12] p-1.5">
         {[
           ["overview", "Overview"],
           ["analytics", "Analytics"],
@@ -1297,9 +1346,9 @@ export default function PlayGroundSimulator() {
             key={value}
             onClick={() => setProjectTab(value as ProjectTab)}
             className={cn(
-              "h-11 shrink-0 rounded-sm px-4 text-sm font-medium transition",
-              projectTab === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-              (value === "ai-analyst" || value === "insights") && projectTab === value ? "bg-indigo-500/10 text-indigo-400" : "",
+              "h-full shrink-0 rounded-lg px-4 font-mono text-xs font-medium uppercase transition",
+              projectTab === value ? "border border-[#1e1e2e] bg-[#13131a] text-[#00e5a0] shadow-sm" : "text-zinc-500 hover:text-[#00e5a0]",
+              value === "ai-analyst" && projectTab === value ? "border-[#7c6df0]/20 bg-[#7c6df0]/10 text-[#7c6df0]" : "",
             )}
           >
             {label}
@@ -1314,21 +1363,18 @@ export default function PlayGroundSimulator() {
   const renderProjectDashboard = () => {
     if (projectTab === "overview") {
       return (
-        <Card className="rounded-md border-border/50 bg-card/50">
-          <CardHeader>
-            <CardTitle>Integration Setup</CardTitle>
-            <CardDescription>Use this API key to send events from your application.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <TerminalCard label="project - integration setup">
+          <TerminalHeader title="Integration Setup" description="Use this API key to send events from your application." icon={<Database className="h-5 w-5" />} />
+          <CardContent className="space-y-6 px-6 pb-6 pt-2">
             <div>
-              <p className="mb-2 text-sm font-medium">Project API Key</p>
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500">Project API Key</p>
               <div className="flex max-w-xl items-center gap-2">
-                <code className="flex-1 break-all rounded-md border border-border/50 bg-muted p-3 font-mono text-sm text-indigo-400">
+                <code className="flex-1 break-all rounded-lg border border-[#1e1e2e] bg-[#13131a] p-3 font-mono text-sm text-[#00e5a0]">
                   {selectedProject.key}
                 </code>
                 <Button
                   variant="outline"
-                  className="h-[46px]"
+                  className="h-[46px] rounded-lg border-[#1e1e2e] bg-[#13131a] text-zinc-300 hover:text-[#00e5a0]"
                   onClick={() => copyText(selectedProject.key, "project-key")}
                 >
                   {copied === "project-key" ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
@@ -1336,8 +1382,8 @@ export default function PlayGroundSimulator() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-sm font-medium">SDK Example</p>
-              <pre className="overflow-x-auto rounded-md border border-border/50 bg-[#0d1117] p-4 text-sm text-zinc-300">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500">SDK Example</p>
+              <pre className="overflow-x-auto rounded-lg border border-[#1e1e2e] bg-[#13131a] p-4 text-sm text-zinc-300">
 {`import { trackEvent } from "shorty-analytics-sdk";
 
 await trackEvent("${selectedProject.key}", {
@@ -1348,7 +1394,7 @@ await trackEvent("${selectedProject.key}", {
               </pre>
             </div>
           </CardContent>
-        </Card>
+        </TerminalCard>
       );
     }
 
@@ -1379,55 +1425,52 @@ await trackEvent("${selectedProject.key}", {
 
     if (projectTab === "logs") {
       return (
-        <Card className="rounded-md border-border/50 bg-card/50">
-          <CardHeader className="flex flex-row items-center justify-between">
+        <TerminalCard label="logs - live events">
+          <CardHeader className="flex flex-row items-center justify-between px-6 pb-4 pt-4">
             <div>
-              <CardTitle>Live Logs</CardTitle>
-              <CardDescription>Custom events received from your application.</CardDescription>
+              <CardTitle className="font-mono text-sm uppercase tracking-wider text-white">Live Logs</CardTitle>
+              <CardDescription className="text-xs font-light text-zinc-500">Custom events received from your application.</CardDescription>
             </div>
-            <Button size="sm" onClick={addDemoEvent}>
+            <Button size="sm" onClick={addDemoEvent} className="rounded-lg bg-[#00e5a0] text-black hover:bg-[#05d594]">
               <Plus className="h-3 w-3" />
               Add Demo Event
             </Button>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto rounded-md border border-border/50">
+          <CardContent className="px-6 pb-6 pt-2">
+            <div className="overflow-x-auto rounded-lg border border-[#1e1e2e]">
               <Table className="min-w-[720px]">
-                <TableHeader className="bg-muted/50">
+                <TableHeader className="bg-[#13131a]">
                   <TableRow>
-                    <TableHead>Event</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Device</TableHead>
-                    <TableHead>Time</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Event</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">User</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Location</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Device</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Time</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {logs.map((log) => (
                     <TableRow key={log.id}>
-                      <TableCell className="font-mono text-xs text-indigo-400">{log.eventName}</TableCell>
+                      <TableCell className="font-mono text-xs text-[#00e5a0]">{log.eventName}</TableCell>
                       <TableCell>{log.userId}</TableCell>
-                      <TableCell className="text-muted-foreground">{log.city}</TableCell>
-                      <TableCell className="text-muted-foreground">{log.device}</TableCell>
-                      <TableCell className="text-muted-foreground">{log.timestamp}</TableCell>
+                      <TableCell className="text-zinc-500">{log.city}</TableCell>
+                      <TableCell className="text-zinc-500">{log.device}</TableCell>
+                      <TableCell className="text-zinc-500">{log.timestamp}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
-        </Card>
+        </TerminalCard>
       );
     }
 
     return (
-      <Card className="overflow-hidden rounded-md border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle>ShortyAI Analyst</CardTitle>
-          <CardDescription>Ask questions about demo event logs.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="h-[260px] space-y-3 overflow-y-auto rounded-md border border-border/50 bg-muted/20 p-4">
+      <TerminalCard label="ai - analyst">
+        <TerminalHeader title="ShortyAI Analyst" description="Ask questions about demo event logs." icon={<Sparkles className="h-5 w-5" />} />
+        <CardContent className="space-y-4 px-6 pb-6 pt-2">
+          <div className="h-[260px] space-y-3 overflow-y-auto rounded-lg border border-[#1e1e2e] bg-[#13131a] p-4">
             {chatMessages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
@@ -1437,8 +1480,8 @@ await trackEvent("${selectedProject.key}", {
                   className={cn(
                     "max-w-[80%] rounded-xl p-3 text-sm",
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-border/50 bg-card text-foreground",
+                      ? "bg-[#00e5a0] text-black"
+                      : "border border-[#1e1e2e] bg-[#0d0d12] text-zinc-300",
                   )}
                 >
                   {message.text}
@@ -1451,15 +1494,15 @@ await trackEvent("${selectedProject.key}", {
               value={chatInput}
               onChange={(event) => setChatInput(event.target.value)}
               placeholder="Ask anything about your events..."
-              className="h-12"
+              className="h-12 border-[#1e1e2e] bg-[#13131a] text-zinc-200"
             />
-            <Button type="submit" className="h-12 gap-2 bg-black text-white hover:bg-black dark:bg-white dark:text-black">
+            <Button type="submit" className="h-12 gap-2 bg-[#00e5a0] text-black hover:bg-[#05d594]">
               <Send className="h-4 w-4" />
               Send
             </Button>
           </form>
         </CardContent>
-      </Card>
+      </TerminalCard>
     );
   };
 
@@ -1512,28 +1555,25 @@ await trackEvent("${selectedProject.key}", {
         <StatsCard title="Analytics Enabled" value={links.length} icon={<Eye className="h-5 w-5 text-emerald-400" />} />
       </div>
 
-      <Card className="overflow-hidden rounded-md">
-        <CardHeader>
-          <CardTitle className="text-xl">Your Shortened URLs</CardTitle>
-          <CardDescription>View all the URLs you have shortened and inspect analytics.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <TerminalCard label="urls - list">
+        <TerminalHeader title="Your Shortened URLs" description="View all the URLs you have shortened and inspect analytics." icon={<Link2 className="h-5 w-5" />} />
+        <CardContent className="space-y-8 px-6 pb-6 pt-2">
+          <div className="overflow-x-auto rounded-lg border border-[#1e1e2e]">
             <Table className="min-w-[820px]">
-              <TableHeader className="bg-white dark:bg-black">
+              <TableHeader className="bg-[#13131a]">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Short URL</TableHead>
-                  <TableHead>Campaign</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Clicks</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-center">Action</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Short URL</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Campaign</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Destination</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Clicks</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Created</TableHead>
+                  <TableHead className="text-center font-mono text-[10px] uppercase tracking-widest text-zinc-400">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {links.map((link) => (
-                  <TableRow key={link.id}>
-                    <TableCell className="max-w-[180px] truncate font-medium text-transparent bg-clip-text bg-linear-to-r from-primary via-violet-500 to-fuchsia-500">
+                  <TableRow key={link.id} className="hover:bg-white/[0.02]">
+                    <TableCell className="max-w-[180px] truncate font-mono font-medium text-[#00e5a0]">
                       {link.shortUrl}
                     </TableCell>
                     <TableCell>
@@ -1569,7 +1609,7 @@ await trackEvent("${selectedProject.key}", {
             </Table>
           </div>
         </CardContent>
-      </Card>
+      </TerminalCard>
     </div>
     );
   };
@@ -1592,7 +1632,7 @@ await trackEvent("${selectedProject.key}", {
           title="API Keys"
           description="Manage authentication keys for API access. Keep them secure."
           action={
-            <Button className="rounded-md py-5">
+            <Button className={playgroundPrimaryButton}>
               <Plus className="h-4 w-4" />
               Create Key
             </Button>
@@ -1605,37 +1645,35 @@ await trackEvent("${selectedProject.key}", {
           <StatsCard title="Last Activity" value="Recent" icon={<Clock className="h-5 w-5 text-amber-400" />} />
         </div>
 
-        <Card className="overflow-hidden rounded-md">
-          <CardHeader className="border-b bg-muted/20 pb-4">
-            <CardTitle className="text-lg">Your API Keys</CardTitle>
-          </CardHeader>
+        <TerminalCard label="api keys - list">
+          <TerminalHeader title="Your API Keys" icon={<KeyRound className="h-5 w-5" />} />
           <CardContent className="overflow-x-auto p-0">
             <Table className="min-w-[760px]">
-              <TableHeader>
+              <TableHeader className="bg-[#13131a]">
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Key</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last Used</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Name</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Key</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Created</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Last Used</TableHead>
+                  <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {apiKeys.map((apiKey) => {
                   const visible = showApiKey[apiKey.key];
                   return (
-                    <TableRow key={apiKey.key}>
+                    <TableRow key={apiKey.key} className="hover:bg-white/[0.02]">
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{apiKey.name}</span>
-                          <Badge variant="secondary" className="h-5 bg-muted/50 px-1.5 text-[10px] text-muted-foreground">
+                          <span className="font-mono font-medium text-zinc-200">{apiKey.name}</span>
+                          <Badge variant="secondary" className="h-5 bg-[#13131a] px-1.5 text-[10px] text-zinc-500">
                             {apiKey.plan}
                           </Badge>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 truncate rounded-md border border-border/50 bg-muted/50 px-3 py-1.5 font-mono text-xs text-muted-foreground">
+                          <div className="flex-1 truncate rounded-md border border-[#1e1e2e] bg-[#13131a] px-3 py-1.5 font-mono text-xs text-zinc-500">
                             {visible ? apiKey.key : `${apiKey.key.slice(0, 10)}********************demo`}
                           </div>
                           <Button
@@ -1660,8 +1698,8 @@ await trackEvent("${selectedProject.key}", {
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{apiKey.createdAt}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{apiKey.lastUsed}</TableCell>
+                      <TableCell className="text-sm text-zinc-500">{apiKey.createdAt}</TableCell>
+                      <TableCell className="text-sm text-zinc-500">{apiKey.lastUsed}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
@@ -1673,7 +1711,7 @@ await trackEvent("${selectedProject.key}", {
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
+        </TerminalCard>
 
         <div className="mt-6 flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
@@ -1693,10 +1731,10 @@ await trackEvent("${selectedProject.key}", {
         description="Brand your short URLs with your own custom domain."
       />
 
-      <Card className="overflow-hidden rounded-md border-border/50 bg-card/40 backdrop-blur-xl">
-        <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/10 pb-4">
+      <TerminalCard label="domains - configuration">
+        <CardHeader className="flex flex-row items-center justify-between px-6 pb-4 pt-4">
           <div>
-            <CardTitle className="flex items-center gap-3 text-xl">
+            <CardTitle className="flex items-center gap-3 font-mono text-lg text-white">
               {domainInput || "links.shorty-demo.com"}
               {domainVerified ? (
                 <Badge className="flex items-center gap-1 rounded-sm border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-500">
@@ -1710,9 +1748,9 @@ await trackEvent("${selectedProject.key}", {
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription className="mt-1 text-xs">Registered on {todayLabel()}</CardDescription>
+            <CardDescription className="mt-1 text-xs text-zinc-500">Registered on {todayLabel()}</CardDescription>
           </div>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+          <Button variant="ghost" size="icon" className="text-zinc-500 hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -1722,9 +1760,9 @@ await trackEvent("${selectedProject.key}", {
               value={domainInput}
               onChange={(event) => setDomainInput(event.target.value)}
               placeholder="e.g. links.mydomain.com"
-              className="h-12"
+              className="h-12 rounded-lg border-[#1e1e2e] bg-[#13131a] text-zinc-200"
             />
-            <Button className="h-12 px-6" onClick={() => setDomainVerified(false)}>
+            <Button className="h-12 bg-[#00e5a0] px-6 text-black hover:bg-[#05d594]" onClick={() => setDomainVerified(false)}>
               <Plus className="h-4 w-4" />
               Add Domain
             </Button>
@@ -1747,9 +1785,9 @@ await trackEvent("${selectedProject.key}", {
                 <DnsRecord title="TXT" host="_shorty_host" value="shorty-verify-demo-token" onCopy={copyText} copied={copied} />
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-border/40 pt-6">
-                <Button variant="outline">Sync Status</Button>
-                <Button className="bg-black px-6 text-white hover:bg-black" onClick={() => setDomainVerified(true)}>
+              <div className="flex justify-end gap-3 border-t border-[#1e1e2e] pt-6">
+                <Button variant="outline" className="border-[#1e1e2e] bg-[#13131a] text-zinc-300">Sync Status</Button>
+                <Button className="bg-[#00e5a0] px-6 text-black hover:bg-[#05d594]" onClick={() => setDomainVerified(true)}>
                   Verify DNS Configuration
                 </Button>
               </div>
@@ -1760,15 +1798,15 @@ await trackEvent("${selectedProject.key}", {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="font-bold">Your domain is active!</h4>
-                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                <h4 className="font-bold text-zinc-100">Your domain is active!</h4>
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-500">
                   Your custom branded domain is verified and routing traffic. New short links can use this custom domain.
                 </p>
               </div>
             </div>
           )}
         </CardContent>
-      </Card>
+      </TerminalCard>
     </div>
   );
 
@@ -1783,36 +1821,36 @@ await trackEvent("${selectedProject.key}", {
       <div className="mx-auto max-w-5xl space-y-8">
         <PageHeading title="Billing & plan" description="Manage your subscription, upgrades, and billing details." />
 
-        <Card className="overflow-hidden border">
-          <CardHeader className="border-b pb-4">
+        <TerminalCard label="billing - current plan">
+          <CardHeader className="px-6 pb-4 pt-4">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
-                <CardTitle className="text-base">Current plan</CardTitle>
-                <CardDescription className="mt-0.5 text-xs">Your active subscription details</CardDescription>
+                <CardTitle className="font-mono text-sm uppercase tracking-wider text-white">Current plan</CardTitle>
+                <CardDescription className="mt-0.5 text-xs text-zinc-500">Your active subscription details</CardDescription>
               </div>
-              <Badge variant="outline" className="px-3 py-1 text-xs">
+              <Badge variant="outline" className="border-[#00e5a0]/30 bg-[#00e5a0]/10 px-3 py-1 text-xs text-[#00e5a0]">
                 {activePlan}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-6 pt-6 sm:grid-cols-4">
+          <CardContent className="grid gap-6 px-6 pb-6 pt-2 sm:grid-cols-4">
             <PlanFact icon={<Crown className="h-3.5 w-3.5" />} label="Plan" value={activePlan} />
             <PlanFact icon={<Calendar className="h-3.5 w-3.5" />} label="Subscribed on" value="24 May 2026" />
             <PlanFact icon={<Clock className="h-3.5 w-3.5" />} label="Renews on" value="24 Jun 2026" />
             <PlanFact icon={<Wallet className="h-3.5 w-3.5" />} label="Billing" value="Monthly" />
           </CardContent>
-        </Card>
+        </TerminalCard>
 
         <div>
-          <h4 className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">Available plans</h4>
+          <h4 className="mb-4 font-mono text-sm font-semibold uppercase tracking-widest text-zinc-500">Available plans</h4>
           <div className="grid gap-5 md:grid-cols-3">
             {plans.map((plan) => (
               <Card
                 key={plan.name}
                 className={cn(
-                  "flex h-full flex-col border",
+                  "flex h-full flex-col overflow-hidden rounded-xl border-[#1e1e2e] bg-[#0d0d12]",
                   activePlan === plan.name
-                    ? "border-emerald-400 ring-1 ring-emerald-400/40"
+                    ? "border-[#00e5a0] ring-1 ring-[#00e5a0]/40"
                     : plan.name === "Base Plan"
                       ? "border-violet-400 ring-1 ring-violet-400/30"
                       : "",
@@ -1820,21 +1858,21 @@ await trackEvent("${selectedProject.key}", {
               >
                 <CardHeader>
                   <div className="mb-3 flex items-center gap-2">
-                    <div className="rounded-lg bg-muted p-1.5 text-muted-foreground">{plan.icon}</div>
+                    <div className="rounded-lg border border-[#1e1e2e] bg-[#13131a] p-1.5 text-[#00e5a0]">{plan.icon}</div>
                     <div>
-                      <p className="text-sm font-semibold">{plan.name}</p>
-                      <p className="text-xs text-muted-foreground">For Shorty users</p>
+                      <p className="font-mono text-sm font-semibold text-zinc-100">{plan.name}</p>
+                      <p className="text-xs text-zinc-500">For Shorty users</p>
                     </div>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold">{plan.price}</span>
-                    <span className="text-sm text-muted-foreground">/ month</span>
+                    <span className="font-mono text-3xl font-extrabold text-white">{plan.price}</span>
+                    <span className="text-sm text-zinc-500">/ month</span>
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col justify-between gap-5">
                   <div className="space-y-2">
                     {plan.features.map((feature) => (
-                      <div key={feature} className="flex items-start gap-2 text-xs">
+                      <div key={feature} className="flex items-start gap-2 text-xs text-zinc-300">
                         <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
                         <span>{feature}</span>
                       </div>
@@ -1842,7 +1880,12 @@ await trackEvent("${selectedProject.key}", {
                   </div>
                   <Button
                     variant={plan.name === "Base Plan" ? "default" : "outline"}
-                    className={cn("w-full text-xs", plan.name === "Base Plan" ? "bg-violet-600 text-white hover:bg-violet-700" : "")}
+                    className={cn(
+                      "w-full text-xs",
+                      plan.name === "Base Plan"
+                        ? "bg-violet-600 text-white hover:bg-violet-700"
+                        : "border-[#1e1e2e] bg-[#13131a] text-zinc-200 hover:bg-[#1a1a24] hover:text-[#00e5a0]",
+                    )}
                     disabled={activePlan === plan.name}
                     onClick={() => setActivePlan(plan.name)}
                   >
@@ -1864,13 +1907,10 @@ await trackEvent("${selectedProject.key}", {
         title="Documentation"
         description="Use Shorty APIs and SDK snippets to integrate links and event tracking."
       />
-      <Card className="rounded-md border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle>Shorten a URL</CardTitle>
-          <CardDescription>Demo docs panel styled like the logged-in application.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <pre className="overflow-x-auto rounded-md border border-border/50 bg-[#0d1117] p-4 text-sm text-zinc-300">
+      <TerminalCard label="docs - shorten url">
+        <TerminalHeader title="Shorten a URL" description="Demo docs panel styled like the logged-in application." icon={<Scissors className="h-5 w-5" />} />
+        <CardContent className="px-6 pb-6 pt-2">
+          <pre className="overflow-x-auto rounded-lg border border-[#1e1e2e] bg-[#13131a] p-4 text-sm text-zinc-300">
 {`POST /url/shorten-url
 
 {
@@ -1879,14 +1919,11 @@ await trackEvent("${selectedProject.key}", {
 }`}
           </pre>
         </CardContent>
-      </Card>
-      <Card className="rounded-md border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle>Track custom events</CardTitle>
-          <CardDescription>Event analytics use project API keys.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <pre className="overflow-x-auto rounded-md border border-border/50 bg-[#0d1117] p-4 text-sm text-zinc-300">
+      </TerminalCard>
+      <TerminalCard label="docs - event tracking">
+        <TerminalHeader title="Track custom events" description="Event analytics use project API keys." icon={<Database className="h-5 w-5" />} />
+        <CardContent className="px-6 pb-6 pt-2">
+          <pre className="overflow-x-auto rounded-lg border border-[#1e1e2e] bg-[#13131a] p-4 text-sm text-zinc-300">
 {`await trackEvent("pk_live_shorty_demo", {
   event: "purchase_completed",
   userId: "user_123",
@@ -1894,7 +1931,7 @@ await trackEvent("${selectedProject.key}", {
 });`}
           </pre>
         </CardContent>
-      </Card>
+      </TerminalCard>
     </div>
   );
 
@@ -1910,7 +1947,7 @@ await trackEvent("${selectedProject.key}", {
   };
 
   return (
-    <section id="interactive-demo" className=" bg-background px-4 py-16 hidden md:block">
+    <section id="interactive-demo" className="hidden bg-background px-4 py-16 md:block">
       <div className="mx-auto max-w-7xl space-y-10">
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <Badge
@@ -1933,23 +1970,23 @@ await trackEvent("${selectedProject.key}", {
           </p>
         </div>
 
-        <div className="mx-auto flex min-h-[760px] max-w-6xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-2xl">
-          <div className="flex h-12 items-center justify-between border-b border-border/60 bg-muted/30 px-4">
+        <div className="mx-auto flex min-h-[760px] max-w-6xl flex-col overflow-hidden rounded-xl border border-[#1e1e2e] bg-[#0d0d12] shadow-2xl">
+          <div className="flex h-12 items-center justify-between border-b border-[#1e1e2e] bg-[#13131a] px-4">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-red-500/80" />
-              <span className="h-3 w-3 rounded-full bg-yellow-500/80" />
-              <span className="h-3 w-3 rounded-full bg-green-500/80" />
-              <span className="ml-3 hidden truncate rounded-md border border-border/60 bg-background/60 px-3 py-1 font-mono text-[11px] text-muted-foreground sm:block">
+              {terminalDots.map((color) => (
+                <span key={color} className="h-2 w-2 rounded-full" style={{ background: color }} />
+              ))}
+              <span className="ml-3 hidden truncate rounded-md border border-[#1e1e2e] bg-[#0d0d12] px-3 py-1 font-mono text-[11px] text-zinc-500 sm:block">
                 https://myk8s.shop
               </span>
             </div>
-            <div className="hidden items-center gap-2 rounded-md border border-border/60 bg-background/60 px-3 py-1 text-[11px] text-muted-foreground md:flex">
-              Demo clicks <span className="font-bold text-primary">{totals.clicks}</span>
+            <div className="hidden items-center gap-2 rounded-md border border-[#1e1e2e] bg-[#0d0d12] px-3 py-1 font-mono text-[11px] text-zinc-500 md:flex">
+              Demo clicks <span className="font-bold text-[#00e5a0]">{totals.clicks}</span>
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col bg-background md:flex-row ">
-            <aside className="w-full shrink-0 border-b border-border/50 bg-background md:w-72 md:border-b-0 md:border-r py-2 px-4">
+          <div className="flex min-h-0 flex-1 flex-col bg-[#0d0d12] md:flex-row">
+            <aside className="w-full shrink-0 border-b border-border/50 bg-background px-4 py-2 dark:border-[#1e1e2e] dark:bg-[#0d0d12] md:w-72 md:border-b-0 md:border-r">
               <div className="flex h-full flex-col ">
                 <Link href="/" className="flex items-center gap-2.5 group">
             <div
@@ -1963,7 +2000,7 @@ await trackEvent("${selectedProject.key}", {
               />
             </div>
             <span
-              className="font-bold tracking-tight"
+              className="font-bold tracking-tight text-foreground dark:text-white"
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "18px",
@@ -1987,17 +2024,17 @@ await trackEvent("${selectedProject.key}", {
                           setUrlStatsId(null);
                         }}
                         className={cn(
-                          "group relative flex w-auto shrink-0 items-center gap-3 overflow-hidden rounded-md px-4 py-3 text-left transition-all duration-200 md:w-full md:gap-4",
+                          "group relative flex w-auto shrink-0 items-center gap-3 overflow-hidden rounded-lg px-4 py-3 text-left transition-all duration-200 md:w-full md:gap-4",
                           isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                            ? "border border-[#00e5a0]/20 bg-[#00e5a0]/10 text-[#00e5a0]"
+                            : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-zinc-500 dark:hover:bg-[#13131a] dark:hover:text-zinc-200",
                         )}
                       >
-                        {isActive ? <div className="absolute bottom-1/4 left-0 top-1/4 w-1 rounded-full bg-primary" /> : null}
+                        {isActive ? <div className="absolute bottom-1/4 left-0 top-1/4 w-1 rounded-full bg-[#00e5a0]" /> : null}
                         <item.icon
                           className={cn(
                             "h-5 w-5 transition-transform duration-200 group-hover:scale-110",
-                            isActive ? "text-primary" : "text-muted-foreground",
+                            isActive ? "text-[#00e5a0]" : "text-muted-foreground dark:text-zinc-500",
                           )}
                         />
                         <span className="whitespace-nowrap text-sm font-semibold tracking-wide">{item.title}</span>
@@ -2006,27 +2043,25 @@ await trackEvent("${selectedProject.key}", {
                     );
                   })}
                 </nav>
-
-               
               </div>
             </aside>
 
             <div className="min-w-0 flex-1">
-              <header className="sticky top-0 z-20 border-b border-border/40 bg-background/80 backdrop-blur-sm">
+              <header className="sticky top-0 z-20 backdrop-blur-sm bg-white dark:bg-[#0d0d12]">
                 <div className="flex h-16 items-center justify-between px-4">
                   <div></div>
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="hidden rounded-full px-3 sm:inline-flex">
+                    <Badge variant="outline" className="hidden rounded-full px-3 text-zinc-400 sm:inline-flex">
                       Playground
                     </Badge>
-                    <Button className="hidden rounded-full px-6 font-semibold shadow-md sm:flex">
+                    <Button className="hidden rounded-full bg-[#00e5a0] px-6 font-semibold text-black shadow-md hover:bg-[#05d594] sm:flex">
                       Logout
                     </Button>
                   </div>
                 </div>
               </header>
 
-              <main className="h-[640px] overflow-y-auto p-3 sm:p-4 md:h-[680px] md:p-8">
+              <main className="h-[640px] overflow-y-auto bg-background p-3 sm:p-4 md:h-[680px] md:p-8">
                 {renderActivePanel()}
               </main>
             </div>
@@ -2051,20 +2086,20 @@ function DnsRecord({
   onCopy: (text: string, key: string) => void;
 }) {
   return (
-    <div className="rounded-lg border border-border/80 bg-muted/20 p-4">
+    <div className="rounded-lg border border-[#1e1e2e] bg-[#13131a] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-bold text-foreground">{title} record</span>
-        <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
+        <span className="font-mono text-xs font-bold text-zinc-200">{title} record</span>
+        <Badge variant="secondary" className="bg-[#00e5a0]/10 px-1.5 py-0 text-[10px] text-[#00e5a0]">
           Recommended
         </Badge>
       </div>
-      <div className="space-y-2 rounded border bg-background/80 p-3 font-mono text-xs">
+      <div className="space-y-2 rounded border border-[#1e1e2e] bg-[#0d0d12] p-3 font-mono text-xs text-zinc-300">
         <div>
-          <span className="text-muted-foreground">Type:</span> {title}
+          <span className="text-zinc-500">Type:</span> {title}
         </div>
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0 truncate">
-            <span className="text-muted-foreground">Host:</span> {host}
+            <span className="text-zinc-500">Host:</span> {host}
           </div>
           <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={() => onCopy(host, `${title}-host`)}>
             {copied === `${title}-host` ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -2072,7 +2107,7 @@ function DnsRecord({
         </div>
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0 truncate">
-            <span className="text-muted-foreground">Value:</span> {value}
+            <span className="text-zinc-500">Value:</span> {value}
           </div>
           <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={() => onCopy(value, `${title}-value`)}>
             {copied === `${title}-value` ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -2094,11 +2129,11 @@ function PlanFact({
 }) {
   return (
     <div className="space-y-1">
-      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <p className="flex items-center gap-1.5 text-xs text-zinc-500">
         {icon}
         {label}
       </p>
-      <p className="font-semibold capitalize">{value}</p>
+      <p className="font-mono font-semibold capitalize text-zinc-100">{value}</p>
     </div>
   );
 }

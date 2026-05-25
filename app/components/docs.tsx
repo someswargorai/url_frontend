@@ -247,7 +247,7 @@ export default function DocumentationPage() {
                           <Icon className="h-4 w-4" style={{ color: item.accent }} strokeWidth={1.5} />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                          <h3 className="font-semibold text-sm mb-1 text-white">{item.title}</h3>
                           <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
                             {item.desc}
                           </p>

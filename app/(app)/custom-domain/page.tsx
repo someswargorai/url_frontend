@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   Clock,
-  ArrowRight,
   Plus,
   Trash2,
   Copy,
@@ -143,8 +142,8 @@ export default function CustomDomainPage() {
     } catch (error) {
       console.error("Error fetching domain:", error);
       if (axios?.isAxiosError(error)) {
-          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message);
       }
     } finally {
       setLoading(false);
@@ -202,8 +201,8 @@ export default function CustomDomainPage() {
     } catch (error) {
       console.error("Error adding domain:", error);
       if (axios?.isAxiosError(error)) {
-          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message);
       }
     } finally {
       setActionLoading(false);
@@ -231,8 +230,8 @@ export default function CustomDomainPage() {
     } catch (error) {
       console.error("Error verifying domain:", error);
       if (axios?.isAxiosError(error)) {
-          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message);
       }
     } finally {
       setActionLoading(false);
@@ -261,8 +260,8 @@ export default function CustomDomainPage() {
     } catch (error) {
       console.error("Error deleting domain:", error);
       if (axios?.isAxiosError(error)) {
-          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message);
       }
     } finally {
       setActionLoading(false);
@@ -297,32 +296,47 @@ export default function CustomDomainPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="relative z-10 container mx-auto px-4 py-5 max-w-6xl">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* background grid */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(#00e5a0 1px, transparent 1px), linear-gradient(90deg, #00e5a0 1px, transparent 1px)`,
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(0,229,160,0.06), transparent 70%)" }}
+        />
+        <div
+          className="absolute top-1/4 right-[10%] w-[300px] h-[300px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(124,109,240,0.05), transparent 70%)" }}
+        />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-8 pb-20 max-w-6xl">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
-              <Globe className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                Custom Domains
-              </h1>
-              <p className="text-muted-foreground text-sm mt-1">
-                Brand your short URLs with your own custom domain.
-              </p>
-            </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight dark:text-white font-mono" style={{ letterSpacing: "-1px" }}>
+              Custom <span style={{ color: "#00e5a0" }}>Domains</span>
+            </h1>
+            <p className="text-zinc-400 text-sm max-w-xl font-light leading-relaxed">
+              Brand your short URLs with your own custom domain for higher CTR and professional identity.
+            </p>
           </div>
+
           {domainRecord === null && !loading && (
             <Button
               onClick={() => setAddDialogOpen(true)}
-              className="rounded-md py-5 cursor-pointer"
+              className="h-11 px-5 rounded-lg cursor-pointer font-mono text-xs font-semibold border-0 transition-all duration-300 gap-2"
+              style={{ background: "#00e5a0", color: "#000" }}
             >
               <Plus className="h-4 w-4" />
               Add Domain
@@ -330,86 +344,122 @@ export default function CustomDomainPage() {
           )}
         </motion.div>
 
-        {/* Main Content */}
-        {loading ? (
-          <div className="space-y-6">
-            <Skeleton className="h-[250px] w-full rounded-md bg-muted/50" />
-          </div>
-        ) : domainRecord === null ? (
-          // Empty State
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-20 text-center px-4 rounded-xl border border-dashed border-border/60 bg-card/40 backdrop-blur-md"
-          >
-            <div className="h-16 w-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 text-primary">
-              <Globe className="h-8 w-8" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">
-              No Custom Domain Configured
-            </h3>
-            <p className="text-muted-foreground max-w-md mb-8 text-sm leading-relaxed">
-              You don&apos;t have any custom domains set up. Add your own domain
-              to start generating fully branded, premium links.
-            </p>
-            <Button
-              onClick={() => setAddDialogOpen(true)}
-              size="lg"
-              className="rounded-md px-6 py-6 cursor-pointer"
-            >
-              <Plus className="h-5 w-5 mr-1" /> Configure Custom Domain
-            </Button>
-          </motion.div>
-        ) : (
-          // Configuration/Status Panel
-          <div className="grid grid-cols-1 gap-8">
-            {/* Domain Card */}
-            <Card className="rounded-md border-border/50 bg-card/40 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="border-b bg-muted/10 pb-4 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl flex items-center gap-3">
-                    {domainRecord.domain}
-                    {domainRecord.isValid ? (
-                      <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 rounded-sm flex items-center gap-1">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Verified
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="bg-amber-500/10 text-amber-500 border-amber-500/20 px-2 py-0.5 rounded-sm flex items-center gap-1"
-                      >
-                        <Clock className="h-3.5 w-3.5 animate-pulse" /> Pending
-                        Verification
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription className="text-xs mt-1">
-                    Registered on{" "}
-                    {new Date(domainRecord.createdAt).toLocaleDateString()}
-                  </CardDescription>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                  disabled={actionLoading}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </CardHeader>
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <StatsCard
+            title="Custom Domains"
+            value={domainRecord ? "1 / 1" : "0 / 1"}
+            icon={<Globe className="h-4.5 w-4.5" />}
+            loading={loading}
+            accentColor="#00e5a0"
+          />
 
-              <CardContent className="p-6 space-y-8">
+          <StatsCard
+            title="Domain Status"
+            value={domainRecord ? (domainRecord.isValid ? "Verified" : "Pending") : "Not Configured"}
+            icon={domainRecord ? (domainRecord.isValid ? <CheckCircle2 className="h-4.5 w-4.5" /> : <Clock className="h-4.5 w-4.5 animate-pulse" />) : <Globe className="h-4.5 w-4.5" />}
+            loading={loading}
+            accentColor={domainRecord ? (domainRecord.isValid ? "#00e5a0" : "#febc2e") : "#7c6df0"}
+          />
+        </div>
+
+        {/* Configuration Terminal Container */}
+        <Card className="rounded-xl border-[#1e1e2e] overflow-hidden bg-[#0d0d12]">
+          {/* Terminal topbar */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+            <div className="flex items-center gap-2">
+              {/* macOS window control dots */}
+              <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                  <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                ))}
+              </div>
+              <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+                system · domains config
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#00e5a0]" />
+              <span className="font-mono text-[9px] text-[#00e5a0] uppercase tracking-wider">
+                CONNECTED
+              </span>
+            </div>
+          </div>
+
+          <CardHeader className="pb-4 pt-4 px-6">
+            <CardTitle className="font-mono text-sm text-white uppercase tracking-wider">Domain Configuration</CardTitle>
+            <CardDescription className="text-zinc-500 text-xs font-light">Set up and verify your DNS settings to route short URLs to your custom branding.</CardDescription>
+          </CardHeader>
+
+          <CardContent className="px-6 pb-6">
+            {loading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={index} className="h-16 rounded-lg bg-[#13131a]/80 border border-[#1e1e2e] animate-pulse" />
+                ))}
+              </div>
+            ) : domainRecord === null ? (
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-16 text-center font-mono text-xs">
+                <Globe className="h-10 w-10 mb-4 opacity-50 text-[#00e5a0] animate-pulse" />
+                <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-2">No Custom Domain</h2>
+                <p className="text-zinc-500 font-light max-w-md mb-6 leading-relaxed">
+                  You don&apos;t have any custom domains set up. Add your own domain to start generating fully branded, premium links.
+                </p>
+                <Button
+                  onClick={() => setAddDialogOpen(true)}
+                  className="h-9 px-4 rounded-lg cursor-pointer bg-[#00e5a0] hover:bg-[#00e5a0]/90 text-black font-semibold text-xs border-0 transition-all duration-300"
+                >
+                  Configure Custom Domain
+                </Button>
+              </div>
+            ) : (
+              /* Configuration Settings Panel */
+              <div className="space-y-6">
+                {/* Domain Header Area */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1e1e2e] pb-4 gap-4">
+                  <div>
+                    <h3 className="font-mono text-base text-white font-semibold flex items-center gap-3">
+                      {domainRecord.domain}
+                      {domainRecord.isValid ? (
+                        <Badge className="bg-[#00e5a0]/10 text-[#00e5a0] border-[#00e5a0]/20 rounded-md font-mono text-[10px] h-5">
+                          <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="bg-[#febc2e]/10 text-[#febc2e] border-[#febc2e]/20 rounded-md font-mono text-[10px] h-5"
+                        >
+                          <Clock className="h-3 w-3 mr-1 animate-pulse" /> Pending Verification
+                        </Badge>
+                      )}
+                    </h3>
+                    <p className="text-zinc-500 font-mono text-[10px] mt-1 uppercase tracking-wider">
+                      Registered on {new Date(domainRecord.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="h-8 px-3 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 cursor-pointer rounded-lg font-mono text-[10px] transition-all duration-200"
+                    disabled={actionLoading}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    Remove Domain
+                  </Button>
+                </div>
+
                 {/* Instructions Section */}
                 {!domainRecord.isValid ? (
                   <div className="space-y-6">
-                    <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
-                      <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div className="p-4 rounded-lg bg-[#febc2e]/5 border border-[#febc2e]/10 flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-[#febc2e] shrink-0 mt-0.5" />
                       <div className="space-y-1">
-                        <h4 className="text-sm font-semibold text-amber-500">
+                        <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#febc2e]">
                           Domain Verification Required
                         </h4>
-                        <p className="text-xs text-amber-500/90 leading-relaxed">
+                        <p className="text-xs text-zinc-400 font-light leading-relaxed">
                           Before we can route traffic through your custom
                           domain, you must verify ownership. Configure the
                           following DNS records in your domain registrar (e.g.
@@ -419,61 +469,59 @@ export default function CustomDomainPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-sm font-bold text-foreground">
+                      <h4 className="font-mono text-xs text-white uppercase tracking-wider">
                         Step 1: Point your domain to our hosting server
                       </h4>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-zinc-400 font-light">
                         Depending on whether this is a root domain or subdomain,
-                        add <span className="font-semibold">one</span> of the
+                        add <span className="font-semibold text-white">one</span> of the
                         following records to connect your domain:
                       </p>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Option A: Root Domain */}
                         <div
-                          className={`p-4 rounded-lg border bg-muted/20 ${
+                          className={`p-4 rounded-lg border bg-[#13131a]/60 ${
                             isSubdomain(domainRecord.domain)
-                              ? "opacity-50"
-                              : "border-border/80"
+                              ? "opacity-40 border-[#1e1e2e]"
+                              : "border-[#1e1e2e] shadow-lg shadow-black/10"
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-foreground">
-                              Option A: For Root Domain (e.g. mydomain.com)
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="font-mono text-[10px] text-white uppercase tracking-wider">
+                              Option A: For Root Domain
                             </span>
                             {!isSubdomain(domainRecord.domain) && (
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] px-1.5 py-0"
+                                className="bg-[#00e5a0]/10 text-[#00e5a0] border-[#00e5a0]/20 rounded-md font-mono text-[9px] h-4.5 px-1.5"
                               >
                                 Recommended
                               </Badge>
                             )}
                           </div>
-                          <div className="bg-background/80 border rounded p-3 text-xs font-mono space-y-2 relative">
-                            <div>
-                              <span className="text-muted-foreground">
-                                Type:
-                              </span>{" "}
-                              A
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">
-                                Host/Name:
-                              </span>{" "}
-                              @ (or blank)
-                            </div>
+                          <div className="bg-[#0d0d12] border border-[#1e1e2e] rounded-lg p-3 text-[11px] font-mono space-y-2 relative">
                             <div className="flex items-center justify-between">
                               <div>
-                                <span className="text-muted-foreground">
-                                  Value:
-                                </span>{" "}
-                                76.76.21.21
+                                <span className="text-zinc-500 uppercase text-[9px] tracking-wider block font-light">Type</span>
+                                <span className="text-white">A</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-[#1e1e2e]/50 pt-2">
+                              <div>
+                                <span className="text-zinc-500 uppercase text-[9px] tracking-wider block font-light">Host / Name</span>
+                                <span className="text-white">@ <span className="text-zinc-500 text-[10px] font-light">(or blank)</span></span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-[#1e1e2e]/50 pt-2">
+                              <div>
+                                <span className="text-zinc-500 uppercase text-[9px] tracking-wider block font-light">Value / IP Address</span>
+                                <span className="text-white">76.76.21.21</span>
                               </div>
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6"
+                                className="h-6 w-6 text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer rounded-md"
                                 onClick={() => copyToClipboard("76.76.21.21")}
                               >
                                 <Copy className="h-3 w-3" />
@@ -484,43 +532,41 @@ export default function CustomDomainPage() {
 
                         {/* Option B: Subdomain */}
                         <div
-                          className={`p-4 rounded-lg border bg-muted/20 ${
+                          className={`p-4 rounded-lg border bg-[#13131a]/60 ${
                             isSubdomain(domainRecord.domain)
-                              ? "border-border/80"
-                              : "opacity-50"
+                              ? "border-[#1e1e2e] shadow-lg shadow-black/10"
+                              : "opacity-40 border-[#1e1e2e]"
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-foreground">
-                              Option B: For Subdomain (e.g. links.mydomain.com)
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="font-mono text-[10px] text-white uppercase tracking-wider">
+                              Option B: For Subdomain
                             </span>
                             {isSubdomain(domainRecord.domain) && (
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] px-1.5 py-0"
+                                className="bg-[#00e5a0]/10 text-[#00e5a0] border-[#00e5a0]/20 rounded-md font-mono text-[9px] h-4.5 px-1.5"
                               >
                                 Recommended
                               </Badge>
                             )}
                           </div>
-                          <div className="bg-background/80 border rounded p-3 text-xs font-mono space-y-2 relative">
-                            <div>
-                              <span className="text-muted-foreground">
-                                Type:
-                              </span>{" "}
-                              CNAME
-                            </div>
+                          <div className="bg-[#0d0d12] border border-[#1e1e2e] rounded-lg p-3 text-[11px] font-mono space-y-2 relative">
                             <div className="flex items-center justify-between">
                               <div>
-                                <span className="text-muted-foreground">
-                                  Host/Name:
-                                </span>{" "}
-                                {getCnameRecordHost(domainRecord.domain)}
+                                <span className="text-zinc-500 uppercase text-[9px] tracking-wider block font-light">Type</span>
+                                <span className="text-white">CNAME</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-[#1e1e2e]/50 pt-2">
+                              <div>
+                                <span className="text-zinc-500 uppercase text-[9px] tracking-wider block font-light">Host / Name</span>
+                                <span className="text-white">{getCnameRecordHost(domainRecord.domain)}</span>
                               </div>
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6"
+                                className="h-6 w-6 text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer rounded-md"
                                 onClick={() =>
                                   copyToClipboard(
                                     getCnameRecordHost(domainRecord.domain),
@@ -530,17 +576,15 @@ export default function CustomDomainPage() {
                                 <Copy className="h-3 w-3" />
                               </Button>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between border-t border-[#1e1e2e]/50 pt-2">
                               <div>
-                                <span className="text-muted-foreground">
-                                  Value:
-                                </span>{" "}
-                                cname.vercel-dns.com
+                                <span className="text-zinc-500 uppercase text-[9px] tracking-wider block font-light">Value / Target</span>
+                                <span className="text-white">cname.vercel-dns.com</span>
                               </div>
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6"
+                                className="h-6 w-6 text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer rounded-md"
                                 onClick={() =>
                                   copyToClipboard("cname.vercel-dns.com")
                                 }
@@ -554,34 +598,34 @@ export default function CustomDomainPage() {
                     </div>
 
                     <div className="space-y-4 pt-2">
-                      <h4 className="text-sm font-bold text-foreground">
+                      <h4 className="font-mono text-xs text-white uppercase tracking-wider">
                         Step 2: Add Ownership Verification TXT Record
                       </h4>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-zinc-400 font-light">
                         Add this TXT record to prove ownership of the domain. It
                         must exactly match the value below:
                       </p>
 
-                      <div className="p-4 rounded-lg border border-border bg-muted/20">
+                      <div className="p-4 rounded-lg border border-[#1e1e2e] bg-[#13131a]/60">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="space-y-1.5">
-                            <span className="text-xs text-muted-foreground font-semibold">
+                            <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider block font-light">
                               Record Type
                             </span>
-                            <div className="bg-background/80 border rounded p-2 text-xs font-mono">
+                            <div className="bg-[#0d0d12] border border-[#1e1e2e] rounded-lg p-3 text-xs font-mono text-white">
                               TXT
                             </div>
                           </div>
                           <div className="space-y-1.5">
-                            <span className="text-xs text-muted-foreground font-semibold">
+                            <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider block font-light">
                               Host / Name
                             </span>
-                            <div className="bg-background/80 border rounded p-2 text-xs font-mono flex items-center justify-between">
-                              <span>{getTxtRecordHost(domainRecord.domain)}</span>
+                            <div className="bg-[#0d0d12] border border-[#1e1e2e] rounded-lg p-3 text-xs font-mono text-white flex items-center justify-between">
+                              <span className="truncate">{getTxtRecordHost(domainRecord.domain)}</span>
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6"
+                                className="h-5 w-5 text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer rounded-md shrink-0 ml-1"
                                 onClick={() => copyToClipboard(getTxtRecordHost(domainRecord.domain))}
                               >
                                 <Copy className="h-3 w-3" />
@@ -589,17 +633,17 @@ export default function CustomDomainPage() {
                             </div>
                           </div>
                           <div className="space-y-1.5">
-                            <span className="text-xs text-muted-foreground font-semibold">
+                            <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider block font-light">
                               Value
                             </span>
-                            <div className="bg-background/80 border rounded p-2 text-xs font-mono flex items-center justify-between">
-                              <span className="truncate max-w-[150px]">
+                            <div className="bg-[#0d0d12] border border-[#1e1e2e] rounded-lg p-3 text-xs font-mono text-white flex items-center justify-between overflow-hidden">
+                              <span className="truncate mr-2">
                                 {domainRecord.verificationToken}
                               </span>
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6"
+                                className="h-5 w-5 text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer rounded-md shrink-0"
                                 onClick={() =>
                                   copyToClipboard(
                                     domainRecord.verificationToken,
@@ -614,18 +658,18 @@ export default function CustomDomainPage() {
                       </div>
                     </div>
 
-                    <div className="pt-6 flex justify-end gap-3 border-t border-border/40">
+                    <div className="pt-6 flex justify-end gap-3 border-t border-[#1e1e2e]">
                       <Button
                         variant="outline"
                         onClick={fetchDomain}
-                        className="gap-2 cursor-pointer"
+                        className="h-9 px-4 rounded-lg bg-white/5 border-[#1e1e2e] text-zinc-300 hover:bg-white/10 hover:text-white font-mono text-xs font-semibold cursor-pointer"
                         disabled={actionLoading}
                       >
-                        <RefreshCw className="h-4 w-4" /> Sync Status
+                        <RefreshCw className="h-4 w-4 mr-1.5" /> Sync Status
                       </Button>
                       <Button
                         onClick={handleVerifyDomain}
-                        className="bg-black hover:bg-black text-white px-6 cursor-pointer"
+                        className="h-9 px-5 rounded-lg cursor-pointer bg-[#00e5a0] hover:bg-[#00e5a0]/90 text-black font-mono text-xs font-semibold border-0 transition-all duration-300"
                         disabled={actionLoading}
                       >
                         {actionLoading
@@ -635,55 +679,56 @@ export default function CustomDomainPage() {
                     </div>
                   </div>
                 ) : (
-                  // Verified/Active State Description
+                  /* Verified / Active State Description */
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-4">
-                      <div className="h-10 w-10 rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-500 shrink-0">
-                        <CheckCircle2 className="h-6 w-6" />
+                    <div className="p-6 rounded-lg bg-[#00e5a0]/5 border border-[#00e5a0]/15 flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-full bg-[#00e5a0]/10 flex items-center justify-center text-[#00e5a0] shrink-0 border border-[#00e5a0]/25">
+                        <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div className="space-y-1.5 flex-1">
-                        <h4 className="text-base font-bold text-foreground">
+                        <h4 className="font-mono text-sm font-bold uppercase tracking-wider text-[#00e5a0]">
                           Your domain is active!
                         </h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+                        <p className="text-xs text-zinc-400 font-light leading-relaxed max-w-2xl">
                           Congratulations! Your custom branded domain{" "}
-                          <span className="font-semibold text-foreground">
+                          <span className="font-semibold text-white">
                             {domainRecord.domain}
                           </span>{" "}
                           is verified and routing traffic. Shortlinks created on
                           your account will now leverage this custom domain for
-                          higher CTR and professional branding.
+                          higher click-through rates and professional look.
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-4 pt-4 border-t border-border/40">
-                      <h4 className="text-sm font-semibold">
+                    <div className="space-y-4 pt-4 border-t border-[#1e1e2e]">
+                      <h4 className="font-mono text-xs text-white uppercase tracking-wider">
                         Active Configurations
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 rounded-lg bg-muted/20 border border-border/50 space-y-1">
-                          <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                        <div className="p-4 rounded-lg bg-[#13131a]/60 border border-[#1e1e2e] space-y-1">
+                          <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest block font-light">
                             Assigned Domain
                           </span>
-                          <p className="text-sm font-semibold flex items-center gap-1.5">
+                          <p className="text-xs text-white font-mono font-semibold flex items-center gap-1.5">
                             {domainRecord.domain}{" "}
                             <ExternalLink
-                              className="h-3.5 w-3.5 text-muted-foreground cursor-pointer"
+                              className="h-3.5 w-3.5 text-zinc-400 cursor-pointer hover:text-[#00e5a0] transition-colors"
                               onClick={() =>
                                 window.open(
                                   `https://${domainRecord.domain}`,
                                   "_blank",
+                                  "noopener,noreferrer"
                                 )
                               }
                             />
                           </p>
                         </div>
-                        <div className="p-4 rounded-lg bg-muted/20 border border-border/50 space-y-1">
-                          <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                        <div className="p-4 rounded-lg bg-[#13131a]/60 border border-[#1e1e2e] space-y-1">
+                          <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest block font-light">
                             Default Domain Routing
                           </span>
-                          <p className="text-sm font-semibold flex items-center gap-1.5 text-emerald-500">
+                          <p className="text-xs font-mono font-semibold flex items-center gap-1.5 text-[#00e5a0]">
                             Active
                           </p>
                         </div>
@@ -691,25 +736,24 @@ export default function CustomDomainPage() {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Create / Add Domain Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-[#0d0d12] border-[#1e1e2e] rounded-xl">
           <DialogHeader>
-            <DialogTitle>Add Custom Domain</DialogTitle>
-            <DialogDescription>
-              Enter the custom domain or subdomain you want to use for
-              shortening URLs.
+            <DialogTitle className="font-mono text-sm uppercase tracking-wider text-white">Add Custom Domain</DialogTitle>
+            <DialogDescription className="text-zinc-500 text-xs font-light">
+              Enter the custom domain or subdomain you want to use for shortening URLs.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="flex flex-col gap-2">
-              <label htmlFor="domain" className="text-sm font-medium">
+              <label htmlFor="domain" className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">
                 Domain Name
               </label>
               <Input
@@ -717,7 +761,7 @@ export default function CustomDomainPage() {
                 value={domainInput}
                 onChange={(e) => setDomainInput(e.target.value)}
                 placeholder="e.g. links.mydomain.com or brand.co"
-                className="col-span-3"
+                className="bg-[#13131a] border-[#1e1e2e] text-white focus-visible:ring-1 focus-visible:ring-[#00e5a0] focus-visible:border-[#00e5a0] font-mono text-xs h-10 px-3.5 rounded-lg animate-none"
                 onKeyDown={(e) => {
                   if (
                     e.key === "Enter" &&
@@ -728,24 +772,24 @@ export default function CustomDomainPage() {
                   }
                 }}
               />
-              <p className="text-[10px] text-muted-foreground leading-relaxed mt-1">
-                Note: Do not include http://, https://, or www. Just enter the
-                bare domain or subdomain.
+              <p className="text-[10px] text-zinc-500 font-light leading-relaxed mt-1">
+                Note: Do not include http://, https://, or www. Just enter the bare domain or subdomain.
               </p>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setAddDialogOpen(false)}
               disabled={actionLoading}
+              className="h-9 px-4 rounded-lg bg-white/5 border-[#1e1e2e] text-zinc-300 hover:bg-white/10 hover:text-white font-mono text-xs font-semibold cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               onClick={handleAddDomain}
               disabled={!domainInput.trim() || actionLoading}
-              className="bg-black hover:bg-black text-white px-6"
+              className="h-9 px-4 rounded-lg cursor-pointer bg-[#00e5a0] hover:bg-[#00e5a0]/90 text-black font-mono text-xs font-semibold border-0 transition-all duration-300"
             >
               {actionLoading ? "Adding..." : "Add Domain"}
             </Button>
@@ -755,21 +799,26 @@ export default function CustomDomainPage() {
 
       {/* Delete / Revoke Custom Domain Confirm Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#0d0d12] border-[#1e1e2e] rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Disconnect Custom Domain</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-mono text-sm uppercase tracking-wider text-white">Disconnect Custom Domain</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-500 text-xs font-light">
               Are you sure you want to remove this domain? Doing so will immediately disrupt traffic routing and cause all active branded shortlinks associated with this domain to stop working. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={actionLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel
+              disabled={actionLoading}
+              className="h-9 px-4 rounded-lg bg-white/5 border-[#1e1e2e] text-zinc-300 hover:bg-white/10 hover:text-white font-mono text-xs font-semibold cursor-pointer"
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
                 handleDeleteDomain();
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="h-9 px-4 rounded-lg cursor-pointer bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-semibold border-0 transition-all duration-300"
               disabled={actionLoading}
             >
               {actionLoading ? "Disconnecting..." : "Disconnect Domain"}
@@ -778,5 +827,58 @@ export default function CustomDomainPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+function StatsCard({
+  title,
+  value,
+  icon,
+  loading,
+  accentColor = "#00e5a0",
+}: {
+  title: string;
+  value: number | string;
+  icon: React.ReactNode;
+  loading?: boolean;
+  accentColor?: string;
+}) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="group relative">
+      <Card className="rounded-xl border-[#1e1e2e] bg-[#0d0d12] h-[130px] overflow-hidden transition-all duration-300 relative">
+        {/* top border glow sweep */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
+        />
+        {/* subtle corner sweep */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          style={{ background: `radial-gradient(circle at top, ${accentColor}02, transparent 60%)` }}
+        />
+        <CardContent className="p-6 flex items-center justify-between h-full relative z-10">
+          <div className="space-y-1.5">
+            <p className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">{title}</p>
+            {loading ? (
+              <Skeleton className="h-8 w-16 mt-2 bg-[#13131a]/80 border border-[#1e1e2e] animate-pulse" />
+            ) : (
+              <h2 className="font-mono font-semibold text-3xl tracking-tight" style={{ color: accentColor }}>
+                {value}
+              </h2>
+            )}
+          </div>
+          <div
+            className="p-3.5 rounded-lg border transition-colors duration-300"
+            style={{
+              background: "rgba(19, 19, 26, 0.6)",
+              borderColor: "#1e1e2e",
+              color: accentColor,
+            }}
+          >
+            {icon}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

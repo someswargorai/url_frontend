@@ -41,7 +41,6 @@ import {
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-
 type Subscription = {
   _id: string;
   email: string;
@@ -71,7 +70,6 @@ type Plan = {
   checkoutLink: string | null;
   features: string[];
   missing: string[];
-  
 };
 
 const PLANS: Plan[] = [
@@ -80,7 +78,7 @@ const PLANS: Plan[] = [
     price: "₹0",
     period: "forever",
     description: "Get started, no card required",
-    icon: <Zap className="h-6 w-6" />,
+    icon: <Zap className="h-4.5 w-4.5" />,
     iconBg: "bg-gray-100 dark:bg-gray-800",
     iconColor: "text-gray-500",
     badge: null,
@@ -122,7 +120,7 @@ const PLANS: Plan[] = [
     price: "₹190",
     period: "month",
     description: "For individuals who need more",
-    icon: <Crown className="h-6 w-6" />,
+    icon: <Crown className="h-4.5 w-4.5" />,
     iconBg: "bg-violet-100 dark:bg-violet-900/30",
     iconColor: "text-violet-600 dark:text-violet-400",
     badge: "Most popular",
@@ -171,7 +169,7 @@ const PLANS: Plan[] = [
     price: "₹475",
     period: "month",
     description: "For teams and power users",
-    icon: <Sparkles className="h-6 w-6" />,
+    icon: <Sparkles className="h-4.5 w-4.5" />,
     iconBg: "bg-amber-100 dark:bg-amber-900/30",
     iconColor: "text-amber-600 dark:text-amber-400",
     badge: null,
@@ -250,24 +248,36 @@ function fmt(dateStr: string) {
   });
 }
 
-function statusColor(status: string) {
-  if (status === "active")
-    return "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800";
-  if (status === "canceled")
-    return "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800";
-  return "bg-red-500/10 text-red-600 border-red-200 dark:border-red-800";
-}
-
 function BillingSkeleton() {
   return (
-    <div className="space-y-6">
-      <Skeleton className="h-44 w-full rounded-2xl" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-64 rounded-2xl" />
-        ))}
+    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center">
+      {/* background grid */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(#00e5a0 1px, transparent 1px), linear-gradient(90deg, #00e5a0 1px, transparent 1px)`,
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(0,229,160,0.06), transparent 70%)" }}
+        />
       </div>
-      <Skeleton className="h-48 w-full rounded-2xl" />
+
+      <div className="space-y-8 container mx-auto px-4 max-w-5xl relative z-10 py-10">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-48 bg-[#13131a]/80 border border-[#1e1e2e] animate-pulse" />
+          <Skeleton className="h-4 w-72 bg-[#13131a]/80 border border-[#1e1e2e] animate-pulse" />
+        </div>
+        <Skeleton className="h-48 w-full rounded-xl bg-[#13131a]/80 border border-[#1e1e2e] animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-[400px] rounded-xl bg-[#13131a]/80 border border-[#1e1e2e] animate-pulse" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -290,12 +300,11 @@ export default function BillingPage() {
           { headers: { Authorization: `Bearer ${session.access_token}` } },
         );
         if (res.data?.success) setSubscription(res.data.plan ?? null);
-      } catch(error){
-        // no subscription yet — that's fine
+      } catch (error) {
         if (axios?.isAxiosError(error)) {
-                  const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-                  toast.error(message); 
-              }
+          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+          toast.error(message);
+        }
       } finally {
         setLoading(false);
       }
@@ -313,10 +322,10 @@ export default function BillingPage() {
         { headers: { Authorization: `Bearer ${session?.access_token}` } },
       );
       window.open(res.data.url, "_blank");
-    } catch(error) {
+    } catch (error) {
       if (axios?.isAxiosError(error)) {
-          const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
-          toast.error(message); 
+        const message = error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong";
+        toast.error(message);
       }
     } finally {
       setPortalLoading(false);
@@ -335,14 +344,11 @@ export default function BillingPage() {
     }
   };
 
-  // add this after openCheckout
   const handlePlanAction = async (plan: Plan) => {
-    // has polarCustomerId = ever bought before → always use portal
     if (subscription?.polarCustomerId) {
       await openPortal();
       return;
     }
-    // never bought → open checkout
     if (plan.checkoutLink) {
       await openCheckout(plan.checkoutLink);
     }
@@ -353,109 +359,148 @@ export default function BillingPage() {
     subscription?.subscriptionStatus === "active";
 
   const hasActiveSub = subscription?.subscriptionStatus === "active";
- 
+
   if (loading) return <BillingSkeleton />;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-     
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-      >
-        <h1 className="text-3xl font-bold tracking-tight text-[#00e5a0]">Billing & plan</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage your subscription, upgrades, and billing details.
-        </p>
-      </motion.div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* background grid */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(#00e5a0 1px, transparent 1px), linear-gradient(90deg, #00e5a0 1px, transparent 1px)`,
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(0,229,160,0.06), transparent 70%)" }}
+        />
+        <div
+          className="absolute top-1/4 right-[10%] w-[300px] h-[300px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(124,109,240,0.05), transparent 70%)" }}
+        />
+      </div>
 
-      {/* ── Current plan card ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05 }}
-      >
-        <Card className="border overflow-hidden">
-          <CardHeader className="border-b pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="text-base">Current plan</CardTitle>
-                <CardDescription className="text-xs mt-0.5">
-                  Your active subscription details
-                </CardDescription>
+      <div className="relative z-10 container mx-auto px-4 py-8 pb-20 max-w-5xl space-y-10">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-2"
+        >
+          <h1 className="text-3xl font-bold tracking-tight dark:text-white font-mono" style={{ letterSpacing: "-1px" }}>
+            Billing & <span style={{ color: "#00e5a0" }}>Plan</span>
+          </h1>
+          <p className="text-zinc-400 text-sm max-w-xl font-light leading-relaxed">
+            Manage your subscription, upgrades, and billing details securely.
+          </p>
+        </motion.div>
+
+        {/* Current plan card inside terminal container */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.05 }}
+        >
+          <Card className="rounded-xl border-[#1e1e2e] overflow-hidden bg-[#0d0d12]">
+            {/* Terminal topbar */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e1e2e] bg-[#13131a]">
+              <div className="flex items-center gap-2">
+                {/* macOS window control dots */}
+                <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                  {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                    <div key={c} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                  ))}
+                </div>
+                <div className="h-4 w-px bg-[#1e1e2e] mx-1" />
+                <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
+                  system · active billing
+                </span>
               </div>
-              {subscription ? (
-                <Badge
-                  variant="outline"
-                  className={`capitalize text-xs px-3 py-1 ${statusColor(
-                    subscription.subscriptionStatus,
-                  )}`}
-                >
-                  {subscription.subscriptionStatus}
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-xs px-3 py-1">
-                  Free
-                </Badge>
-              )}
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#00e5a0]" />
+                <span className="font-mono text-[9px] text-[#00e5a0] uppercase tracking-wider">
+                  CONNECTED
+                </span>
+              </div>
             </div>
-          </CardHeader>
 
-          <CardContent className="pt-3">
-            {subscription ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <Crown className="h-3.5 w-3.5" /> Plan
-                  </p>
-                  <p className="font-semibold capitalize">
-                    {subscription.plan}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5" /> Subscribed on
-                  </p>
-                  <p className="font-semibold">
-                    {fmt(subscription.subscribedAt)}
-                  </p> 
-                </div>
-                {subscription?.subscriptionStatus!=="canceled" && 
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <RefreshCw className="h-3.5 w-3.5" /> Renews on
-                  </p>
-                  <p className="font-semibold">
-                    {subscription.renewsAt ? fmt(subscription.renewsAt) : "—"}
-                  </p>
-                </div>}
+            <CardHeader className="pb-4 pt-4 px-6">
+              <CardTitle className="font-mono text-sm text-white uppercase tracking-wider flex items-center justify-between">
+                <span>Current Plan Details</span>
+                {subscription ? (
+                  <Badge
+                    variant="outline"
+                    className={`capitalize font-mono text-[10px] h-5 rounded-md ${
+                      subscription.subscriptionStatus === "active"
+                        ? "bg-[#00e5a0]/5 text-[#00e5a0] border-[#00e5a0]/20"
+                        : subscription.subscriptionStatus === "canceled"
+                        ? "bg-[#febc2e]/5 text-[#febc2e] border-[#febc2e]/20"
+                        : "bg-[#ff5f57]/5 text-[#ff5f57] border-[#ff5f57]/20"
+                    }`}
+                  >
+                    {subscription.subscriptionStatus}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-zinc-500/5 text-zinc-400 border-zinc-500/20 font-mono text-[10px] h-5 rounded-md">
+                    Free
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
 
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <CreditCard className="h-3.5 w-3.5" /> Billing
-                  </p>
-                  <p className="font-semibold">Monthly</p>
+            <CardContent className="px-6 pb-6 pt-2">
+              {subscription ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="p-4 rounded-lg bg-[#13131a]/60 border border-[#1e1e2e] space-y-1">
+                    <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <Crown className="h-3 w-3" /> Plan Tier
+                    </p>
+                    <p className="text-sm font-mono font-semibold text-white capitalize">
+                      {subscription.plan}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-[#13131a]/60 border border-[#1e1e2e] space-y-1">
+                    <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <CalendarDays className="h-3 w-3" /> Subscribed
+                    </p>
+                    <p className="text-sm font-mono font-semibold text-white">
+                      {fmt(subscription.subscribedAt)}
+                    </p>
+                  </div>
+                  {subscription?.subscriptionStatus !== "canceled" && (
+                    <div className="p-4 rounded-lg bg-[#13131a]/60 border border-[#1e1e2e] space-y-1">
+                      <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <RefreshCw className="h-3 w-3" /> Renews On
+                      </p>
+                      <p className="text-sm font-mono font-semibold text-[#00e5a0]">
+                        {subscription.renewsAt ? fmt(subscription.renewsAt) : "—"}
+                      </p>
+                    </div>
+                  )}
+                  <div className="p-4 rounded-lg bg-[#13131a]/60 border border-[#1e1e2e] space-y-1">
+                    <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <CreditCard className="h-3 w-3" /> Cycle
+                    </p>
+                    <p className="text-sm font-mono font-semibold text-white">Monthly</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 text-muted-foreground text-sm py-2">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                You&apos;re on the free plan. Upgrade below to unlock more
-                features.
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center gap-3 text-zinc-400 text-xs py-2 bg-[#13131a]/30 border border-[#1e1e2e]/50 p-4 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-[#7c6df0] shrink-0" />
+                  <span>You&apos;re currently on the free tier. Upgrade below to unlock custom domains, API key access, and advanced real-time analytics.</span>
+                </div>
+              )}
 
-            {subscription && subscription?.subscriptionStatus!=="canceled" && (
-              <>
-                <Separator className="my-6" />
-                <div className="flex flex-col sm:flex-row gap-3">
+              {subscription && subscription?.subscriptionStatus !== "canceled" && (
+                <div className="mt-6 pt-6 border-t border-[#1e1e2e] flex flex-col sm:flex-row gap-3">
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={openPortal}
                     disabled={portalLoading}
-                    className="gap-2 rounded-sm! cursor-pointer"
+                    className="h-9 px-4 rounded-lg bg-white/5 border-[#1e1e2e] text-zinc-300 hover:bg-white/10 hover:text-white font-mono text-xs font-semibold cursor-pointer gap-2"
                   >
                     {portalLoading ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />
@@ -466,217 +511,239 @@ export default function BillingPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={openPortal}
                     disabled={portalLoading}
-                    className="rounded-sm! gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900 cursor-pointer"
+                    className="h-9 px-4 rounded-lg bg-red-950/10 border-red-900/30 text-red-400 hover:bg-red-950/20 hover:text-red-300 font-mono text-xs font-semibold cursor-pointer gap-2"
                   >
                     Cancel subscription
                   </Button>
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* ── Plan cards ── */}
-      <div>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4">
-          Available plans
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {PLANS.map((plan, i) => {
-            const current = isActive(plan.name);
-            const isFree = plan.name === "Free";
-
-            return (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
-              >
-                <Card
-                  className={`relative flex flex-col h-full transition-all duration-200 ${
-                    current
-                      ? "border-emerald-400 dark:border-emerald-600 ring-1 ring-emerald-400/40"
-                      :  !hasActiveSub
-                      ? "border-violet-400 dark:border-violet-600 ring-1 ring-violet-400/30"
-                      : "border"
-                  }`}
-                >
-                
-                  <CardHeader className="pt-3 pb-3">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div
-                        className={`p-1.5 rounded-lg ${
-                          plan.name === "Free"
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-500"
-                            : plan.name === "Base"
-                            ? "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400"
-                            : "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400"
-                        }`}
-                      >
-                        <span className="size-2!">{plan.icon}</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">{plan.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {plan.description}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-extrabold">
-                        {plan.price}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {plan.period === "forever"
-                          ? "/ free forever"
-                          : `/ ${plan.period}`}
-                      </span>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="flex-1 space-y-2.5 pb-5">
-                    <ScrollArea className="h-40">
-                        {plan.features.map((f) => (
-                        <div key={f} className="flex items-start gap-2 mt-2 first:mt-0">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                            <span className="text-xs">{f}</span>
-                        </div>
-                        ))}
-                        {plan.missing.map((f) => (
-                        <div
-                            key={f}
-                            className="flex items-start gap-2 opacity-35 mt-2 first:mt-0"
-                        >
-                            <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                            <span className="text-xs">{f}</span>
-                        </div>
-                        ))}
-                    </ScrollArea>
-                  </CardContent>
-
-                  <div className="px-6 pb-6">
-                    {isActive(plan.name) ? (
-                      <Button
-                        className="w-full h-10 text-xs bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 cursor-default"
-                        disabled
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5 mr-2" />
-                        Active plan
-                      </Button>
-                    ) : plan.name === "Free" ? (
-                      <Button
-                        variant="outline"
-                        className="w-full h-10 text-xs"
-                        disabled={!!subscription?.polarCustomerId}
-                      >
-                        {subscription?.polarCustomerId
-                          ? "Manage via portal"
-                          : "Current"}
-                      </Button>
-                    ) : (
-                      <Button
-                        className={`w-full h-10 text-xs gap-2 group ${
-                          plan.highlight
-                            ? "bg-violet-600 hover:bg-violet-700 text-white"
-                            : ""
-                        }`}
-                        variant={plan.highlight ? "default" : "outline"}
-                        onClick={() => handlePlanAction(plan)}
-                        disabled={portalLoading}
-                      >
-                        {portalLoading ? (
-                          <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                        ) : subscription?.polarCustomerId ? (
-                          <>
-                           {subscription?.plan.toLowerCase() === plan.name.toLowerCase() ? "Manage current plan" : `Switch to ${plan.name}`}
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </>
-                        ) : (
-                          <>
-                            Get {plan.name}
-                            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-     
-
-      {/* ── FAQ ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45, duration: 0.4 }}
-        >
-        {/* section label with lines */}
-        <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-            Frequently asked questions
-            </span>
-            <div className="flex-1 h-px bg-border" />
-        </div>
-
-        <Accordion type="single" collapsible className="space-y-2 border-none">
-            {FAQ.map((item, i) => (
-            <AccordionItem
-                key={i}
-                value={`faq-${i}`}
-                className="border rounded-xl px-5 bg-card data-[state=open]:border-border/80 transition-colors"
-            >
-                <AccordionTrigger className="text-sm font-medium py-4 hover:no-underline gap-3 [&>svg]:hidden items-center">
-                <span className="text-[11px] font-semibold text-muted-foreground/50 min-w-5">
-                    {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="flex-1 text-left">{item.q}</span>
-                <div className="w-5 h-5 rounded-full border border-border flex items-center justify-center shrink-0">
-                    <span className="text-muted-foreground text-xs leading-none transition-transform duration-200 group-data-[state=open]:rotate-45">+</span>
-                </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-4 pl-8">
-                {item.a}
-                </AccordionContent>
-            </AccordionItem>
-            ))}
-        </Accordion>
+              )}
+            </CardContent>
+          </Card>
         </motion.div>
 
-      {/* ── Support footer ── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.4 }}
-        className="text-center text-xs text-muted-foreground pb-6"
-      >
-        Questions about billing?{" "}
-        <a
-          href="mailto:support@yourapp.com"
-          className="underline underline-offset-2 hover:text-foreground transition-colors"
+        {/* Pricing/Plan Tiers Section */}
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#00e5a0]">
+              Available subscription tiers
+            </span>
+            <div className="flex-1 h-px bg-[#1e1e2e]" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {PLANS.map((plan, i) => {
+              const current = isActive(plan.name);
+
+              const accentColor =
+                plan.name === "Free"
+                  ? "#7c6df0"
+                  : plan.name === "Base Plan"
+                  ? "#00e5a0"
+                  : "#febc2e";
+
+              return (
+                <motion.div
+                  key={plan.name}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+                  className="group relative h-full flex flex-col"
+                >
+                  <Card
+                    className={`relative flex flex-col w-full h-full transition-all duration-300 rounded-xl overflow-hidden bg-[#0d0d12] ${
+                      current
+                        ? "border-[#00e5a0] ring-1 ring-[#00e5a0]/30 shadow-lg shadow-[#00e5a0]/5"
+                        : "border-[#1e1e2e] hover:border-[#1e1e2e]/80"
+                    }`}
+                  >
+                    {/* top border glow sweep */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
+                    />
+                    {/* subtle corner sweep */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                      style={{ background: `radial-gradient(circle at top, ${accentColor}02, transparent 60%)` }}
+                    />
+
+                    {/* Plan Badge if highlighted */}
+                    {plan.badge && (
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-[#00e5a0]/15 text-[#00e5a0] border-[#00e5a0]/25 rounded-md font-mono text-[9px] h-4.5 px-2 uppercase tracking-wide">
+                          {plan.badge}
+                        </Badge>
+                      </div>
+                    )}
+
+                    <CardHeader className="pt-6 pb-4 px-6 border-b border-[#1e1e2e]/50">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div
+                          className="p-2 rounded-lg border transition-colors duration-300 shrink-0"
+                          style={{
+                            background: "rgba(19, 19, 26, 0.6)",
+                            borderColor: current ? "#00e5a0" : "#1e1e2e",
+                            color: accentColor,
+                          }}
+                        >
+                          {plan.icon}
+                        </div>
+                        <div>
+                          <p className="font-mono text-sm font-semibold text-white">{plan.name}</p>
+                          <p className="text-[10px] text-zinc-500 font-light leading-relaxed">
+                            {plan.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-baseline gap-1 mt-2">
+                        <span className="text-3xl font-bold font-mono tracking-tight" style={{ color: accentColor }}>
+                          {plan.price}
+                        </span>
+                        <span className="text-xs font-mono text-zinc-500">
+                          {plan.period === "forever"
+                            ? "/ forever"
+                            : `/ ${plan.period}`}
+                        </span>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="flex-1 px-6 pt-5 pb-5 flex flex-col">
+                      <ScrollArea className="h-44 pr-2">
+                        <div className="space-y-3">
+                          {plan.features.map((f) => (
+                            <div key={f} className="flex items-start gap-2.5">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-[#00e5a0] shrink-0 mt-0.5" />
+                              <span className="text-xs text-zinc-300 font-light">{f}</span>
+                            </div>
+                          ))}
+                          {plan.missing.map((f) => (
+                            <div key={f} className="flex items-start gap-2.5 opacity-30">
+                              <XCircle className="h-3.5 w-3.5 text-zinc-500 shrink-0 mt-0.5" />
+                              <span className="text-xs text-zinc-400 font-light">{f}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+
+                    <div className="px-6 pb-6 pt-2">
+                      {isActive(plan.name) ? (
+                        <Button
+                          className="w-full h-10 text-xs bg-[#00e5a0]/5 text-[#00e5a0] border border-[#00e5a0]/20 rounded-lg font-mono font-semibold cursor-default hover:bg-[#00e5a0]/5"
+                          disabled
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-2" />
+                          Active plan
+                        </Button>
+                      ) : plan.name === "Free" ? (
+                        <Button
+                          variant="outline"
+                          disabled={!!subscription?.polarCustomerId}
+                          className="w-full h-10 text-xs rounded-lg font-mono font-semibold bg-white/5 border-[#1e1e2e] text-zinc-300 hover:bg-white/10 hover:text-white"
+                        >
+                          {subscription?.polarCustomerId
+                            ? "Manage via portal"
+                            : "Current"}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant={plan.highlight ? "default" : "outline"}
+                          onClick={() => handlePlanAction(plan)}
+                          disabled={portalLoading}
+                          className={`w-full h-10 text-xs rounded-lg font-mono font-semibold cursor-pointer gap-2 transition-all duration-300 ${
+                            plan.highlight
+                              ? "bg-[#00e5a0] hover:bg-[#00e5a0]/90 text-black border-0"
+                              : "bg-white/5 border-[#1e1e2e] text-zinc-300 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          {portalLoading ? (
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          ) : subscription?.polarCustomerId ? (
+                            <>
+                              {subscription?.plan.toLowerCase() === plan.name.toLowerCase() ? "Manage plan" : `Switch to ${plan.name}`}
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </>
+                          ) : (
+                            <>
+                              Get {plan.name}
+                              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── FAQ Accordion ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.4 }}
         >
-          Contact support
-        </a>{" "}
-        · Powered by{" "}
-        <a
-          href="https://polar.sh"
-          target="_blank"
-          rel="noreferrer"
-          className="underline underline-offset-2 hover:text-foreground transition-colors"
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-[#1e1e2e]" />
+            <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+              Frequently asked questions
+            </span>
+            <div className="flex-1 h-px bg-[#1e1e2e]" />
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-2 border-none">
+            {FAQ.map((item, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="border border-[#1e1e2e] rounded-xl px-5 bg-[#0d0d12] data-[state=open]:border-[#00e5a0]/40 transition-colors"
+              >
+                <AccordionTrigger className="text-xs font-mono text-white py-4 hover:no-underline gap-3 [&>svg]:hidden items-center group">
+                  <span className="font-mono text-[10px] text-zinc-500 min-w-5">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="flex-1 text-left font-semibold uppercase tracking-wider">{item.q}</span>
+                  <div className="w-5 h-5 rounded-full border border-[#1e1e2e] group-hover:border-[#00e5a0]/50 flex items-center justify-center shrink-0 transition-colors">
+                    <span className="text-zinc-500 group-data-[state=open]:text-[#00e5a0] text-xs leading-none transition-transform duration-200 group-data-[state=open]:rotate-45">+</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-xs text-zinc-400 font-light leading-relaxed pb-4 pl-8">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
+
+        {/* ── Support footer ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="text-center font-mono text-[10px] text-zinc-500 pb-6"
         >
-          Polar
-        </a>
-      </motion.div>
+          Questions about billing?{" "}
+          <a
+            href="mailto:support@yourapp.com"
+            className="underline underline-offset-2 hover:text-white transition-colors"
+          >
+            Contact support
+          </a>{" "}
+          · Powered by{" "}
+          <a
+            href="https://polar.sh"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2 hover:text-[#00e5a0] transition-colors"
+          >
+            Polar
+          </a>
+        </motion.div>
+      </div>
     </div>
   );
 }
