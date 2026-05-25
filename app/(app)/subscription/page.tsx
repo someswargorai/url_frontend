@@ -364,7 +364,7 @@ export default function BillingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
       >
-        <h1 className="text-2xl font-bold tracking-tight">Billing & plan</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-[#00e5a0]">Billing & plan</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Manage your subscription, upgrades, and billing details.
         </p>
@@ -636,8 +636,8 @@ export default function BillingPage() {
                 value={`faq-${i}`}
                 className="border rounded-xl px-5 bg-card data-[state=open]:border-border/80 transition-colors"
             >
-                <AccordionTrigger className="text-sm font-medium py-4 hover:no-underline gap-3 [&>svg]:hidden">
-                <span className="text-[11px] font-semibold text-muted-foreground/50 min-w-[20px]">
+                <AccordionTrigger className="text-sm font-medium py-4 hover:no-underline gap-3 [&>svg]:hidden items-center">
+                <span className="text-[11px] font-semibold text-muted-foreground/50 min-w-5">
                     {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="flex-1 text-left">{item.q}</span>

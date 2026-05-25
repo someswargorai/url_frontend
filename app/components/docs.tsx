@@ -1,410 +1,544 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Terminal, Code2, Server, CheckCircle2, Package, Globe, Cpu, Scissors } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Navbar } from "../common/Navbar";
+import {
+  Copy, Terminal, Code2, Server,
+  CheckCircle2, Package, Globe, Cpu, Scissors
+} from "lucide-react";
+import {
+  Accordion, AccordionContent,
+  AccordionItem, AccordionTrigger
+} from "@/components/ui/accordion";
 
-function CodeBlock({ code, language= "javascript", id}: { code: string; language?: string, id: string }) {
-    const [copied, setCopied] = useState<boolean>(false);
+// ── CodeBlock ──────────────────────────────────────────────────────────────────
+function CodeBlock({ code, id }: { code: string; id: string }) {
+  const [copied, setCopied] = useState(false);
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-    return (
-        <div className="relative rounded-lg bg-zinc-950 p-4 border border-zinc-800/50 shadow-inner group">
-            <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                    variant="secondary"
-                    size="icon"
-                    className="h-8 w-8 bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
-                    onClick={handleCopy}
-                >
-                    {copied ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                </Button>
-            </div>
-            <pre className="text-sm text-zinc-300 font-mono overflow-x-auto">
-                <code>{code}</code>
-            </pre>
+  return (
+    <div className="relative rounded-lg overflow-hidden group"
+      style={{ background: "#060608", border: "1px solid #1e1e2e" }}
+    >
+      {/* topbar */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b"
+        style={{ background: "#13131a", borderColor: "#1e1e2e" }}
+      >
+        <div className="flex gap-1.5">
+          {["#ff5f57","#febc2e","#28c840"].map(c => (
+            <div key={c} className="w-2 h-2 rounded-full" style={{ background: c }} />
+          ))}
         </div>
-    );
+        <Button
+          size="icon"
+          className="h-6 w-6 rounded-md border-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ background: "rgba(0,229,160,0.1)", color: "#00e5a0" }}
+          onClick={handleCopy}
+        >
+          {copied
+            ? <CheckCircle2 className="h-3 w-3" />
+            : <Copy className="h-3 w-3" />
+          }
+        </Button>
+      </div>
+      <pre className="p-5 text-xs font-mono overflow-x-auto leading-relaxed"
+        style={{ color: "#a0a0b8" }}
+      >
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
 }
 
-export default function DocumentationPage() {
+// ── method badge ───────────────────────────────────────────────────────────────
+function MethodBadge({ method }: { method: string }) {
+  const colors: Record<string, string> = {
+    POST: "#00e5a0", GET: "#7c6df0", DELETE: "#ff5050",
+  };
+  return (
+    <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded"
+      style={{
+        background: `${colors[method] ?? "#00e5a0"}15`,
+        color: colors[method] ?? "#00e5a0",
+        border: `1px solid ${colors[method] ?? "#00e5a0"}30`,
+      }}
+    >
+      {method}
+    </span>
+  );
+}
 
-    return (
-        <>
-            <div id="docs" className="container mx-auto py-12 px-4 md:px-8 lg:px-12 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="mb-12 space-y-4 text-center md:text-left relative">
-                    <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl -z-10" />
-                    <Badge variant="outline" className="px-3 py-1 bg-background/50 backdrop-blur-sm border-primary/20 text-primary mb-4">
-                        <Code2 className="w-4 h-4 mr-2 inline-block" /> v1.0.2
-                    </Badge>
-                    <p className="text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/60">
-                        Developer Documentation 
-                    </p>
-                    <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                        Integrate our lightning-fast URL shortening service directly into your application using our NPM package or REST API.
-                    </p>
+// ── param table ────────────────────────────────────────────────────────────────
+function ParamTable({ rows, cols }: {
+  rows: Record<string, string>[];
+  cols: string[];
+}) {
+  return (
+    <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #1e1e2e" }}>
+      <table className="w-full text-xs">
+        <thead>
+          <tr style={{ background: "#13131a", borderBottom: "1px solid #1e1e2e" }}>
+            {cols.map(c => (
+              <th key={c} className="px-4 py-2.5 text-left font-mono font-medium"
+                style={{ color: "#6b6b85" }}
+              >
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} style={{ borderBottom: i < rows.length - 1 ? "1px solid #1e1e2e" : "none" }}>
+              {cols.map(c => (
+                <td key={c} className="px-4 py-3 font-mono" style={{ color: "#a0a0b8" }}>
+                  {c === "Required" ? (
+                    <span className="px-2 py-0.5 rounded text-[9px]"
+                      style={{
+                        background: row[c] === "Yes" ? "rgba(0,229,160,0.08)" : "rgba(255,255,255,0.04)",
+                        color: row[c] === "Yes" ? "#00e5a0" : "#6b6b85",
+                        border: `1px solid ${row[c] === "Yes" ? "rgba(0,229,160,0.2)" : "#1e1e2e"}`,
+                      }}
+                    >
+                      {row[c]}
+                    </span>
+                  ) : (
+                    row[c]
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ── section heading ────────────────────────────────────────────────────────────
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <div className="h-px w-4" style={{ background: "#00e5a0" }} />
+      <span className="font-mono text-[10px] tracking-widest uppercase"
+        style={{ color: "#6b6b85" }}
+      >
+        {children}
+      </span>
+    </div>
+  );
+}
+
+// ── main page ──────────────────────────────────────────────────────────────────
+export default function DocumentationPage() {
+  const tabItems = [
+    { value: "overview",       icon: Globe,    label: "Overview"       },
+    { value: "installation",   icon: Package,  label: "Installation"   },
+    { value: "usage",          icon: Cpu,      label: "Quick Start"    },
+    { value: "event-tracking", icon: Terminal, label: "Event Tracking" },
+    { value: "api",            icon: Server,   label: "API Reference"  },
+  ];
+
+  return (
+    <div
+      id="docs"
+      className="min-h-screen"
+      
+    >
+      <div className="container mx-auto py-16 px-4 md:px-8 lg:px-12 max-w-5xl">
+
+        {/* header */}
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="h-px w-8" style={{ background: "#00e5a0" }} />
+            <span className="font-mono text-[11px] tracking-widest uppercase"
+              style={{ color: "#00e5a0" }}
+            >
+              developer docs
+            </span>
+            <span className="font-mono text-[9px] px-2 py-0.5 rounded ml-1"
+              style={{ background: "rgba(124,109,240,0.1)", color: "#7c6df0", border: "1px solid rgba(124,109,240,0.2)" }}
+            >
+              v1.0.2
+            </span>
+          </div>
+
+          <h1 className="font-bold leading-none tracking-tight mb-4"
+            style={{ fontSize: "clamp(28px, 4vw, 48px)", letterSpacing: "-2px" }}
+          >
+            Developer
+            <br />
+            <span style={{ color: "#00e5a0" }}>Documentation</span>
+          </h1>
+          <p className="font-mono text-xs leading-relaxed max-w-lg"
+            style={{ color: "#6b6b85" }}
+          >
+            Integrate URL shortening and analytics into your application via our
+            NPM package or REST API.
+          </p>
+        </div>
+
+        {/* tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          {/* tab list */}
+          <div className="rounded-md border mb-8 overflow-hidden"
+            style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
+          >
+            <TabsList className="flex w-full h-[50px]! p-0 bg-transparent rounded-sm gap-0">
+              {tabItems.map((tab, i) => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-none
+                      font-mono text-[11px] transition-all duration-150 border-0
+                      data-[state=active]:bg-transparent data-[state=active]:shadow-none
+                      data-[state=inactive]:text-muted-foreground"
+                    style={{
+                      borderRight: i < tabItems.length - 1 ? "1px solid #1e1e2e" : "none",
+                    }}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-white" strokeWidth={1.5} />
+                    <span className="hidden sm:inline text-white">{tab.label}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
+
+          {/* ── Overview ── */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="rounded-xl border overflow-hidden"
+              style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
+            >
+              <div className="px-6 py-5 border-b" style={{ borderColor: "#1e1e2e" }}>
+                <h2 className="font-semibold tracking-tight mb-1">Welcome to Shorty</h2>
+                <p className="font-mono text-[11px]" style={{ color: "#6b6b85" }}>
+                  The easiest way to integrate URL shortening and analytics.
+                </p>
+              </div>
+              <div className="p-6 space-y-6">
+                <p className="font-mono text-xs leading-relaxed" style={{ color: "#6b6b85" }}>
+                  Whether you&apos;re building a social media platform, SMS tool, or need tidy links —
+                  our developer ecosystem gives you the flexibility you need via NPM or REST API.
+                </p>
+                <div className="grid md:grid-cols-3 gap-3">
+                  {[
+                    { icon: Package,  title: "NPM Package",  desc: "Plug-and-play SDK for your Node.js backend.", accent: "#00e5a0" },
+                    { icon: Server,   title: "REST API",     desc: "Language-agnostic endpoints for any stack.",  accent: "#7c6df0" },
+                    { icon: Code2,    title: "Analytics",    desc: "IPs, devices, location, click volume.",        accent: "#00e5a0" },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.title}
+                        className="rounded-lg p-4 space-y-3"
+                        style={{ background: "#13131a", border: "1px solid #1e1e2e" }}
+                      >
+                        <div className="p-2 rounded-lg w-fit"
+                          style={{ background: `${item.accent}10`, border: `1px solid ${item.accent}20` }}
+                        >
+                          <Icon className="h-4 w-4" style={{ color: item.accent }} strokeWidth={1.5} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                          <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                            {item.desc}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── Installation ── */}
+          <TabsContent value="installation" className="space-y-4">
+            <div className="rounded-xl border overflow-hidden"
+              style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
+            >
+              <div className="flex items-center gap-3 px-6 py-4 border-b"
+                style={{ background: "#13131a", borderColor: "#1e1e2e" }}
+              >
+                <Terminal className="h-4 w-4" style={{ color: "#00e5a0" }} strokeWidth={1.5} />
+                <div>
+                  <p className="font-semibold text-sm">NPM Installation</p>
+                  <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                    Install the official package into your Node.js project.
+                  </p>
+                </div>
+              </div>
+              <div className="p-6 space-y-5">
+                <div>
+                  <SectionLabel>npm</SectionLabel>
+                  <CodeBlock id="install-npm" code="npm i shorty-analytics-sdk" />
+                </div>
+                <div>
+                  <SectionLabel>yarn</SectionLabel>
+                  <CodeBlock id="install-yarn" code="yarn add shorty-analytics-sdk" />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── Quick Start ── */}
+          <TabsContent value="usage" className="space-y-4">
+            <div className="rounded-xl border overflow-hidden"
+              style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b"
+                style={{ background: "#13131a", borderColor: "#1e1e2e" }}
+              >
+                <div>
+                  <p className="font-semibold text-sm">Quick Start Guide</p>
+                  <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                    Shorten a URL using the SDK.
+                  </p>
+                </div>
+                <span className="font-mono text-[9px] px-2 py-0.5 rounded"
+                  style={{ background: "rgba(0,229,160,0.08)", color: "#00e5a0", border: "1px solid rgba(0,229,160,0.2)" }}
+                >
+                  Node.js
+                </span>
+              </div>
+              <div className="p-6 space-y-4">
+                <p className="font-mono text-xs" style={{ color: "#6b6b85" }}>
+                  Import <code style={{ color: "#00e5a0" }}>createShortUrl</code>, pass the original URL
+                  and your API key. Manage keys from your dashboard.
+                </p>
+                <CodeBlock
+                  id="usage-js"
+                  code={`const { createShortUrl } = require("shorty-analytics-sdk");
+
+async function generateShortLink() {
+  const apiKey = "YOUR_API_KEY";
+  const longUrl = "https://your-very-long-url.com/path?query=123";
+
+  try {
+    const response = await createShortUrl(longUrl, apiKey);
+    console.log("Short URL ID:", response.url);
+    console.log("Full Link: https://yourdomain.com/" + response.url);
+  } catch (error) {
+    console.error("Failed:", error.message);
+  }
+}
+
+generateShortLink();`}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── Event Tracking ── */}
+          <TabsContent value="event-tracking" className="space-y-4">
+            <div className="rounded-xl border overflow-hidden"
+              style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b"
+                style={{ background: "#13131a", borderColor: "#1e1e2e" }}
+              >
+                <div>
+                  <p className="font-semibold text-sm">Event Tracking Integration</p>
+                  <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                    Track custom events with automatic metadata enrichment.
+                  </p>
+                </div>
+                <span className="font-mono text-[9px] px-2 py-0.5 rounded"
+                  style={{ background: "rgba(124,109,240,0.08)", color: "#7c6df0", border: "1px solid rgba(124,109,240,0.2)" }}
+                >
+                  Node.js / REST
+                </span>
+              </div>
+
+              <div className="p-6 space-y-8">
+                {/* step 1 */}
+                <div>
+                  <SectionLabel>01 · SDK usage</SectionLabel>
+                  <p className="font-mono text-[11px] mb-4" style={{ color: "#6b6b85" }}>
+                    Import <code style={{ color: "#00e5a0" }}>trackEvent</code> from{" "}
+                    <code style={{ color: "#7c6df0" }}>shorty-analytics-sdk</code>.
+                  </p>
+                  <CodeBlock
+                    id="event-sdk"
+                    code={`const { trackEvent } = require("shorty-analytics-sdk");
+
+async function captureUserBehavior() {
+  const projectKey = "pk_your_project_key_here";
+
+  try {
+    await trackEvent(projectKey, {
+      event: "product_purchased",
+      userId: "user_9942",
+      notification: true,
+      metadata: {
+        item: "Nike Pegasus 40",
+        price: 120.00,
+        currency: "USD"
+      }
+    });
+    console.log("Event captured!");
+  } catch (error) {
+    console.error("Failed:", error.message);
+  }
+}
+
+captureUserBehavior();`}
+                  />
                 </div>
 
-                <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-8 p-1 bg-transparent md:bg-muted/50 backdrop-blur-sm rounded-xl h-[48px]!">
-                        <TabsTrigger value="overview" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Globe className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
-                        <TabsTrigger value="installation" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Package className="w-4 h-4 mr-2" /> Installation</TabsTrigger>
-                        <TabsTrigger value="usage" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Cpu className="w-4 h-4 mr-2" /> Quick Start</TabsTrigger>
-                        <TabsTrigger value="event-tracking" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Terminal className="w-4 h-4 mr-2" /> Event Tracking</TabsTrigger>
-                        <TabsTrigger value="api" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Server className="w-4 h-4 mr-1" /> API Reference</TabsTrigger>
-                    </TabsList>
+                {/* step 2 */}
+                <div>
+                  <SectionLabel>02 · REST endpoint</SectionLabel>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg mb-4"
+                    style={{ background: "#13131a", border: "1px solid #1e1e2e" }}
+                  >
+                    <MethodBadge method="POST" />
+                    <code className="font-mono text-xs" style={{ color: "#a0a0b8" }}>
+                      /event/track
+                    </code>
+                    <span className="ml-auto font-mono text-[9px] px-2 py-0.5 rounded"
+                      style={{ background: "rgba(255,255,255,0.04)", color: "#6b6b85", border: "1px solid #1e1e2e" }}
+                    >
+                      Public
+                    </span>
+                  </div>
 
-                    <TabsContent value="overview" className="space-y-6 mt-13 md:mt-4">
-                        <Card className="border-primary/10 shadow-lg shadow-primary/5 bg-gradient-to-br from-card to-card/50">
-                            <CardHeader>
-                                <CardTitle className="text-2xl">Welcome to Shorty</CardTitle>
-                                <CardDescription className="text-base">
-                                    The easiest way to integrate URL shortening and robust link analytics into your software.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-muted-foreground leading-relaxed">
-                                    Whether you are building a social media management platform, an SMS marketing tool, or just need to keep your links tidy, our developer ecosystem gives you the flexibility you need. You can interact with our service using our official Node.js package or by integrating directly with our RESTful API.
-                                </p>
-                                <div className="grid md:grid-cols-3 gap-4 pt-4">
-                                    <div className="p-4 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm flex flex-col items-center text-center space-y-2">
-                                        <div className="p-3 bg-primary/10 rounded-full text-primary">
-                                            <Package className="w-6 h-6" />
-                                        </div>
-                                        <h3 className="font-semibold">NPM Package</h3>
-                                        <p className="text-sm text-muted-foreground">Plug and play SDK for your Node.js backend.</p>
-                                    </div>
-                                    <div className="p-4 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm flex flex-col items-center text-center space-y-2">
-                                        <div className="p-3 bg-primary/10 rounded-full text-primary">
-                                            <Server className="w-6 h-6" />
-                                        </div>
-                                        <h3 className="font-semibold">REST API</h3>
-                                        <p className="text-sm text-muted-foreground">Language agnostic API endpoints for any stack.</p>
-                                    </div>
-                                    <div className="p-4 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm flex flex-col items-center text-center space-y-2">
-                                        <div className="p-3 bg-primary/10 rounded-full text-primary">
-                                            <Code2 className="w-6 h-6" />
-                                        </div>
-                                        <h3 className="font-semibold">Analytics</h3>
-                                        <p className="text-sm text-muted-foreground">Track IPs, devices, location, and click volume.</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="installation" className="space-y-6 mt-13 md:mt-4">
-                        <Card className="border-border/50 overflow-hidden">
-                            <CardHeader className="bg-muted/30 border-b border-border/50">
-                                <CardTitle className="flex items-center text-xl">
-                                    <Terminal className="w-5 h-5 mr-2 text-primary" />
-                                    NPM Installation
-                                </CardTitle>
-                                <CardDescription>Install the official package into your Node.js project.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <p className="text-muted-foreground mb-4">
-                                    The easiest way to use our API is by installing the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty-analytics-sdk</code>.
-                                </p>
-                                <CodeBlock
-                                    id="install-npm"
-                                    language="bash"
-                                    code="npm i shorty-analytics-sdk"
-                                />
-                                <p className="text-muted-foreground mt-6 mb-4">Or with yarn:</p>
-                                <CodeBlock
-                                    id="install-yarn"
-                                    language="bash"
-                                    code="yarn add shorty-analytics-sdk"
-                                />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="usage" className="space-y-6 mt-13 md:mt-4">
-                        <Card className="border-border/50 overflow-hidden">
-                            <CardHeader className="bg-muted/30 border-b border-border/50">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-xl">Quick Start Guide</CardTitle>
-                                        <CardDescription className="mt-1">How to shorten a URL using the SDK.</CardDescription>
-                                    </div>
-                                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20">Node.js</Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="pt-6 space-y-6">
-                                <p className="text-muted-foreground">
-                                    To create a short URL, import the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">createShortUrl</code> function, and pass it the original URL and your secret API Key. You can manage your API keys from the Dashboard.
-                                </p>
-                                <CodeBlock
-                                    id="usage-js"
-                                    language="javascript"
-                                    code={`const { createShortUrl } = require("shorty-analytics-sdk");
-
-    async function generateShortLink() {
-    const apiKey = "YOUR_API_KEY"; // Retrieve this from your environment variables
-    const longUrl = "https://your-very-long-and-complex-url.com/path?query=123";
-
-    try {
-    const response = await createShortUrl(longUrl, apiKey);
-                                                    
-    // The response object contains the shortened URL identifier
-    console.log("Success! Short URL ID:", response.url);
-    console.log("Full Link: https://yourdomain.com/" + response.url);
-                                                    
-    } catch (error) {
-    console.error("Failed to shorten link:", error.message);
-    }
-    }
-
-    generateShortLink();`}
-        />
-                            </CardContent>
-                        
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="event-tracking" className="space-y-6 mt-13 md:mt-4">
-                        <Card className="border-border/50 overflow-hidden shadow-sm">
-                            <CardHeader className="bg-muted/30 border-b border-border/50">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-xl">Event Tracking Integration</CardTitle>
-                                        <CardDescription className="mt-1">Track custom events with automatic metadata enrichment.</CardDescription>
-                                    </div>
-                                    <Badge className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20">Node.js / REST</Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="pt-6 space-y-6">
-                                <p className="text-muted-foreground leading-relaxed">
-                                    Our platform supports seamless, real-time behavioral analytics tracking. When you register a <strong>Project</strong> in the dashboard, you receive a Project API Key. You can use this key with our SDK or call our public ingestion endpoint directly to track clicks, signups, transactions, and other actions.
-                                </p>
-                                
-                                <div>
-                                    <h3 className="text-md font-semibold mb-2">1. Initialize the Event Ingestion</h3>
-                                    <p className="text-muted-foreground mb-4">
-                                        Import the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">trackEvent</code> function from the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">shorty-analytics-sdk</code>.
-                                    </p>
-                                    <CodeBlock
-                                        id="event-sdk-usage"
-                                        language="javascript"
-                                        code={`const { trackEvent } = require("shorty-analytics-sdk");
-
-    async function captureUserBehavior() {
-    const projectKey = "pk_your_project_key_here";
-
-    try {
-        await trackEvent(projectKey, {
-        event: "product_purchased",
-        userId: "user_9942", // Optional: Link this to your internal user identifier
-        notification: true, // Optional: Send email notification to the project owner
-        metadata: { 
-            item: "Nike Pegasus 40",
-            price: 120.00,
-            currency: "USD"
-        }
-        });
-        console.log("Event captured successfully!");
-    } catch (error) {
-        console.error("Failed to capture event:", error.message);
-    }
-    }
-
-    captureUserBehavior();`}
-                                    />
-                                </div>
-
-                                <div className="pt-4">
-                                    <h3 className="text-md font-semibold mb-2">2. REST Ingestion API</h3>
-                                    <p className="text-muted-foreground mb-4">
-                                        If you are not using our Node.js SDK, you can send HTTP POST requests directly to our ingestion endpoint:
-                                    </p>
-                                    <div className="p-3 bg-muted/30 border border-border/50 rounded-md flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <Badge className="bg-indigo-500 hover:bg-indigo-600">POST</Badge>
-                                            <code className="text-sm font-mono text-foreground">/event/track</code>
-                                        </div>
-                                        <Badge variant="outline" className="text-[10px]">Public</Badge>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h4 className="text-sm font-medium mb-2 text-foreground font-mono">Headers</h4>
-                                            <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
-                                                <table className="w-full text-sm text-left">
-                                                    <thead className="bg-muted/50 text-muted-foreground">
-                                                        <tr>
-                                                            <th className="px-4 py-2 font-medium">Header</th>
-                                                            <th className="px-4 py-2 font-medium">Value</th>
-                                                            <th className="px-4 py-2 font-medium">Required</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-border/50">
-                                                        <tr>
-                                                            <td className="px-4 py-3 font-mono text-xs">x-project-key</td>
-                                                            <td className="px-4 py-3">Your project&apos;s API Key</td>
-                                                            <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="px-4 py-3 font-mono text-xs">Content-Type</td>
-                                                            <td className="px-4 py-3">application/json</td>
-                                                            <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 className="text-sm font-medium mb-2 text-foreground font-mono font-semibold">Body Parameters</h4>
-                                            <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
-                                                <table className="w-full text-sm text-left font-sans">
-                                                    <thead className="bg-muted/50 text-muted-foreground">
-                                                        <tr>
-                                                            <th className="px-4 py-2 font-medium">Parameter</th>
-                                                            <th className="px-4 py-2 font-medium">Type</th>
-                                                            <th className="px-4 py-2 font-medium">Required</th>
-                                                            <th className="px-4 py-2 font-medium">Description</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-border/50">
-                                                        <tr>
-                                                            <td className="px-4 py-3 font-mono text-xs">event</td>
-                                                            <td className="px-4 py-3 font-mono text-xs">string</td>
-                                                            <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
-                                                            <td className="px-4 py-3">The name of the tracking event (e.g., &quot;signup&quot;)</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="px-4 py-3 font-mono text-xs">userId</td>
-                                                            <td className="px-4 py-3 font-mono text-xs">string</td>
-                                                            <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">No</Badge></td>
-                                                            <td className="px-4 py-3">Your internal authenticated user ID</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="px-4 py-3 font-mono text-xs">anonymousId</td>
-                                                            <td className="px-4 py-3 font-mono text-xs">string</td>
-                                                            <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">No</Badge></td>
-                                                            <td className="px-4 py-3">Unique tracking ID for anonymous guest visitors</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="px-4 py-3 font-mono text-xs">metadata</td>
-                                                            <td className="px-4 py-3 font-mono text-xs">object</td>
-                                                            <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">No</Badge></td>
-                                                            <td className="px-4 py-3">Any arbitrary key-value pairs of business logic context</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="api" className="space-y-6 mt-13 md:mt-4">
-                        <Card className="border-border/50 overflow-hidden shadow-sm">
-                            <CardHeader className="bg-muted/30 border-b border-border/50">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-xl">Create Short URL</CardTitle>
-                                        <CardDescription className="mt-1">Direct REST API endpoint for shortening links.</CardDescription>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">POST</Badge>
-                                        <Badge variant="outline" className="font-mono text-xs text-muted-foreground">/api/v1/shorten</Badge>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <Accordion type="single" collapsible className="w-full" defaultValue="request">
-                                    <AccordionItem value="request" className="border-b-0 border border-border/50 rounded-t-lg px-4 bg-background">
-                                        <AccordionTrigger className="hover:no-underline py-4">
-                                            <span className="font-semibold text-sm">Request Configuration</span>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="pb-4">
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <h4 className="text-sm font-medium mb-2 text-foreground">Headers</h4>
-                                                    <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
-                                                        <table className="w-full text-sm text-left">
-                                                            <thead className="bg-muted/50 text-muted-foreground">
-                                                                <tr>
-                                                                    <th className="px-4 py-2 font-medium">Header</th>
-                                                                    <th className="px-4 py-2 font-medium">Value</th>
-                                                                    <th className="px-4 py-2 font-medium">Required</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody className="divide-y divide-border/50">
-                                                                <tr>
-                                                                    <td className="px-4 py-3 font-mono text-xs">Authorization</td>
-                                                                    <td className="px-4 py-3">Bearer &lt;YOUR_API_KEY&gt;</td>
-                                                                    <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td className="px-4 py-3 font-mono text-xs">Content-Type</td>
-                                                                    <td className="px-4 py-3">application/json</td>
-                                                                    <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">Yes</Badge></td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <h4 className="text-sm font-medium mb-2 text-foreground">Body Data</h4>
-                                                    <CodeBlock
-                                                        id="api-body"
-                                                        language="json"
-                                                        code={`{
-    "url": "https://example.com/very/long/path/to/resource"
-    }`}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-
-                                    <AccordionItem value="response" className="border-t-0 border border-border/50 rounded-b-lg px-4 bg-background">
-                                        <AccordionTrigger className="hover:no-underline py-4">
-                                            <span className="font-semibold text-sm">Response Handling</span>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="pb-4">
-                                            <div className="space-y-4">
-                                                <div className="flex items-center space-x-2">
-                                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                                    <span className="text-sm font-medium text-emerald-500">200 OK</span>
-                                                </div>
-                                                <CodeBlock
-                                                    id="api-response"
-                                                    language="json"
-                                                    code={`{
-    "url": "B1x9K"
-    }`}
-                                                />
-                                                <p className="text-xs text-muted-foreground mt-2">
-                                                    If the request fails, a standard error object will be returned with a corresponding HTTP status code (e.g., 401 Unauthorized, 500 Server Error).
-                                                </p>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="font-mono text-[10px] mb-2" style={{ color: "#6b6b85" }}>
+                         headers
+                      </p>
+                      <ParamTable
+                        cols={["Header", "Value", "Required"]}
+                        rows={[
+                          { Header: "x-project-key",  Value: "Your project API Key", Required: "Yes" },
+                          { Header: "Content-Type",   Value: "application/json",     Required: "Yes" },
+                        ]}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] mb-2" style={{ color: "#6b6b85" }}>
+                         body parameters
+                      </p>
+                      <ParamTable
+                        cols={["Parameter", "Type", "Required", "Description"]}
+                        rows={[
+                          { Parameter: "event",       Type: "string", Required: "Yes", Description: "Event name e.g. signup" },
+                          { Parameter: "userId",      Type: "string", Required: "No",  Description: "Your internal user ID" },
+                          { Parameter: "anonymousId", Type: "string", Required: "No",  Description: "ID for guest visitors" },
+                          { Parameter: "metadata",    Type: "object", Required: "No",  Description: "Arbitrary key-value context" },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-        </>
-        
-    );
+          </TabsContent>
+
+          {/* ── API Reference ── */}
+          <TabsContent value="api" className="space-y-4">
+            <div className="rounded-xl border overflow-hidden"
+              style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b"
+                style={{ background: "#13131a", borderColor: "#1e1e2e" }}
+              >
+                <div>
+                  <p className="font-semibold text-sm">Create Short URL</p>
+                  <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                    Direct REST endpoint for shortening links.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MethodBadge method="POST" />
+                  <code className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                    /api/v1/shorten
+                  </code>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <Accordion type="single" collapsible defaultValue="request" className="space-y-2 border-0">
+                  {[
+                    {
+                      value: "request",
+                      label: "Request configuration",
+                      content: (
+                        <div className="space-y-4 pt-2">
+                          <div>
+                            <SectionLabel>headers</SectionLabel>
+                            <ParamTable
+                              cols={["Header", "Value", "Required"]}
+                              rows={[
+                                { Header: "Authorization", Value: "Bearer <YOUR_API_KEY>", Required: "Yes" },
+                                { Header: "Content-Type",  Value: "application/json",      Required: "Yes" },
+                              ]}
+                            />
+                          </div>
+                          <div>
+                            <SectionLabel>body</SectionLabel>
+                            <CodeBlock
+                              id="api-body"
+                              code={`{\n  "url": "https://example.com/very/long/path"\n}`}
+                            />
+                          </div>
+                        </div>
+                      ),
+                    },
+                    {
+                      value: "response",
+                      label: "Response handling",
+                      content: (
+                        <div className="space-y-3 pt-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full" style={{ background: "#00e5a0" }} />
+                            <span className="font-mono text-[11px]" style={{ color: "#00e5a0" }}>
+                              200 OK
+                            </span>
+                          </div>
+                          <CodeBlock
+                            id="api-response"
+                            code={`{\n  "url": "B1x9K"\n}`}
+                          />
+                          <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
+                            On failure, a standard error object is returned with the corresponding
+                            HTTP status code (401, 500, etc).
+                          </p>
+                        </div>
+                      ),
+                    },
+                  ].map((item) => (
+                    <AccordionItem
+                      key={item.value}
+                      value={item.value}
+                      className="rounded-lg border px-4 overflow-hidden"
+                      style={{ background: "#13131a", borderColor: "#1e1e2e" }}
+                    >
+                      <AccordionTrigger className="hover:no-underline py-3.5">
+                        <span className="font-mono text-xs" style={{ color: "#a0a0b8" }}>
+                          {item.label}
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-4">
+                        {item.content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
 }

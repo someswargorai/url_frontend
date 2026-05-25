@@ -259,9 +259,9 @@ export function PricingSection() {
             transition={{ duration: 0.4 }}
           >
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Simple, honest pricing
+              Simple, <span className="text-[#00e5a0]">honest</span> pricing
             </h2>
-            <p className="text-muted-foreground text-sm md:text-lg">
+            <p className="text-muted-foreground text-sm md:text-sm">
               Start free. Upgrade when you need more. Cancel anytime.
             </p>
           </motion.div>

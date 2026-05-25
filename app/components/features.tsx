@@ -138,7 +138,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
           {/* code line */}
           <div
             className="mt-5 flex items-center gap-2 rounded-md px-3 py-2"
-            style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.05)" }}
+            style={{  border: "1px solid rgba(255,255,255,0.05)" }}
           >
             <div
               className="w-1.5 h-1.5 rounded-full shrink-0"
@@ -213,7 +213,7 @@ export function FeaturesSection() {
           />
           <span className="font-mono text-xs text-muted-foreground">
             Processing live events — RabbitMQ batch pipeline active
-          </span>
+          </span> 
         </div>
         <div className="flex items-center gap-6">
           {[

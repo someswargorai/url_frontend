@@ -1921,9 +1921,12 @@ await trackEvent("${selectedProject.key}", {
               Live product playground
             </span>
           </Badge>
-          <h2 className="text-2xl font-extrabold tracking-tight sm:text-4xl">
-            Preview the Shorty dashboard before logging in
-          </h2>
+          <br/>
+          <span className="text-2xl font-extrabold tracking-tight sm:text-4xl">
+            Preview the <span className="text-[#00e5a0]">Shorty</span> Dashboard 
+          </span>
+           <span className="mb-1 text-muted-foreground/35 font-extrabold sm:text-4xl"> clicking your links.</span>
+
           <p className="text-sm text-muted-foreground sm:text-base">
             This is a state-only demo of the authenticated product. It mirrors the real screens without API calls,
             auth, or persistence.

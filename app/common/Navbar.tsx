@@ -21,14 +21,10 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all",
+        "fixed top-0 left-0 right-0 z-50 transition-all dark:bg-[rgba(6,6,8,0.85)] backdrop-blur-lg dark:border-b dark:border-[rgba(30,30,46,0.8)] ",
         ["/", "/login"].includes(pathname) ? "block" : "hidden"
       )}
-      style={{
-        background: "rgba(6,6,8,0.85)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid #1e1e2e",
-      }}
+      
     >
       {/* top accent line */}
       <div
@@ -96,8 +92,7 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="hidden sm:flex h-8 w-8 rounded-lg p-0"
-              style={{ border: "1px solid #1e1e2e" }}
+              className="hidden sm:flex h-8 w-8 rounded-lg p-0 border border-gray-200"
               asChild
             >
               <Link href="https://github.com/someswargorai/url_frontend.git" target="_blank">

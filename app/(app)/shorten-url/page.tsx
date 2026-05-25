@@ -134,7 +134,7 @@ export default function DashboardPage() {
       {/* headline */}
       <h1
         className="font-bold leading-none tracking-tight mb-6"
-        style={{ fontSize: "clamp(20px, 4vw, 76px)", letterSpacing: "-4px" }}
+        style={{ fontSize: "clamp(20px, 7vw, 76px)", letterSpacing: "-1px" }}
       >
         Shorten Links.
         <br />
@@ -185,17 +185,16 @@ export default function DashboardPage() {
                 )}
               </div>
               <Button
-                type="submit"
-                disabled={loading}
-                className="h-14 w-full font-bold text-md transition-all hover:scale-[1.01] active:scale-[0.99] shadow-sm shadow-primary/20"
-              >
-                {loading ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <Scissors className="mr-2 h-5 w-5" />
-                )}
-                {loading ? "Creating..." : "Shorten Now"}
-              </Button>
+              type="submit"
+              disabled={loading}
+              className="h-12 px-6 font-semibold text-sm gap-2 shrink-0 rounded-lg border-0"
+              style={{ background: "#00e5a0", color: "#000" }}
+            >
+              {loading
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating...</>
+                : <><Scissors className="h-4 w-4" strokeWidth={1.5} /> Shorten Now</>
+              }
+            </Button>
             </form>
           </CardContent>
         </Card>

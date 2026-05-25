@@ -15,7 +15,7 @@ export default async function proxy(request: NextRequest) {
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }
-  console.log("isAuth", cookie, pathname);
+  
   if (token && pathname.startsWith("/login")) {
     return NextResponse.redirect(new URL("/shorten-url", request.url));
   }
