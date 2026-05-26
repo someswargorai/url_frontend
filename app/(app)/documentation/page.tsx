@@ -151,7 +151,7 @@ export default function DocumentationPage() {
       className="min-h-screen"
       
     >
-      <div className="container mx-auto py-1 px-4 md:px-8 lg:px-12 max-w-5xl">
+      <div className="container mx-auto py-1 px-4 md:px-8 lg:px-12 max-w-7xl">
 
         {/* header */}
         <div className="mb-12">
@@ -219,7 +219,7 @@ export default function DocumentationPage() {
               style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
             >
               <div className="px-6 py-5 border-b" style={{ borderColor: "#1e1e2e" }}>
-                <h2 className="font-semibold tracking-tight mb-1">Welcome to Shorty</h2>
+                <h2 className="font-semibold tracking-tight mb-1 text-white">Welcome to Shorty</h2>
                 <p className="font-mono text-[11px]" style={{ color: "#6b6b85" }}>
                   The easiest way to integrate URL shortening and analytics.
                 </p>
@@ -270,7 +270,7 @@ export default function DocumentationPage() {
               >
                 <Terminal className="h-4 w-4" style={{ color: "#00e5a0" }} strokeWidth={1.5} />
                 <div>
-                  <p className="font-semibold text-sm">NPM Installation</p>
+                  <p className="font-semibold text-sm text-white">NPM Installation</p>
                   <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
                     Install the official package into your Node.js project.
                   </p>
@@ -298,7 +298,7 @@ export default function DocumentationPage() {
                 style={{ background: "#13131a", borderColor: "#1e1e2e" }}
               >
                 <div>
-                  <p className="font-semibold text-sm">Quick Start Guide</p>
+                  <p className="font-semibold text-sm text-white">Quick Start Guide</p>
                   <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
                     Shorten a URL using the SDK.
                   </p>
@@ -346,7 +346,7 @@ generateShortLink();`}
                 style={{ background: "#13131a", borderColor: "#1e1e2e" }}
               >
                 <div>
-                  <p className="font-semibold text-sm">Event Tracking Integration</p>
+                  <p className="font-semibold text-sm text-white">Event Tracking Integration</p>
                   <p className="font-mono text-[10px]" style={{ color: "#6b6b85" }}>
                     Track custom events with automatic metadata enrichment.
                   </p>

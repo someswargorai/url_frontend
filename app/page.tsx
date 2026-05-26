@@ -113,7 +113,7 @@ export default function LandingPage() {
       {/* headline */}
       <h1
         className="font-bold leading-none tracking-tight mb-6"
-        style={{ fontSize: "clamp(40px, 7vw, 96px)", letterSpacing: "-4px" }}
+        style={{ fontSize: "clamp(40px, 5vw, 96px)", letterSpacing: "-4px" }}
       >
         Shorten Links.
         <br />
@@ -185,7 +185,7 @@ export default function LandingPage() {
 
           {/* bottom hint */}
           <div className="flex items-center gap-4 mt-3">
-            {["no account needed", "instant redirect", "full analytics"].map((t, i) => (
+            {["no account needed", "instant redirect"].map((t, i) => (
               <div key={t} className="flex items-center gap-1.5">
                 {i > 0 && <div className="w-px h-3" style={{ background: "#1e1e2e" }} />}
                 <span className="font-mono text-[9px] text-muted-foreground">{t}</span>
@@ -328,9 +328,8 @@ export default function LandingPage() {
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0, y: 16 }} 
+              whileInView={{ opacity: 1, y: 0 }} 
               transition={{ delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="relative px-8 py-8 group overflow-hidden"
               style={{ borderColor: "#1e1e2e" }}
@@ -363,7 +362,6 @@ export default function LandingPage() {
                 }}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
                 transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
               >
                 {stat.val}
@@ -409,7 +407,6 @@ export default function LandingPage() {
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="relative rounded-xl border overflow-hidden"
         style={{ background: "#0d0d12", borderColor: "#1e1e2e" }}
@@ -476,7 +473,6 @@ export default function LandingPage() {
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
             transition={{ delay: 0.1, duration: 0.4 }}
             className="font-bold leading-none tracking-tight mb-6 text-white"
             style={{ fontSize: "clamp(32px, 5vw, 64px)", letterSpacing: "-3px" }}
@@ -490,7 +486,6 @@ export default function LandingPage() {
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.4 }}
             className="text-sm text-muted-foreground font-light leading-relaxed max-w-md mx-auto mb-12"
           >
@@ -502,7 +497,6 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
             transition={{ delay: 0.25, duration: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
@@ -533,7 +527,6 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
             transition={{ delay: 0.35, duration: 0.5 }}
             className="flex items-center justify-center gap-8 mt-12 flex-wrap"
           >
@@ -644,7 +637,7 @@ export default function LandingPage() {
       {[
         { label: "Terms",    href: "#" },
         { label: "Privacy",  href: "#" },
-        { label: "API docs", href: "#" },
+        { label: "API docs", href: "#docs" },
       ].map((item, i) => (
         <div key={item.label} className="flex items-center">
           {i > 0 && (

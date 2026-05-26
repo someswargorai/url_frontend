@@ -620,8 +620,8 @@ export default function BillingPage() {
                           ))}
                           {plan.missing.map((f) => (
                             <div key={f} className="flex items-start gap-2.5 opacity-30">
-                              <XCircle className="h-3.5 w-3.5 text-zinc-500 shrink-0 mt-0.5" />
-                              <span className="text-xs text-zinc-400 font-light">{f}</span>
+                              <XCircle className="h-3.5 w-3.5 text-zinc-50 shrink-0 mt-0.5" />
+                              <span className="text-xs text-zinc-50 font-light">{f}</span>
                             </div>
                           ))}
                         </div>
@@ -706,9 +706,9 @@ export default function BillingPage() {
                   <span className="font-mono text-[10px] text-zinc-500 min-w-5">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="flex-1 text-left font-semibold uppercase tracking-wider">{item.q}</span>
-                  <div className="w-5 h-5 rounded-full border border-[#1e1e2e] group-hover:border-[#00e5a0]/50 flex items-center justify-center shrink-0 transition-colors">
-                    <span className="text-zinc-500 group-data-[state=open]:text-[#00e5a0] text-xs leading-none transition-transform duration-200 group-data-[state=open]:rotate-45">+</span>
+                  <span className="flex-1 text-left font-semibold uppercase tracking-wider text-zinc-500">{item.q}</span>
+                  <div className="w-5 h-5 rounded-full border border-[#1e1e2e]  flex items-center justify-center shrink-0 transition-colors">
+                    <span className="text-zinc-500  text-xs leading-none transition-transform duration-200 group-data-[state=open]:rotate-45">+</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-xs text-zinc-400 font-light leading-relaxed pb-4 pl-8">

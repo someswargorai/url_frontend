@@ -84,7 +84,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
     <motion.div
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ margin: "-60px" }}
       transition={{ duration: 0.45, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
       className="group relative"
     >
@@ -159,12 +159,11 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 
 export function FeaturesSection() {
   return (
-    <section className="py-24 px-4 md:px-10 max-w-6xl mx-auto">
+    <section className="py-24 px-4 md:px-10 max-w-6xl mx-auto" id="features">
       {/* section header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
         transition={{ duration: 0.4 }}
         className="mb-14"
       >
@@ -198,7 +197,6 @@ export function FeaturesSection() {
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mt-12 rounded-xl border px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         style={{

@@ -67,6 +67,7 @@ import {
 import InsightsAnalytics, { type ProjectAnalytics } from "@/components/InsightsAnalytics";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import {motion} from "framer-motion";
 
 type SidebarTab =
   | "shorten"
@@ -1959,15 +1960,24 @@ await trackEvent("${selectedProject.key}", {
             </span>
           </Badge>
           <br/>
-          <span className="text-2xl font-extrabold tracking-tight sm:text-4xl">
-            Preview the <span className="text-[#00e5a0]">Shorty</span> Dashboard 
-          </span>
-           <span className="mb-1 text-muted-foreground/35 font-extrabold sm:text-4xl"> clicking your links.</span>
-
-          <p className="text-sm text-muted-foreground sm:text-base">
-            This is a state-only demo of the authenticated product. It mirrors the real screens without API calls,
-            auth, or persistence.
-          </p>
+           <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <h2
+              className="font-bold leading-none tracking-tight"
+              style={{ fontSize: "clamp(28px, 4vw, 52px)", letterSpacing: "-2px" }}
+            >
+              Preview the{" "}
+              <span style={{ color: "#00e5a0" }}>Shorty</span>{" "}
+              Dashboard
+              <br />
+              <span style={{ color: "rgba(255,255,255,0.12)" }}>
+                without clicking your links.
+              </span>
+            </h2>
+            </motion.div>
         </div>
 
         <div className="mx-auto flex min-h-[760px] max-w-6xl flex-col overflow-hidden rounded-xl border border-[#1e1e2e] bg-[#0d0d12] shadow-2xl">

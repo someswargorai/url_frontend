@@ -29,7 +29,6 @@ export function AnalyticsSection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
             <div className="flex items-center gap-2 mb-5">
@@ -61,7 +60,6 @@ export function AnalyticsSection() {
                   key={item.label}
                   initial={{ opacity: 0, x: -16 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
                   transition={{ delay: i * 0.08, duration: 0.4 }}
                   className="flex items-start gap-4 py-5 border-b border-border/30 group"
                 >
@@ -90,7 +88,6 @@ export function AnalyticsSection() {
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
             transition={{ delay: 0.4 }}
             className="flex items-center gap-8 pt-2"
           >
@@ -114,7 +111,6 @@ export function AnalyticsSection() {
           className="flex-1 w-full max-w-lg"
           initial={{ opacity: 0, x: 30 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <div
@@ -186,7 +182,6 @@ export function AnalyticsSection() {
                       style={{ background: i === 11 ? "#00e5a0" : "#1e1e2e" }}
                       initial={{ height: 0 }}
                       whileInView={{ height: `${h}%` }}
-                      viewport={{ once: true }}
                       transition={{ delay: i * 0.04, duration: 0.4, ease: "easeOut" }}
                     />
                   ))}
@@ -218,7 +213,6 @@ export function AnalyticsSection() {
                           style={{ background: "#00e5a0", opacity: 0.7 }}
                           initial={{ width: 0 }}
                           whileInView={{ width: `${row.pct}%` }}
-                          viewport={{ once: true }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
                         />
                       </div>
@@ -246,7 +240,7 @@ export function AnalyticsSection() {
                       className="flex items-center gap-2"
                       initial={{ opacity: 0, x: 8 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ margin: "-60px" }}
                       transition={{ delay: 0.3 + i * 0.07 }}
                     >
                       <div

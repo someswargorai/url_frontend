@@ -73,7 +73,6 @@ export default function RootLayout({
             {children}
         </ThemeProvider>
         </Providers>
-
       </body>
     </html>
   );
